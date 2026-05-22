@@ -1,0 +1,1061 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFC AI/ML 시스템 아키텍처 — AWS 기반</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #1a375e;
+  --blue:   #2e6da4;
+  --sky:    #e8f2fb;
+  --accent: #f08c00;
+  --red:    #c0392b;
+  --green:  #177b4e;
+  --purple: #6a0d91;
+  --teal:   #007a87;
+  --white:  #ffffff;
+  --gray:   #f4f6f9;
+  --border: #ccddeee0;
+  --text:   #1a1a2e;
+  --muted:  #5a6a82;
+  /* AWS brand colors */
+  --aws-orange: #FF9900;
+  --aws-dark:   #232F3E;
+  --aws-squid:  #1A1A2E;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #eef2f7;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ── Hero ── */
+.hero {
+  background: linear-gradient(135deg, #0d1b30 0%, #1a2f50 45%, #1a375e 100%);
+  color: var(--white);
+  padding: 44px 5%;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-badge {
+  display: inline-block;
+  background: var(--aws-orange);
+  color: var(--white);
+  font-size: 11px; font-weight: 700;
+  padding: 4px 14px; border-radius: 20px;
+  letter-spacing: .05em;
+  margin-bottom: 14px;
+}
+.hero h1 {
+  font-size: 1.9rem; font-weight: 700;
+  margin-bottom: 6px;
+}
+.hero h2 {
+  font-size: 1rem; font-weight: 400;
+  color: #aaccee; margin-bottom: 18px;
+}
+.hero-summary {
+  background: rgba(255,255,255,.09);
+  border-left: 4px solid var(--aws-orange);
+  padding: 12px 20px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px; line-height: 1.75;
+  max-width: 900px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ── TOC bar ── */
+.toc-bar {
+  background: var(--aws-dark);
+  padding: 0 5%;
+  display: flex; gap: 2px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.toc-bar a {
+  color: #aaccee; text-decoration: none;
+  font-size: 12px; font-weight: 500;
+  padding: 10px 14px; white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.toc-bar a:hover { background: var(--aws-orange); color: var(--white); }
+
+/* ── Wrapper ── */
+.wrapper { max-width: 1300px; margin: 0 auto; padding: 36px 24px 80px; }
+
+/* ── Section card ── */
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(30,60,100,.08);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 24px;
+  background: var(--aws-dark);
+  color: var(--white);
+}
+.card-header .num {
+  background: var(--aws-orange);
+  color: var(--white);
+  font-size: 11px; font-weight: 700;
+  padding: 2px 10px; border-radius: 12px;
+  white-space: nowrap;
+}
+.card-header h3 { font-size: 1rem; font-weight: 600; }
+.card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+.card-body { padding: 22px 24px; }
+
+.sub-title {
+  font-size: 13px; font-weight: 700;
+  color: var(--blue);
+  border-left: 3px solid var(--blue);
+  padding-left: 10px;
+  margin-bottom: 12px; margin-top: 18px;
+}
+.sub-title:first-child { margin-top: 0; }
+
+/* ── Medallion banner ── */
+.medallion-bar {
+  display: flex; gap: 0; margin-bottom: 24px;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.med-zone {
+  flex: 1; padding: 14px 16px; text-align: center;
+}
+.med-bronze { background: linear-gradient(135deg, #4a2c0a, #7a4a1e); color: #f0c080; }
+.med-silver { background: linear-gradient(135deg, #2a3040, #3c4a5e); color: #c8d8e8; }
+.med-gold   { background: linear-gradient(135deg, #2a2000, #5a4800); color: #ffd700; }
+.med-mlops  { background: linear-gradient(135deg, #1a0a30, #3a1a60); color: #c890f0; }
+.med-zone .mz-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.med-zone .mz-sub   { font-size: 11px; opacity: 0.75; }
+.med-sep { width: 1px; background: rgba(255,255,255,0.1); }
+
+/* ── Architecture layer rows ── */
+.arch-wrap { display: flex; gap: 16px; align-items: flex-start; }
+.arch-main  { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.arch-mlops { width: 220px; flex-shrink: 0; }
+
+.layer {
+  display: flex; gap: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+  min-height: 70px;
+}
+.layer-label {
+  width: 150px; min-width: 150px;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  padding: 10px 14px;
+  color: var(--white);
+  font-size: 12px; font-weight: 700;
+  line-height: 1.4;
+}
+.layer-num {
+  font-size: 10px; font-weight: 400;
+  opacity: 0.6; margin-bottom: 2px;
+}
+.layer-services {
+  flex: 1; padding: 10px 14px;
+  background: var(--white);
+  display: flex; flex-direction: column;
+  justify-content: center; gap: 6px;
+  border-left: 1px solid var(--border);
+}
+.services-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.svc {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.svc-icon { font-size: 12px; }
+.svc-desc {
+  font-size: 11px; color: var(--muted); line-height: 1.4;
+}
+
+/* Layer color themes */
+.l1 .layer-label { background: linear-gradient(135deg, #004d5c, #007a87); }
+.l1 .svc { background: #e6f4f6; border-color: #9dd3da; color: #005f6b; }
+.l2 .layer-label { background: linear-gradient(135deg, #1a2e4a, #2e5090); }
+.l2 .svc { background: #e8f2fb; border-color: #9ac0e0; color: #1a375e; }
+.l3 .layer-label { background: linear-gradient(135deg, #0d3320, #177b4e); }
+.l3 .svc { background: #eaf7f0; border-color: #80d0a8; color: #0d5a38; }
+.l4 .layer-label { background: linear-gradient(135deg, #2d1060, #6a0d91); }
+.l4 .svc { background: #f5eafb; border-color: #c490e4; color: #5a0d80; }
+.l5 .layer-label { background: linear-gradient(135deg, #7a2800, #b84000); }
+.l5 .svc { background: #fff5e6; border-color: #f0b060; color: #8a3000; }
+.l6 .layer-label { background: linear-gradient(135deg, #7a0a0a, #b82020); }
+.l6 .svc { background: #fbebe9; border-color: #e8a0a0; color: #8a0808; }
+.l7 .layer-label { background: linear-gradient(135deg, #2a3a4a, #3a5a6a); }
+.l7 .svc { background: var(--gray); border-color: #b0c0d0; color: #2a3a4a; }
+
+/* Medal tags on layers */
+.medal {
+  font-size: 9px; font-weight: 700;
+  padding: 1px 6px; border-radius: 3px;
+  display: inline-block; margin-left: 4px;
+}
+.medal-b { background: rgba(180,90,30,0.15); color: #cd7f32; border: 1px solid rgba(180,90,30,0.4); }
+.medal-s { background: rgba(160,160,160,0.15); color: #8a9aaa; border: 1px solid rgba(160,160,160,0.4); }
+.medal-g { background: rgba(200,160,0,0.15); color: #b09000; border: 1px solid rgba(200,160,0,0.4); }
+
+/* ── MLOps sidebar ── */
+.mlops-card {
+  background: linear-gradient(160deg, #1a0a30, #2a1a50);
+  border-radius: 10px;
+  border: 1px solid rgba(200,140,255,0.2);
+  overflow: hidden;
+  position: sticky; top: 60px;
+}
+.mlops-title {
+  background: rgba(106,13,145,0.5);
+  padding: 10px 14px;
+  font-size: 12px; font-weight: 700;
+  color: #d0a0ff;
+  border-bottom: 1px solid rgba(200,140,255,0.2);
+  display: flex; align-items: center; gap: 6px;
+}
+.mlops-section {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mlops-section:last-child { border-bottom: none; }
+.mlops-section-title {
+  font-size: 10px; font-weight: 700;
+  color: rgba(200,150,255,0.7);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.mlops-svc {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+.mlops-svc-name {
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.3;
+}
+.mlops-svc-desc {
+  color: rgba(255,255,255,0.45);
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+/* ── Data Flow Diagram ── */
+.flow-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 10px 0;
+}
+.flow-box {
+  width: 100%; max-width: 860px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid;
+  display: flex; align-items: center; gap: 14px;
+}
+.fb-teal   { border-color: var(--teal); background: #e6f4f6; }
+.fb-blue   { border-color: var(--blue); background: var(--sky); }
+.fb-green  { border-color: var(--green); background: #eaf7f0; }
+.fb-purple { border-color: var(--purple); background: #f5eafb; }
+.fb-orange { border-color: var(--accent); background: #fff5e6; }
+.fb-red    { border-color: var(--red); background: #fbebe9; }
+.fb-gray   { border-color: var(--muted); background: var(--gray); }
+
+.flow-arrow-v {
+  width: 2px; height: 16px;
+  background: var(--accent);
+  position: relative; margin: 1px auto;
+}
+.flow-arrow-v::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--accent);
+}
+.fb-icon { font-size: 20px; flex-shrink: 0; }
+.fb-content { flex: 1; }
+.fb-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.fb-subs  { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.fb-svcs  { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.fb-svc-tag {
+  font-size: 10.5px; font-weight: 600;
+  padding: 1px 8px; border-radius: 4px;
+  border: 1px solid;
+}
+.tag-teal   { background: #e6f4f6; border-color: #9dd3da; color: #005f6b; }
+.tag-blue   { background: #e8f2fb; border-color: #9ac0e0; color: #1a375e; }
+.tag-green  { background: #eaf7f0; border-color: #80d0a8; color: #0d5a38; }
+.tag-purple { background: #f5eafb; border-color: #c490e4; color: #5a0d80; }
+.tag-orange { background: #fff5e6; border-color: #f0b060; color: #8a3000; }
+.tag-red    { background: #fbebe9; border-color: #e8a0a0; color: #8a0808; }
+.tag-gray   { background: var(--gray); border-color: #b0c0d0; color: #2a3a4a; }
+.tag-aws    { background: #fff3e0; border-color: #ff9900; color: #7a3a00; }
+
+/* ── Tables ── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  background: var(--aws-dark); color: var(--white);
+  padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px;
+}
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: var(--gray); }
+tr:hover td { background: var(--sky); }
+td:first-child { font-weight: 600; color: var(--navy); }
+
+/* ── KPI-style cost cards ── */
+.cost-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.cost-card {
+  background: var(--gray);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  text-align: center;
+}
+.cost-card .cc-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.cost-card .cc-val   { font-size: 22px; font-weight: 700; color: var(--navy); }
+.cost-card .cc-sub   { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Security / Governance ── */
+.sec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.sec-card {
+  background: var(--gray);
+  border-radius: 10px; border: 1px solid var(--border);
+  padding: 16px;
+}
+.sec-card .sc-title {
+  font-size: 13px; font-weight: 700;
+  color: var(--navy); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.sec-card ul { padding-left: 16px; }
+.sec-card li { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-badge">AWS 기반 아키텍처 · AFC AI/ML Platform</div>
+  <h1>AI/ML 시스템 아키텍처</h1>
+  <h2>AWS Cloud — Medallion Architecture + MLOps 7계층 상세 설계</h2>
+  <div class="hero-summary">
+    AFC(자동요금징수) 도메인 AI/ML 플랫폼의 전체 AWS 서비스 구성을 계층별로 정의합니다.
+    Bronze→Silver→Gold 메달리온 데이터 레이크 위에 SageMaker 기반 ML 파이프라인을 구축하고,
+    MLOps 자동화를 통해 18개 유즈케이스를 단계적으로 운영합니다.
+  </div>
+</div>
+
+<!-- ── TOC ── -->
+<nav class="toc-bar">
+  <a href="#overview">전체 구조</a>
+  <a href="#dataflow">데이터 흐름</a>
+  <a href="#layers">7계층 상세</a>
+  <a href="#mlops">MLOps</a>
+  <a href="#security">보안·거버넌스</a>
+  <a href="#sizing">서비스 선택</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ══════════════════════════════════════════════
+     1. 전체 구조 개요
+═══════════════════════════════════════════════ -->
+<div class="card" id="overview">
+  <div class="card-header">
+    <span class="num">01</span>
+    <h3>전체 구조 개요</h3>
+    <span class="en">Platform Overview</span>
+  </div>
+  <div class="card-body">
+    <div class="medallion-bar">
+      <div class="med-zone med-bronze">
+        <div class="mz-title">🥉 Bronze Zone</div>
+        <div class="mz-sub">원천 데이터 원형 보존<br>S3 Raw · DMS CDC</div>
+      </div>
+      <div class="med-sep"></div>
+      <div class="med-zone med-silver">
+        <div class="mz-title">🥈 Silver Zone</div>
+        <div class="mz-sub">정제·통합·표준화<br>Glue ETL · Redshift</div>
+      </div>
+      <div class="med-sep"></div>
+      <div class="med-zone med-gold">
+        <div class="mz-title">🥇 Gold Zone</div>
+        <div class="mz-sub">분석·모델 학습용<br>Feature Store · Athena</div>
+      </div>
+      <div class="med-sep"></div>
+      <div class="med-zone med-mlops">
+        <div class="mz-title">⚙️ MLOps Layer</div>
+        <div class="mz-sub">파이프라인 자동화<br>SageMaker Pipelines · CodePipeline</div>
+      </div>
+    </div>
+
+    <div class="arch-wrap">
+      <div class="arch-main">
+
+        <div class="layer l1">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 1</div>
+            Data Ingestion
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">🔄</span>AWS DMS (CDC)</span>
+              <span class="svc"><span class="svc-icon">⚡</span>Kinesis Data Streams</span>
+              <span class="svc"><span class="svc-icon">🔥</span>Kinesis Firehose</span>
+              <span class="svc"><span class="svc-icon">🔌</span>AWS Glue (Batch ETL)</span>
+              <span class="svc"><span class="svc-icon">📡</span>API Gateway</span>
+              <span class="svc"><span class="svc-icon">📂</span>Transfer Family (SFTP)</span>
+            </div>
+            <div class="svc-desc">AFC 운영계 (게이트 이벤트·거래·CCTV 메타) → S3 Bronze 실시간·배치 적재 / 운영계-분석계 망 분리</div>
+          </div>
+        </div>
+
+        <div class="layer l2">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 2</div>
+            Data Lake /<br>Warehouse
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">🪣</span>Amazon S3 <span class="medal medal-b">Bronze</span><span class="medal medal-s">Silver</span><span class="medal medal-g">Gold</span></span>
+              <span class="svc"><span class="svc-icon">🏛️</span>Lake Formation</span>
+              <span class="svc"><span class="svc-icon">📚</span>Glue Data Catalog</span>
+              <span class="svc"><span class="svc-icon">🔍</span>Amazon Athena</span>
+              <span class="svc"><span class="svc-icon">🏗️</span>Amazon Redshift</span>
+            </div>
+            <div class="svc-desc">Parquet 포맷·파티셔닝·압축 / Lake Formation FGAC로 카드 ID 컬럼 수준 접근 제어 / Redshift는 Gold 분석 마트</div>
+          </div>
+        </div>
+
+        <div class="layer l3">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 3</div>
+            Feature Layer
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">🧩</span>SageMaker Feature Store</span>
+              <span class="svc"><span class="svc-icon">🏗️</span>Redshift (Feature Mart)</span>
+              <span class="svc"><span class="svc-icon">🔧</span>Glue ETL (Feature 파이프)</span>
+              <span class="svc"><span class="svc-icon">⚡</span>Lambda (실시간 특성)</span>
+            </div>
+            <div class="svc-desc">Offline Store (S3 기반 학습) + Online Store (저지연 추론) 이원화 / 피처 버전 관리로 학습-서빙 일관성 보장</div>
+          </div>
+        </div>
+
+        <div class="layer l4">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 4</div>
+            ML Platform
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">🏋️</span>SageMaker Training Jobs</span>
+              <span class="svc"><span class="svc-icon">📦</span>SageMaker Model Registry</span>
+              <span class="svc"><span class="svc-icon">🧪</span>SageMaker Experiments</span>
+              <span class="svc"><span class="svc-icon">🤖</span>SageMaker Autopilot</span>
+              <span class="svc"><span class="svc-icon">🐳</span>Amazon ECR</span>
+            </div>
+            <div class="svc-desc">XGBoost·LSTM·Isolation Forest 등 커스텀 컨테이너 / Experiments로 하이퍼파라미터 추적 / Model Registry에서 승인 게이팅</div>
+          </div>
+        </div>
+
+        <div class="layer l5">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 5</div>
+            Serving Layer
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">🔄</span>SageMaker Batch Transform</span>
+              <span class="svc"><span class="svc-icon">⚡</span>SageMaker Endpoints</span>
+              <span class="svc"><span class="svc-icon">🕐</span>SageMaker Async Inference</span>
+              <span class="svc"><span class="svc-icon">🚀</span>API Gateway + Lambda</span>
+              <span class="svc"><span class="svc-icon">🗄️</span>ElastiCache (Redis)</span>
+            </div>
+            <div class="svc-desc">Phase 1: 일배치(Batch Transform) → Phase 2: 준실시간(Async) → Phase 3: 실시간(Real-time Endpoint) 단계 전환 / Redis로 추론 결과 캐싱</div>
+          </div>
+        </div>
+
+        <div class="layer l6">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 6</div>
+            Monitoring
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">📊</span>SageMaker Model Monitor</span>
+              <span class="svc"><span class="svc-icon">📈</span>Amazon CloudWatch</span>
+              <span class="svc"><span class="svc-icon">📉</span>Amazon Managed Grafana</span>
+              <span class="svc"><span class="svc-icon">🔍</span>AWS CloudTrail</span>
+              <span class="svc"><span class="svc-icon">🚨</span>SNS (알람)</span>
+            </div>
+            <div class="svc-desc">Data Drift·Model Drift·Bias Drift 자동 감지 / CloudWatch Alarm → SNS → 재학습 EventBridge 트리거 / CloudTrail 감사 로그 90일 보관</div>
+          </div>
+        </div>
+
+        <div class="layer l7">
+          <div class="layer-label">
+            <div class="layer-num">LAYER 7</div>
+            Business<br>Application
+          </div>
+          <div class="layer-services">
+            <div class="services-row">
+              <span class="svc"><span class="svc-icon">📊</span>Amazon QuickSight</span>
+              <span class="svc"><span class="svc-icon">🔔</span>Amazon SNS / SQS</span>
+              <span class="svc"><span class="svc-icon">🔗</span>Step Functions</span>
+              <span class="svc"><span class="svc-icon">🌐</span>AppSync (실시간 API)</span>
+              <span class="svc"><span class="svc-icon">📱</span>AWS Amplify (앱 연동)</span>
+            </div>
+            <div class="svc-desc">QuickSight 대시보드 → 단속·정비·CS·정산 담당자별 뷰 / SQS로 게이트 단속 알림 큐잉 / Step Functions로 민원·정비 워크플로 오케스트레이션</div>
+          </div>
+        </div>
+
+      </div><!-- /arch-main -->
+
+      <!-- MLOps Sidebar -->
+      <div class="arch-mlops">
+        <div class="mlops-card">
+          <div class="mlops-title">⚙️ MLOps 자동화</div>
+          <div class="mlops-section">
+            <div class="mlops-section-title">CI/CD 파이프라인</div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">SageMaker Pipelines</div>
+                <div class="mlops-svc-desc">ML 워크플로 오케스트레이션</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">AWS CodePipeline</div>
+                <div class="mlops-svc-desc">코드→빌드→배포 자동화</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">AWS CodeBuild</div>
+                <div class="mlops-svc-desc">컨테이너 빌드·테스트</div>
+              </div>
+            </div>
+          </div>
+          <div class="mlops-section">
+            <div class="mlops-section-title">자동 재학습</div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">EventBridge</div>
+                <div class="mlops-svc-desc">드리프트 감지 → 재학습 트리거</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">Lambda</div>
+                <div class="mlops-svc-desc">트리거 핸들러·전처리 훅</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">Step Functions</div>
+                <div class="mlops-svc-desc">재학습→평가→승인→배포</div>
+              </div>
+            </div>
+          </div>
+          <div class="mlops-section">
+            <div class="mlops-section-title">Champion / Challenger</div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">Model Registry</div>
+                <div class="mlops-svc-desc">버전별 승인 상태 관리</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">SM Production Variants</div>
+                <div class="mlops-svc-desc">트래픽 가중치 A/B 분할</div>
+              </div>
+            </div>
+          </div>
+          <div class="mlops-section">
+            <div class="mlops-section-title">인프라 코드</div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">AWS CDK / CloudFormation</div>
+                <div class="mlops-svc-desc">전체 인프라 IaC 관리</div>
+              </div>
+            </div>
+            <div class="mlops-svc">
+              <div>
+                <div class="mlops-svc-name">Amazon ECR</div>
+                <div class="mlops-svc-desc">학습·서빙 컨테이너 저장소</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /arch-wrap -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     2. 데이터 흐름
+═══════════════════════════════════════════════ -->
+<div class="card" id="dataflow">
+  <div class="card-header">
+    <span class="num">02</span>
+    <h3>AFC 데이터 흐름</h3>
+    <span class="en">End-to-End Data Flow</span>
+  </div>
+  <div class="card-body">
+    <div class="flow-diagram">
+
+      <div class="flow-box fb-teal">
+        <div class="fb-icon">🚇</div>
+        <div class="fb-content">
+          <div class="fb-title">AFC 운영계 (On-Premise / Private Cloud)</div>
+          <div class="fb-subs">게이트 이벤트 · 거래 로그 · 단말기 IoT · CCTV 메타데이터 · 정산 데이터</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-gray">게이트 DB (Oracle/PostgreSQL)</span>
+            <span class="fb-svc-tag tag-gray">영상관제 서버</span>
+            <span class="fb-svc-tag tag-gray">IoT Gateway</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-blue">
+        <div class="fb-icon">🔄</div>
+        <div class="fb-content">
+          <div class="fb-title">Data Ingestion — 실시간 · 배치 · API</div>
+          <div class="fb-subs">운영계 → 분석계 망 분리 후 안전 복제</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-teal">AWS DMS (CDC)</span>
+            <span class="fb-svc-tag tag-teal">Kinesis Data Streams</span>
+            <span class="fb-svc-tag tag-teal">Kinesis Firehose</span>
+            <span class="fb-svc-tag tag-blue">AWS Glue Batch</span>
+            <span class="fb-svc-tag tag-blue">API Gateway</span>
+            <span class="fb-svc-tag tag-blue">Transfer Family</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-blue" style="background:#e0ecf8;">
+        <div class="fb-icon">🪣</div>
+        <div class="fb-content">
+          <div class="fb-title">Data Lake — Bronze / Silver / Gold (Amazon S3)</div>
+          <div class="fb-subs">Bronze: 원천 원형 보존 → Silver: 정제·통합 → Gold: 분석·모델용</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-orange">S3 Bronze (Raw)</span>
+            <span class="fb-svc-tag tag-gray">S3 Silver (Curated)</span>
+            <span class="fb-svc-tag tag-aws">S3 Gold (Analytics)</span>
+            <span class="fb-svc-tag tag-blue">Lake Formation FGAC</span>
+            <span class="fb-svc-tag tag-blue">Glue Data Catalog</span>
+            <span class="fb-svc-tag tag-blue">Redshift (Mart)</span>
+            <span class="fb-svc-tag tag-blue">Athena (Ad-hoc)</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-green">
+        <div class="fb-icon">🧩</div>
+        <div class="fb-content">
+          <div class="fb-title">Feature Store — 학습 · 추론용 피처 통합 저장소</div>
+          <div class="fb-subs">Offline(학습) + Online(추론) 이원화 / 버전 관리·재사용</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-green">SageMaker Feature Store</span>
+            <span class="fb-svc-tag tag-green">Glue ETL (피처 엔지니어링)</span>
+            <span class="fb-svc-tag tag-green">Lambda (실시간 특성)</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-purple">
+        <div class="fb-icon">🏋️</div>
+        <div class="fb-content">
+          <div class="fb-title">ML Platform — 학습 · 레지스트리 · 실험 관리</div>
+          <div class="fb-subs">SageMaker 기반 / 커스텀 컨테이너(ECR) + 관리형 알고리즘 병행</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-purple">SageMaker Training Jobs</span>
+            <span class="fb-svc-tag tag-purple">SageMaker Experiments</span>
+            <span class="fb-svc-tag tag-purple">SageMaker Model Registry</span>
+            <span class="fb-svc-tag tag-purple">SageMaker Autopilot</span>
+            <span class="fb-svc-tag tag-purple">Amazon ECR</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-orange">
+        <div class="fb-icon">⚡</div>
+        <div class="fb-content">
+          <div class="fb-title">Serving Layer — 배치 · 비동기 · 실시간 추론</div>
+          <div class="fb-subs">Phase별 단계 전환: 배치 → 비동기 → 실시간</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-orange">SageMaker Batch Transform</span>
+            <span class="fb-svc-tag tag-orange">SageMaker Async Inference</span>
+            <span class="fb-svc-tag tag-orange">SageMaker Endpoints</span>
+            <span class="fb-svc-tag tag-orange">ElastiCache Redis</span>
+            <span class="fb-svc-tag tag-orange">API Gateway</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+
+      <div class="flow-box fb-gray">
+        <div class="fb-icon">📊</div>
+        <div class="fb-content">
+          <div class="fb-title">Business Application — 대시보드 · 알림 · 업무 워크플로</div>
+          <div class="fb-subs">단속·정비·CS·정산 업무 시스템 연결 / 관제센터 실시간 알림</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-gray">Amazon QuickSight</span>
+            <span class="fb-svc-tag tag-gray">SNS / SQS</span>
+            <span class="fb-svc-tag tag-gray">Step Functions</span>
+            <span class="fb-svc-tag tag-gray">AppSync</span>
+            <span class="fb-svc-tag tag-gray">AWS Amplify</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     3. 계층별 AWS 서비스 상세
+═══════════════════════════════════════════════ -->
+<div class="card" id="layers">
+  <div class="card-header">
+    <span class="num">03</span>
+    <h3>계층별 AWS 서비스 상세</h3>
+    <span class="en">Layer-by-Layer AWS Service Detail</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead>
+        <tr>
+          <th>계층</th>
+          <th>주요 AWS 서비스</th>
+          <th>선택 이유</th>
+          <th>AFC 적용 포인트</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1. Data Ingestion</td>
+          <td>DMS, Kinesis, Glue, API Gateway, Transfer Family</td>
+          <td>CDC(변경 데이터 캡처)로 운영계 부하 없이 실시간 복제</td>
+          <td>게이트 IN/OUT 이벤트 즉시 스트리밍 → 부정승차 실시간 탐지 피처 생성</td>
+        </tr>
+        <tr>
+          <td>2. Data Lake</td>
+          <td>S3, Lake Formation, Glue Catalog, Athena, Redshift</td>
+          <td>Lake Formation 컬럼 수준 FGAC로 교통카드 ID 익명화 레이어 강제 적용</td>
+          <td>Bronze 적재 즉시 카드 ID → SHA-256 가명화 / Redshift에 OD 분석 마트 구축</td>
+        </tr>
+        <tr>
+          <td>3. Feature Layer</td>
+          <td>SageMaker Feature Store, Redshift, Glue ETL, Lambda</td>
+          <td>Offline(학습 일관성) + Online(저지연 추론) 이원화 / 피처 재사용으로 개발 속도 향상</td>
+          <td>역별·시간대별 피처 공유 (수요예측 + 혼잡도 예측 동시 활용)</td>
+        </tr>
+        <tr>
+          <td>4. ML Platform</td>
+          <td>SageMaker Training, Experiments, Model Registry, Autopilot, ECR</td>
+          <td>Managed Spot Training으로 학습 비용 최대 90% 절감</td>
+          <td>XGBoost(부정승차), LSTM(수요예측), Isolation Forest(이상거래) 컨테이너 분리 관리</td>
+        </tr>
+        <tr>
+          <td>5. Serving</td>
+          <td>Batch Transform, Async Inference, Real-time Endpoints, ElastiCache, API Gateway</td>
+          <td>Phase별 비용-성능 최적화 / ElastiCache로 반복 추론 캐싱</td>
+          <td>Phase 1: 일배치 단속 리스트 → Phase 2: 5분 주기 혼잡도 → Phase 3: 실시간 낙상 탐지</td>
+        </tr>
+        <tr>
+          <td>6. Monitoring</td>
+          <td>SageMaker Model Monitor, CloudWatch, Managed Grafana, CloudTrail, SNS</td>
+          <td>자동 재학습 트리거로 계절성·이벤트 드리프트 대응</td>
+          <td>설날·추석·콘서트 등 비정기 이벤트로 인한 수요 패턴 급변 자동 감지</td>
+        </tr>
+        <tr>
+          <td>7. Business App</td>
+          <td>QuickSight, SNS/SQS, Step Functions, AppSync, Amplify</td>
+          <td>QuickSight ML Insights로 anomaly 자동 하이라이트</td>
+          <td>단속 담당자 SQS 큐 → 모바일 앱 푸시 / 정비 Step Functions → 티켓 자동 생성</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     4. MLOps 파이프라인 상세
+═══════════════════════════════════════════════ -->
+<div class="card" id="mlops">
+  <div class="card-header">
+    <span class="num">04</span>
+    <h3>MLOps 파이프라인 상세</h3>
+    <span class="en">MLOps Pipeline — CI/CD · Auto-Retraining · Champion-Challenger</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-title">자동 재학습 흐름</div>
+    <div class="flow-diagram">
+      <div class="flow-box fb-red" style="max-width:100%;">
+        <div class="fb-icon">🚨</div>
+        <div class="fb-content">
+          <div class="fb-title">드리프트 감지 트리거</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-red">SageMaker Model Monitor</span>
+            <span class="fb-svc-tag tag-red">CloudWatch Alarm</span>
+            <span class="fb-svc-tag tag-gray">시간 스케줄 (EventBridge Cron)</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+      <div class="flow-box fb-purple" style="max-width:100%;">
+        <div class="fb-icon">⚙️</div>
+        <div class="fb-content">
+          <div class="fb-title">SageMaker Pipelines 재학습 워크플로</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-purple">데이터 전처리 Step</span>
+            <span class="fb-svc-tag tag-purple">학습 Step</span>
+            <span class="fb-svc-tag tag-purple">평가 Step (정확도 기준 자동 Gate)</span>
+            <span class="fb-svc-tag tag-purple">모델 등록 Step</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+      <div class="flow-box fb-blue" style="max-width:100%;">
+        <div class="fb-icon">✅</div>
+        <div class="fb-content">
+          <div class="fb-title">Model Registry 승인 Gate</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-blue">자동 승인 (기준 초과 시)</span>
+            <span class="fb-svc-tag tag-blue">수동 승인 (운영자 검토)</span>
+            <span class="fb-svc-tag tag-blue">Staging → Production 승격</span>
+          </div>
+        </div>
+      </div>
+      <div class="flow-arrow-v"></div>
+      <div class="flow-box fb-orange" style="max-width:100%;">
+        <div class="fb-icon">🔀</div>
+        <div class="fb-content">
+          <div class="fb-title">Champion-Challenger 배포 (Production Variants)</div>
+          <div class="fb-svcs">
+            <span class="fb-svc-tag tag-orange">Champion 90% 트래픽</span>
+            <span class="fb-svc-tag tag-orange">Challenger 10% 트래픽</span>
+            <span class="fb-svc-tag tag-orange">A/B 성능 비교 후 자동 교체</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title" style="margin-top:24px;">MLOps 성숙도 단계</div>
+    <table>
+      <thead>
+        <tr><th>Level</th><th>단계</th><th>구현 내용</th><th>적용 Phase</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Level 0</td>
+          <td>수동 ML</td>
+          <td>노트북 기반 탐색·실험, 수동 배포</td>
+          <td>초기 PoC</td>
+        </tr>
+        <tr>
+          <td>Level 1</td>
+          <td>ML 파이프라인 자동화</td>
+          <td>SageMaker Pipelines 학습·배포 자동화, Model Registry 도입</td>
+          <td>Phase 1</td>
+        </tr>
+        <tr>
+          <td>Level 2</td>
+          <td>CI/CD 파이프라인</td>
+          <td>CodePipeline 코드 변경 → 자동 재학습·배포 / 드리프트 기반 자동 재학습</td>
+          <td>Phase 2~3</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     5. 보안 · 거버넌스
+═══════════════════════════════════════════════ -->
+<div class="card" id="security">
+  <div class="card-header">
+    <span class="num">05</span>
+    <h3>보안 · 거버넌스</h3>
+    <span class="en">Security &amp; Data Governance</span>
+  </div>
+  <div class="card-body">
+    <div class="sec-grid">
+      <div class="sec-card">
+        <div class="sc-title">🔒 데이터 암호화</div>
+        <ul>
+          <li>S3 SSE-KMS (AWS KMS 키 관리)</li>
+          <li>Redshift 클러스터 암호화</li>
+          <li>전송 중 TLS 1.2+ 강제</li>
+          <li>SageMaker 학습 볼륨 암호화</li>
+        </ul>
+      </div>
+      <div class="sec-card">
+        <div class="sc-title">🛡️ 접근 제어</div>
+        <ul>
+          <li>Lake Formation FGAC (컬럼 수준)</li>
+          <li>IAM 역할 최소 권한 원칙</li>
+          <li>VPC Endpoint (S3, SageMaker)</li>
+          <li>PrivateLink 기반 서비스 연결</li>
+        </ul>
+      </div>
+      <div class="sec-card">
+        <div class="sc-title">🪪 개인정보 보호</div>
+        <ul>
+          <li>Bronze 적재 즉시 카드 ID 가명화</li>
+          <li>Macie로 PII 자동 탐지·알림</li>
+          <li>데이터 보존 기간별 S3 Lifecycle</li>
+          <li>삭제 요청 시 파티션 단위 삭제</li>
+        </ul>
+      </div>
+      <div class="sec-card">
+        <div class="sc-title">📋 감사 · 컴플라이언스</div>
+        <ul>
+          <li>CloudTrail 모든 API 호출 기록</li>
+          <li>AWS Config 리소스 변경 추적</li>
+          <li>Security Hub 컴플라이언스 대시보드</li>
+          <li>감사 로그 S3 Glacier 90일+ 보관</li>
+        </ul>
+      </div>
+      <div class="sec-card">
+        <div class="sc-title">🌐 네트워크 격리</div>
+        <ul>
+          <li>운영계-분석계 망 분리 (Transit GW)</li>
+          <li>SageMaker VPC 전용 모드</li>
+          <li>NAT Gateway 아웃바운드만 허용</li>
+          <li>Security Group 최소 포트 오픈</li>
+        </ul>
+      </div>
+      <div class="sec-card">
+        <div class="sc-title">🤖 AI 윤리·거버넌스</div>
+        <ul>
+          <li>SageMaker Clarify 편향 탐지</li>
+          <li>Model Card 작성 의무화</li>
+          <li>RAG + Guardrail (LLM 응답 감사)</li>
+          <li>Phase 3: AI 거버넌스 위원회 운영</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     6. 서비스 규모 및 비용 가이드
+═══════════════════════════════════════════════ -->
+<div class="card" id="sizing">
+  <div class="card-header">
+    <span class="num">06</span>
+    <h3>서비스 선택 가이드</h3>
+    <span class="en">AWS Service Selection &amp; Sizing Guide</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead>
+        <tr>
+          <th>유즈케이스</th>
+          <th>학습 인스턴스</th>
+          <th>서빙 방식</th>
+          <th>권장 인스턴스</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>U01 수요 예측 (LSTM)</td>
+          <td>ml.p3.2xlarge (Spot)</td>
+          <td>Batch Transform (일배치)</td>
+          <td>ml.m5.large</td>
+          <td>일 1회 전 역사 일괄 추론</td>
+        </tr>
+        <tr>
+          <td>U05 부정승차 탐지 (XGBoost)</td>
+          <td>ml.m5.4xlarge (Spot)</td>
+          <td>Async Inference (5분 주기)</td>
+          <td>ml.c5.xlarge</td>
+          <td>게이트 이벤트 배치 집계 후 추론</td>
+        </tr>
+        <tr>
+          <td>U04 예지보전 (Isolation Forest)</td>
+          <td>ml.m5.2xlarge (Spot)</td>
+          <td>Batch Transform (시간배치)</td>
+          <td>ml.m5.large</td>
+          <td>IoT 센서 1시간 집계 데이터 기반</td>
+        </tr>
+        <tr>
+          <td>U11 LLM 챗봇 (RAG)</td>
+          <td>—(파운데이션 모델)</td>
+          <td>Real-time Endpoint</td>
+          <td>ml.g5.2xlarge (GPU)</td>
+          <td>Bedrock 연동 또는 SageMaker JumpStart</td>
+        </tr>
+        <tr>
+          <td>U03 혼잡도 예측 (GBM)</td>
+          <td>ml.m5.4xlarge (Spot)</td>
+          <td>Async Inference (5분 주기)</td>
+          <td>ml.c5.xlarge</td>
+          <td>Phase 2 이후 준실시간 전환</td>
+        </tr>
+        <tr>
+          <td>U09/U10 CCTV 이상탐지 (CV)</td>
+          <td>ml.p3.8xlarge (On-Demand)</td>
+          <td>Real-time Endpoint (GPU)</td>
+          <td>ml.g4dn.xlarge</td>
+          <td>Phase 2~3 / 영상 스트림 처리</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px;font-size:12px;color:var(--muted);">
+      * Spot Instance 사용 시 학습 비용 최대 90% 절감 가능 / SageMaker Managed Spot Training 권장<br>
+      * 서빙 인스턴스는 초기 소형 → 트래픽 증가 시 Auto Scaling 설정으로 탄력적 운영
+    </p>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+<style>
+.close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>

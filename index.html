@@ -1,0 +1,1597 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFC 도메인 AI/ML 분석 · Use Case 조사 및 우선순위</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a375e;
+  --blue: #2e6da4;
+  --sky: #e8f2fb;
+  --accent: #f08c00;
+  --red: #c0392b;
+  --green: #177b4e;
+  --purple: #6a0d91;
+  --teal: #007a87;
+  --white: #ffffff;
+  --gray: #f4f6f9;
+  --text: #1a1a2e;
+  --muted: #5a6a82;
+  --slide-bg: linear-gradient(135deg, #0d1b30 0%, #1a2f50 50%, #1a375e 100%);
+  --card-bg: rgba(255,255,255,0.08);
+  --card-hover: rgba(255,255,255,0.14);
+  --border: rgba(255,255,255,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #0d1b30;
+  overflow: hidden;
+  color: var(--white);
+}
+
+/* ── Slide Container ── */
+.deck { position: relative; width: 100vw; height: 100vh; }
+
+.slide {
+  display: none;
+  position: absolute; inset: 0;
+  background: var(--slide-bg);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 64px 80px;
+  overflow: hidden;
+}
+.slide.active { display: flex; }
+
+/* Decorative background circles */
+.slide::before {
+  content: "";
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(46,109,164,0.12) 0%, transparent 70%);
+  top: -200px; right: -100px;
+  pointer-events: none;
+}
+.slide::after {
+  content: "";
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,122,135,0.10) 0%, transparent 70%);
+  bottom: -100px; left: -100px;
+  pointer-events: none;
+}
+
+/* ── Controls ── */
+.controls {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(10,20,40,0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  z-index: 100;
+}
+
+.ctrl-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--white);
+  font-size: 18px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.ctrl-btn:hover { background: rgba(255,255,255,0.22); }
+
+.slide-counter {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  min-width: 60px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--accent));
+  transition: width 0.3s ease;
+  z-index: 200;
+}
+
+/* Slide nav dots */
+.nav-dots {
+  display: flex; gap: 6px;
+  position: fixed;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 101;
+  margin-top: 4px;
+}
+.nav-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.nav-dot.active { background: var(--accent); transform: scale(1.3); }
+
+/* ── Slide Titles ── */
+.slide-badge {
+  font-size: 11px; font-weight: 500; letter-spacing: 2px;
+  color: var(--accent);
+  text-transform: uppercase;
+  background: rgba(240,140,0,0.12);
+  border: 1px solid rgba(240,140,0,0.3);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+.slide-num {
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.slide-title {
+  font-size: 28px; font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.slide-sub {
+  font-size: 14px; color: rgba(255,255,255,0.55);
+  text-align: center;
+  margin-bottom: 28px;
+}
+.slide-content { width: 100%; max-width: 1200px; }
+
+/* ── Cover Slide ── */
+.cover-badge {
+  font-size: 11px; letter-spacing: 3px; color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.cover-title {
+  font-size: 52px; font-weight: 900;
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--white) 0%, #a8c8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.cover-subtitle {
+  font-size: 22px; font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 40px;
+}
+.cover-divider {
+  width: 80px; height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--accent));
+  border-radius: 2px;
+  margin: 0 auto 40px;
+}
+.cover-meta {
+  font-size: 13px; color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+}
+
+/* ── Domain Grid (Slide 2) ── */
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+.domain-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 3px solid;
+  position: relative;
+}
+.domain-card:nth-child(5) { grid-column: 1; }
+.d1 { border-left-color: var(--teal); }
+.d2 { border-left-color: var(--blue); }
+.d3 { border-left-color: var(--green); }
+.d4 { border-left-color: var(--purple); }
+.d5 { border-left-color: var(--red); }
+.d6 { border-left-color: var(--accent); }
+.d7 { border-left-color: #8a9db5; }
+
+.d-code {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 4px;
+}
+.d-name {
+  font-size: 13px; font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+.d-en {
+  font-size: 10px; color: rgba(255,255,255,0.38);
+  margin-bottom: 8px;
+}
+.d-desc {
+  font-size: 11px; color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.d-stars { font-size: 13px; color: var(--accent); }
+
+/* ── Featured domain cards (D1·D2·D3 강조) ── */
+.domain-card.featured {
+  border-left-width: 4px;
+  background: rgba(255,255,255,0.13);
+  box-shadow: 0 0 0 1px rgba(240,140,0,0.35), 0 6px 20px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+}
+.domain-card.dim {
+  opacity: 0.5;
+}
+.d-focus-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(240,140,0,0.18);
+  border: 1px solid rgba(240,140,0,0.45);
+  color: var(--accent);
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 5px;
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+.d-hl {
+  color: #ffc84a;
+  font-weight: 700;
+}
+
+/* ── Use Case Table (Slide 3) ── */
+.uc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.uc-table thead tr {
+  background: rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.uc-table th {
+  padding: 10px 14px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+  text-align: left;
+  text-transform: uppercase;
+}
+.uc-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  vertical-align: middle;
+  color: rgba(255,255,255,0.85);
+}
+.uc-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+.uc-id {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  background: rgba(46,109,164,0.3);
+  border: 1px solid rgba(46,109,164,0.5);
+  color: #7ab8e8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.uc-link-row td { cursor: pointer; }
+.uc-link-row:hover .uc-name { text-decoration: underline; color: #7ab8e8; }
+
+.uc-name { font-weight: 600; color: var(--white); }
+.uc-link .uc-name { color: #82c4f5; }
+.uc-link-row a {
+  text-decoration: none;
+  color: inherit;
+  display: table-row;
+}
+
+.uc-case { color: rgba(255,255,255,0.6); font-size: 12px; }
+
+.ai-badge {
+  font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 4px;
+  white-space: nowrap;
+}
+.ai-forecast { background: rgba(0,122,135,0.25); color: #5dd3de; border: 1px solid rgba(0,122,135,0.4); }
+.ai-predict  { background: rgba(46,109,164,0.25); color: #7ab8e8; border: 1px solid rgba(46,109,164,0.4); }
+.ai-anomaly  { background: rgba(192,57,43,0.25); color: #f08080; border: 1px solid rgba(192,57,43,0.4); }
+.ai-cv       { background: rgba(106,13,145,0.25); color: #c490e4; border: 1px solid rgba(106,13,145,0.4); }
+.ai-nlp      { background: rgba(240,140,0,0.2); color: #f0c060; border: 1px solid rgba(240,140,0,0.35); }
+
+.link-arrow { font-size: 12px; color: rgba(130,196,245,0.6); margin-left: 6px; }
+
+.uc-no-link { opacity: 0.45; }
+.uc-note {
+  font-size: 12px;
+  background: rgba(240,140,0,0.1);
+  border: 1px solid rgba(240,140,0,0.25);
+  border-radius: 6px;
+  padding: 8px 14px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 14px;
+}
+
+/* ── 18 UC Classification (Slide 4) ── */
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+.phase-col {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.phase-header {
+  padding: 10px 14px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ph-short { background: rgba(23,123,78,0.3); color: #5de8a0; border-bottom: 1px solid rgba(23,123,78,0.3); }
+.ph-mid   { background: rgba(240,140,0,0.2); color: #f0c060; border-bottom: 1px solid rgba(240,140,0,0.3); }
+.ph-long  { background: rgba(192,57,43,0.2); color: #f08080; border-bottom: 1px solid rgba(192,57,43,0.3); }
+
+.phase-items { padding: 8px 0; }
+.phase-item {
+  display: flex; align-items: flex-start;
+  gap: 8px;
+  padding: 6px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 11.5px;
+}
+.phase-item:last-child { border-bottom: none; }
+.pi-code {
+  font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  min-width: 28px;
+  margin-top: 1px;
+}
+.pi-name { font-weight: 600; color: rgba(255,255,255,0.85); line-height: 1.3; }
+.pi-data { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+.warn-box {
+  margin-top: 12px;
+  background: rgba(192,57,43,0.1);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px; color: rgba(255,180,170,0.85);
+}
+
+/* ── Impact Cards (Slide 5) ── */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+.impact-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.impact-header {
+  padding: 10px 16px;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.ih-rev  { background: rgba(192,57,43,0.2); color: #f08080; border-bottom: 1px solid rgba(192,57,43,0.25); }
+.ih-ops  { background: rgba(23,123,78,0.2); color: #5de8a0; border-bottom: 1px solid rgba(23,123,78,0.25); }
+.ih-cx   { background: rgba(106,13,145,0.2); color: #c490e4; border-bottom: 1px solid rgba(106,13,145,0.25); }
+.ih-gen  { background: rgba(240,140,0,0.18); color: #f0c060; border-bottom: 1px solid rgba(240,140,0,0.25); }
+
+.impact-items { padding: 10px 16px; }
+.impact-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px;
+}
+.impact-row:last-child { border-bottom: none; }
+.ir-uc { font-weight: 600; color: rgba(255,255,255,0.8); }
+.ir-val {
+  font-size: 13px; font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* ── Priority Matrix (Slide 6) ── */
+.matrix-wrap {
+  display: flex; gap: 20px;
+  width: 100%; align-items: flex-start;
+}
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+  aspect-ratio: 1.4;
+  position: relative;
+}
+.matrix-label-y {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+  align-self: center;
+  margin-right: 4px;
+}
+.matrix-labels-x {
+  grid-column: 1 / -1;
+  display: flex; justify-content: space-between;
+  padding: 0 10px;
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
+}
+.quadrant {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex; flex-direction: column;
+}
+.q-title {
+  font-size: 12px; font-weight: 700;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.q-qw  { color: #5de8a0; }
+.q-sb  { color: #7ab8e8; }
+.q-fi  { color: #c490e4; }
+.q-lb  { color: #f08080; }
+
+.q-items { display: flex; flex-wrap: wrap; gap: 5px; }
+.q-item {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.top5-panel {
+  width: 260px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.top5-title {
+  font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+.top5-item {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.top5-rank {
+  font-size: 16px;
+  min-width: 24px;
+}
+.top5-info { flex: 1; }
+.top5-name {
+  font-size: 12px; font-weight: 600;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+.top5-bar-wrap {
+  height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;
+}
+.top5-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--accent));
+  border-radius: 3px;
+}
+.top5-score {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  min-width: 28px; text-align: right;
+}
+
+/* ── Criteria (Slide 7) ── */
+.criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.criteria-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.criteria-pct {
+  font-size: 42px; font-weight: 900;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.criteria-name {
+  font-size: 13px; font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.criteria-desc {
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  line-height: 1.5;
+}
+.c1 .criteria-pct { color: #f08c00; }
+.c2 .criteria-pct { color: #c0392b; }
+.c3 .criteria-pct { color: #007a87; }
+.c4 .criteria-pct { color: #6a0d91; }
+
+.criteria-bar-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+}
+.cb-label { font-size: 12px; color: rgba(255,255,255,0.6); min-width: 200px; }
+.cb-wrap { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.cb-fill { height: 100%; border-radius: 4px; }
+.cb-pct { font-size: 13px; font-weight: 700; min-width: 38px; text-align: right; }
+
+/* ── Roadmap (Slide 8) ── */
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  width: 100%;
+  position: relative;
+}
+.phase-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 6px;
+}
+.phase-card-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.ph-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900;
+  flex-shrink: 0;
+}
+.ph-1 .ph-dot { background: rgba(0,122,135,0.3); color: var(--teal); border: 2px solid var(--teal); }
+.ph-2 .ph-dot { background: rgba(46,109,164,0.3); color: #7ab8e8; border: 2px solid #2e6da4; }
+.ph-3 .ph-dot { background: rgba(240,140,0,0.25); color: var(--accent); border: 2px solid var(--accent); }
+.ph-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); }
+.ph-name { font-size: 14px; font-weight: 700; color: var(--white); }
+
+.phase-body { padding: 10px 14px; }
+.track {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  border-left: 2px solid;
+}
+.track-a { border-left-color: var(--red); }
+.track-b { border-left-color: var(--teal); }
+.track-c { border-left-color: var(--accent); }
+.track-d { border-left-color: var(--purple); }
+
+.track-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+.track-items { font-size: 11px; color: rgba(255,255,255,0.75); line-height: 1.5; }
+
+.phase-kpi {
+  margin: 8px 14px 12px;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.kpi-label { font-weight: 700; color: rgba(255,255,255,0.4); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+
+/* ── Architecture (Slide 9) ── */
+.arch-layers { width: 100%; display: flex; flex-direction: column; gap: 7px; }
+.arch-layer {
+  display: flex; align-items: stretch;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  min-height: 44px;
+}
+.al-num {
+  width: 36px; min-width: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.5);
+}
+.al-name {
+  min-width: 170px;
+  display: flex; align-items: center;
+  padding: 6px 12px;
+  font-size: 12px; font-weight: 700;
+  color: var(--white);
+}
+.al-detail {
+  flex: 1;
+  display: flex; align-items: center;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  line-height: 1.5;
+}
+.al-tag {
+  font-size: 10px; font-weight: 600;
+  padding: 1px 7px; border-radius: 3px;
+  margin-left: 6px; white-space: nowrap;
+}
+.medal-bronze { background: rgba(180,90,30,0.2); color: #cd7f32; border: 1px solid rgba(180,90,30,0.4); }
+.medal-silver { background: rgba(160,160,160,0.2); color: #c0c0c0; border: 1px solid rgba(160,160,160,0.4); }
+.medal-gold   { background: rgba(200,160,0,0.2); color: #ffd700; border: 1px solid rgba(200,160,0,0.4); }
+
+.la1 { background: rgba(0,122,135,0.15); }
+.la1 .al-num { background: rgba(0,122,135,0.3); }
+.la1 .al-name { background: rgba(0,122,135,0.2); }
+.la2 { background: rgba(46,109,164,0.12); }
+.la2 .al-num { background: rgba(46,109,164,0.3); }
+.la2 .al-name { background: rgba(46,109,164,0.2); }
+.la3 { background: rgba(23,123,78,0.12); }
+.la3 .al-num { background: rgba(23,123,78,0.3); }
+.la3 .al-name { background: rgba(23,123,78,0.2); }
+.la4 { background: rgba(106,13,145,0.12); }
+.la4 .al-num { background: rgba(106,13,145,0.3); }
+.la4 .al-name { background: rgba(106,13,145,0.2); }
+.la5 { background: rgba(240,140,0,0.12); }
+.la5 .al-num { background: rgba(240,140,0,0.25); }
+.la5 .al-name { background: rgba(240,140,0,0.18); }
+.la6 { background: rgba(192,57,43,0.12); }
+.la6 .al-num { background: rgba(192,57,43,0.3); }
+.la6 .al-name { background: rgba(192,57,43,0.2); }
+.la7 { background: rgba(90,106,130,0.15); }
+.la7 .al-num { background: rgba(90,106,130,0.3); }
+.la7 .al-name { background: rgba(90,106,130,0.2); }
+
+.arch-note {
+  margin-top: 10px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+/* ── Risk Table (Slide 10) ── */
+.risk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.risk-table th {
+  padding: 10px 14px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.risk-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  vertical-align: top;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.5;
+}
+.risk-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+.risk-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+.r-high { background: rgba(192,57,43,0.3); color: #f08080; border: 1px solid rgba(192,57,43,0.5); }
+.r-med  { background: rgba(240,140,0,0.25); color: #f0c060; border: 1px solid rgba(240,140,0,0.45); }
+.r-low  { background: rgba(23,123,78,0.25); color: #5de8a0; border: 1px solid rgba(23,123,78,0.45); }
+
+.risk-factor { font-weight: 600; color: var(--white); }
+.risk-mitigation { color: rgba(255,255,255,0.6); font-size: 12px; }
+
+/* ── Final Recommendation (Slide 11) ── */
+.rec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.rec-table th {
+  padding: 9px 12px;
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+  background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.rec-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  vertical-align: middle;
+  color: rgba(255,255,255,0.8);
+}
+.rec-stars { color: var(--accent); font-size: 13px; }
+.rec-uc { font-weight: 600; color: var(--white); font-size: 12.5px; }
+.rec-effect { color: rgba(255,255,255,0.6); }
+.rec-top td { background: rgba(240,140,0,0.07) !important; }
+.rec-top td:first-child { border-left: 3px solid var(--accent); }
+.rec-top .rec-uc { color: #ffc84a !important; }
+.rec-top::after { content: ''; }
+.phase-p1 { background: rgba(0,122,135,0.2); color: #5dd3de; border: 1px solid rgba(0,122,135,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.phase-p12 { background: rgba(46,109,164,0.2); color: #7ab8e8; border: 1px solid rgba(46,109,164,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.phase-p2 { background: rgba(106,13,145,0.2); color: #c490e4; border: 1px solid rgba(106,13,145,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.phase-p3 { background: rgba(192,57,43,0.15); color: #f08080; border: 1px solid rgba(192,57,43,0.3); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+
+.period-val { font-size: 12px; color: rgba(255,255,255,0.55); }
+.ai-type { font-size: 11px; color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="deck">
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 1 — 표지
+═══════════════════════════════════════════════ -->
+<section class="slide active" id="s1">
+  <div class="cover-badge">STRATEGIC REPORT · PROPOSAL-READY</div>
+  <div class="cover-title">AFC 도메인 AI/ML 분석</div>
+  <div class="cover-subtitle">Use Case 조사 · 우선순위 분석</div>
+  <div class="cover-divider"></div>
+  <div class="cover-meta"> &nbsp;&nbsp; <span id="today-date"></span></div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 2 — AFC 도메인 분류 (7 Domains)
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="slide-title">AFC 도메인 분류</div>
+  <div class="slide-sub">7개 핵심 비즈니스 도메인 × AI/ML 적용 잠재력</div>
+  <div class="slide-content">
+    <div class="domain-grid">
+      <div class="domain-card d1 featured">
+        <div class="d-code">D1</div>
+        <div class="d-name">수익·정산</div>
+        <div class="d-en">Revenue &amp; Settlement</div>
+        <div class="d-desc">수수료 정산, <span class="d-hl">부정승차 탐지</span>, 환승 정산 최적화</div>
+        <div class="d-stars">★★★</div>
+        <div class="d-focus-tag">🎯 핵심 UC · 부정승차·이상거래 탐지</div>
+      </div>
+      <div class="domain-card d2 featured">
+        <div class="d-code">D2</div>
+        <div class="d-name">자산·인프라 운영</div>
+        <div class="d-en">Asset &amp; Operations</div>
+        <div class="d-desc">게이트·단말기 가동률, <span class="d-hl">장애 예지보전</span>, 부품 관리</div>
+        <div class="d-stars">★★★</div>
+        <div class="d-focus-tag">🎯 핵심 UC · 게이트·단말기 예지보전</div>
+      </div>
+      <div class="domain-card d3 featured">
+        <div class="d-code">D3</div>
+        <div class="d-name">수요·운영 계획</div>
+        <div class="d-en">Demand &amp; Planning</div>
+        <div class="d-desc"><span class="d-hl">시간대·노선별 수요 예측</span>, 다이어 최적화, OD 분석</div>
+        <div class="d-stars">★★★</div>
+        <div class="d-focus-tag">🎯 핵심 UC · 시간대·역별 승차 수요 예측</div>
+      </div>
+      <div class="domain-card d4 dim">
+        <div class="d-code">D4</div>
+        <div class="d-name">승객 경험</div>
+        <div class="d-en">Passenger Experience</div>
+        <div class="d-desc">안내·민원, 환승 추천, 모바일 앱 개인화</div>
+        <div class="d-stars">★★☆</div>
+      </div>
+      <div class="domain-card d5 featured">
+        <div class="d-code">D5</div>
+        <div class="d-name">안전·보안</div>
+        <div class="d-en">Safety &amp; Security</div>
+        <div class="d-desc">혼잡도 예측, 이상행동·낙상 탐지, CCTV 영상 분석, <span class="d-hl">운전자 운행패턴 스코어링</span></div>
+        <div class="d-stars">★★★</div>
+        <div class="d-focus-tag">🎯 핵심 UC · 운전자 리스크 프로파일 세그멘테이션</div>
+      </div>
+      <div class="domain-card d6 dim">
+        <div class="d-code">D6</div>
+        <div class="d-name">마케팅·로열티</div>
+        <div class="d-en">Marketing &amp; Loyalty</div>
+        <div class="d-desc">정기권 이탈 예측, 개인화 캠페인, Gen AI 콘텐츠</div>
+        <div class="d-stars">★★☆</div>
+      </div>
+      <div class="domain-card d7 dim">
+        <div class="d-code">D7</div>
+        <div class="d-name">거버넌스·컴플라이언스</div>
+        <div class="d-en">Governance &amp; Compliance</div>
+        <div class="d-desc">개인정보 보호, 감사 자동화, 데이터 품질 관리</div>
+        <div class="d-stars">★★☆</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 3 — 교통 분야 검증 유즈케이스 (T1~T7)
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="slide-title">교통 분야 검증 유즈케이스</div>
+  <div class="slide-sub">글로벌 선행 사례로 검증된 7개 핵심 유즈케이스 — T1~T6 상세 문서 연결</div>
+  <div class="slide-content">
+    <table class="uc-table">
+      <thead>
+        <tr>
+          <th>UC</th>
+          <th>유즈케이스</th>
+          <th>글로벌 사례</th>
+          <th>AI 유형</th>
+          <th>문서</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T1</span></td>
+          <td><a href="sub/1.station_time_based_demand_forecasting_usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">시간대·역별 승차 수요 예측</span></a></td>
+          <td class="uc-case">TfL, MTA NY, JR East</td>
+          <td><span class="ai-badge ai-forecast">Forecasting</span></td>
+          <td><a href="sub/1.station_time_based_demand_forecasting_usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T2</span></td>
+          <td><a href="sub/2.afc_gate_terminal_predictive_maintenance_usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">게이트·단말기 예지보전</span></a></td>
+          <td class="uc-case">Singapore SMRT, HK MTR</td>
+          <td><span class="ai-badge ai-predict">Predictive AI</span></td>
+          <td><a href="sub/2.afc_gate_terminal_predictive_maintenance_usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T3</span></td>
+          <td><a href="sub/3.fare_evasion_abnormal_transaction_detection_usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">부정승차·이상거래 탐지</span></a></td>
+          <td class="uc-case">TfL, 서울교통공사</td>
+          <td><span class="ai-badge ai-anomaly">Anomaly Detection</span></td>
+          <td><a href="sub/3.fare_evasion_abnormal_transaction_detection_usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T4</span></td>
+          <td><a href="sub/4.AFC_OD_Analysis_Usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">OD(기종점) 추정·환승 패턴 분석</span></a></td>
+          <td class="uc-case">EZ-Link (SG), Octopus (HK)</td>
+          <td><span class="ai-badge ai-forecast">Forecasting</span></td>
+          <td><a href="sub/4.AFC_OD_Analysis_Usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T5</span></td>
+          <td><a href="sub/5.realtime_crowding_prediction_usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">혼잡도 실시간 예측</span></a></td>
+          <td class="uc-case">Tokyo Metro, Seoul Metro</td>
+          <td><span class="ai-badge ai-forecast">Forecasting + CCTV</span></td>
+          <td><a href="sub/5.realtime_crowding_prediction_usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T6</span></td>
+          <td><a href="sub/6.cctv_abnormal_fall_detection_db_networkrail_usecase.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">CCTV 영상 이상행동·낙상 탐지</span></a></td>
+          <td class="uc-case">DB (독), Network Rail (UK)</td>
+          <td><span class="ai-badge ai-cv">Computer Vision</span></td>
+          <td><a href="sub/6.cctv_abnormal_fall_detection_db_networkrail_usecase.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+        <tr class="uc-link-row">
+          <td><span class="uc-id">T7</span></td>
+          <td><a href="sub/7.passenger_chatbot_case.html" target="_blank" style="text-decoration:none;color:inherit;display:block;">
+            <span class="uc-name uc-link">승객 민원 챗봇·음성 응대</span></a></td>
+          <td class="uc-case">SNCF Léa, Amtrak Julie</td>
+          <td><span class="ai-badge ai-nlp">NLP/LLM</span></td>
+          <td><a href="sub/7.passenger_chatbot_case.html" target="_blank" style="color:#82c4f5;font-size:18px;text-decoration:none;">↗</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="uc-note">
+      💡 <strong>핵심 시사점:</strong> AFC 부정승차 탐지는 단독 모델보다 CCTV + 게이트 이벤트 + 거래 로그 결합 시 탐지 정확도 및 운영 효율이 현저히 향상됩니다.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 4 — 18개 유즈케이스 분류
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="slide-title">상세 유즈케이스 분류</div>
+  <div class="slide-sub">데이터 준비도·구현 난이도 기반 단기·중기·장기 구분</div>
+  <div class="slide-content">
+    <div class="phase-grid">
+      <div class="phase-col">
+        <div class="phase-header ph-short">🟢 단기 Quick Wins &nbsp;<small style="font-weight:400;opacity:0.7;">9개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U01</span><div><div class="pi-name">수요 예측</div><div class="pi-data">거래 로그 + 캘린더</div></div></div>
+          <div class="phase-item"><span class="pi-code">U02</span><div><div class="pi-name">OD 분석</div><div class="pi-data">태그 IN/OUT + 환승</div></div></div>
+          <div class="phase-item"><span class="pi-code">U05</span><div><div class="pi-name">부정승차 탐지</div><div class="pi-data">거래 + 게이트 시퀀스</div></div></div>
+          <div class="phase-item"><span class="pi-code">U06</span><div><div class="pi-name">정산 오류 탐지</div><div class="pi-data">정산·클리어링 로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U07</span><div><div class="pi-name">정기권 이탈 예측</div><div class="pi-data">정기권 이력</div></div></div>
+          <div class="phase-item"><span class="pi-code">U08</span><div><div class="pi-name">승객 세그멘테이션</div><div class="pi-data">거래 + 회원 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U14</span><div><div class="pi-name">스케줄 최적화</div><div class="pi-data">다이어 + 인력 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U16</span><div><div class="pi-name">데이터 품질 관리</div><div class="pi-data">메타데이터·원천 로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U17</span><div><div class="pi-name">Gen AI 마케팅</div><div class="pi-data">캠페인 이력</div></div></div>
+        </div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-header ph-mid">🟡 중기 Strategic Bets &nbsp;<small style="font-weight:400;opacity:0.7;">8개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U03</span><div><div class="pi-name">혼잡도 예측</div><div class="pi-data">CCTV(선택) 보강</div></div></div>
+          <div class="phase-item"><span class="pi-code">U04</span><div><div class="pi-name">게이트 예지보전</div><div class="pi-data">IoT 로그 표준화</div></div></div>
+          <div class="phase-item"><span class="pi-code">U11</span><div><div class="pi-name">LLM 민원 챗봇</div><div class="pi-data">응대 매뉴얼 정리</div></div></div>
+          <div class="phase-item"><span class="pi-code">U12</span><div><div class="pi-name">분실물 매칭</div><div class="pi-data">사진·텍스트 DB</div></div></div>
+          <div class="phase-item"><span class="pi-code">U13</span><div><div class="pi-name">MaaS 개인화 추천</div><div class="pi-data">앱 로그·제휴 카탈로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U15</span><div><div class="pi-name">동적 요금 시뮬</div><div class="pi-data">가격탄력성·정책 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U18</span><div><div class="pi-name">LLM 운영 어시스턴트</div><div class="pi-data">운영 문서 정리</div></div></div>
+          <div class="phase-item"><span class="pi-code">U19</span><div><div class="pi-name">운전자 운행패턴 스코어링</div><div class="pi-data">운행 로그 + 사고·지연 이력</div></div></div>
+        </div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-header ph-long">🔴 장기 Long Bets &nbsp;<small style="font-weight:400;opacity:0.7;">2개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U09</span><div><div class="pi-name">CCTV 이상행동 탐지</div><div class="pi-data">대량 영상 수집·라벨링 필요</div></div></div>
+          <div class="phase-item"><span class="pi-code">U10</span><div><div class="pi-name">낙상·선로 침입 탐지</div><div class="pi-data">CCTV + 사고 라벨 DB</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">⚠️ <strong>영상 데이터 거버넌스 신규 구축 필요</strong> — U09·U10은 Phase 2 이후 단계적 추진. 대량 영상 수집·라벨링 인프라 및 개인정보 거버넌스 선행 구축이 전제 조건입니다.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 5 — 18개 유즈케이스 정량 효과
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="slide-title">유즈케이스 기대 효과</div>
+  <div class="slide-sub">비즈니스 임팩트 카테고리별 1차 효과 추정</div>
+  <div class="slide-content">
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-header ih-rev">🏆 수익 보호 &amp; 오류 제거</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U05 부정승차·이상거래 탐지</span><span class="ir-val">+0.3~1.0% 매출 회수</span></div>
+          <div class="impact-row"><span class="ir-uc">U06 정산 오류 자동 탐지</span><span class="ir-val">오정산 −50%+</span></div>
+          <div class="impact-row"><span class="ir-uc">U07 정기권 이탈 예측</span><span class="ir-val">이탈률 −10~20%</span></div>
+          <div class="impact-row"><span class="ir-uc">U13 MaaS 개인화 추천</span><span class="ir-val">제휴 수익 +10~20%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-ops">⚙️ 운영 효율 &amp; 비용 절감</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U01 시간대·역별 수요 예측</span><span class="ir-val">운영비 −3~7%</span></div>
+          <div class="impact-row"><span class="ir-uc">U02 OD 이동 패턴 분석</span><span class="ir-val">배차·요금 최적화 기반 확보</span></div>
+          <div class="impact-row"><span class="ir-uc">U04 게이트·단말기 예지보전</span><span class="ir-val">다운타임 −30~50%</span></div>
+          <div class="impact-row"><span class="ir-uc">U14 스케줄 최적화</span><span class="ir-val">인건비 −2~5%</span></div>
+          <div class="impact-row"><span class="ir-uc">U16 데이터 품질 거버넌스</span><span class="ir-val">오류 리포트 −60%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-cx">🤖 고객 경험 &amp; 안전</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U11 LLM 민원 챗봇</span><span class="ir-val">1차 응대 60%+ 자동화</span></div>
+          <div class="impact-row"><span class="ir-uc">U03 혼잡도 실시간 예측</span><span class="ir-val">혼잡 민원 −15~25%</span></div>
+          <div class="impact-row"><span class="ir-uc">U09/U10 CCTV 안전 탐지</span><span class="ir-val">사고 대응 시간 −40%</span></div>
+          <div class="impact-row"><span class="ir-uc">U19 운전자 운행패턴 스코어링</span><span class="ir-val">안전사고 리스크 −20~35%</span></div>
+          <div class="impact-row"><span class="ir-uc">U12 분실물 AI 매칭</span><span class="ir-val">처리 시간 −50%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-gen">🚀 Gen AI 생산성</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U17 Gen AI 마케팅 콘텐츠</span><span class="ir-val">제작 시간 −70%</span></div>
+          <div class="impact-row"><span class="ir-uc">U18 LLM 운영 어시스턴트</span><span class="ir-val">운영 보고 −40%</span></div>
+          <div class="impact-row"><span class="ir-uc">U15 동적 요금 시뮬레이션</span><span class="ir-val">정책 분석 시간 −60%</span></div>
+          <div class="impact-row"><span class="ir-uc">U08 승객 세그멘테이션</span><span class="ir-val">캠페인 전환율 +15%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 6 — 우선순위 매트릭스
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="slide-title">우선순위 매트릭스</div>
+  <div class="slide-sub">Business Impact × Implementation Effort (Feasibility)</div>
+  <div class="slide-content" style="display:flex;gap:20px;align-items:flex-start;">
+    <div style="flex:1;">
+      <div style="display:flex;gap:10px;height:340px;">
+        <div style="display:flex;flex-direction:column;justify-content:space-between;padding:6px 0;align-items:center;">
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);transform:rotate(-90deg);white-space:nowrap;display:block;margin-top:30px;">High Impact</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);transform:rotate(-90deg);white-space:nowrap;display:block;margin-bottom:30px;">Low Impact</span>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;">
+          <div class="quadrant">
+            <div class="q-title q-qw">🚀 Quick Wins</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:6px;">High Impact · Low Effort</div>
+            <div class="q-items">
+              <span class="q-item">U05 부정승차</span>
+              <span class="q-item">U01 수요예측</span>
+              <span class="q-item">U11 LLM챗봇</span>
+              <span class="q-item">U06 정산오류</span>
+              <span class="q-item">U07 정기권이탈</span>
+              <span class="q-item">U02 OD분석</span>
+            </div>
+          </div>
+          <div class="quadrant">
+            <div class="q-title q-sb">🎯 Strategic Bets</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:6px;">High Impact · High Effort</div>
+            <div class="q-items">
+              <span class="q-item">U04 예지보전</span>
+              <span class="q-item">U03 혼잡도</span>
+              <span class="q-item">U13 MaaS추천</span>
+              <span class="q-item">U14 스케줄최적화</span>
+              <span class="q-item">U19 운전자스코어링</span>
+            </div>
+          </div>
+          <div class="quadrant">
+            <div class="q-title q-fi">🌱 Fill-ins</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:6px;">Low Impact · Low Effort</div>
+            <div class="q-items">
+              <span class="q-item">U17 Gen AI</span>
+              <span class="q-item">U08 세그멘테이션</span>
+              <span class="q-item">U16 데이터품질</span>
+              <span class="q-item">U18 LLM어시스턴트</span>
+              <span class="q-item">U12 분실물매칭</span>
+            </div>
+          </div>
+          <div class="quadrant">
+            <div class="q-title q-lb">🔬 Long Bets</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:6px;">Low Impact · High Effort</div>
+            <div class="q-items">
+              <span class="q-item">U09 CCTV이상행동</span>
+              <span class="q-item">U10 낙상탐지</span>
+              <span class="q-item">U15 동적요금</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 36px 0;font-size:10px;color:rgba(255,255,255,0.3);">
+        <span>← Low Effort</span>
+        <span>High Effort →</span>
+      </div>
+    </div>
+    <div class="top5-panel">
+      <div class="top5-title">🏆 TOP 5 우선순위 (가중치 적용)</div>
+      <div class="top5-item">
+        <span class="top5-rank">🥇</span>
+        <div class="top5-info">
+          <div class="top5-name">U05 부정승차·이상거래</div>
+          <div class="top5-bar-wrap"><div class="top5-bar" style="width:100%"></div></div>
+        </div>
+        <span class="top5-score">92</span>
+      </div>
+      <div class="top5-item">
+        <span class="top5-rank">🥈</span>
+        <div class="top5-info">
+          <div class="top5-name">U01 시간대 수요 예측</div>
+          <div class="top5-bar-wrap"><div class="top5-bar" style="width:95%"></div></div>
+        </div>
+        <span class="top5-score">88</span>
+      </div>
+      <div class="top5-item">
+        <span class="top5-rank">🥉</span>
+        <div class="top5-info">
+          <div class="top5-name">U04 게이트 예지보전</div>
+          <div class="top5-bar-wrap"><div class="top5-bar" style="width:92%"></div></div>
+        </div>
+        <span class="top5-score">85</span>
+      </div>
+      <div class="top5-item">
+        <span class="top5-rank" style="font-size:12px;min-width:24px;text-align:center;">4</span>
+        <div class="top5-info">
+          <div class="top5-name">U11 LLM 민원 챗봇</div>
+          <div class="top5-bar-wrap"><div class="top5-bar" style="width:90%"></div></div>
+        </div>
+        <span class="top5-score">83</span>
+      </div>
+      <div class="top5-item">
+        <span class="top5-rank" style="font-size:12px;min-width:24px;text-align:center;">5</span>
+        <div class="top5-info">
+          <div class="top5-name">U03 혼잡도 예측</div>
+          <div class="top5-bar-wrap"><div class="top5-bar" style="width:87%"></div></div>
+        </div>
+        <span class="top5-score">80</span>
+      </div>
+      <a href="sub/priority_evaluation_criteria.html" target="_blank"
+         style="display:flex;align-items:center;justify-content:center;gap:6px;
+                margin-top:14px;padding:9px 14px;border-radius:8px;text-decoration:none;
+                background:rgba(240,140,0,0.12);border:1px solid rgba(240,140,0,0.35);
+                color:#ffc84a;font-size:12px;font-weight:700;letter-spacing:.3px;
+                transition:background .15s;">
+        📊 평가 기준 상세 보기 ↗
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 8 — 추천 AI 로드맵 (3Phase)
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="slide-title">AI 도입 로드맵</div>
+  <div class="slide-sub">3 Phase 단계적 추진 — PoC → Pilot → Production</div>
+  <div class="slide-content">
+    <div class="roadmap-grid">
+      <div class="phase-card ph-1">
+        <div class="phase-card-header">
+          <div class="ph-dot">1</div>
+          <div>
+            <div class="ph-label">PHASE 1 · 단기</div>
+            <div class="ph-name">PoC &amp; Quick Wins</div>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="track track-a">
+            <div class="track-label">🅰 수익 보호</div>
+            <div class="track-items">U05 부정승차 · U06 정산 오류</div>
+          </div>
+          <div class="track track-b">
+            <div class="track-label">🅱 운영 효율</div>
+            <div class="track-items">U01 수요 예측 · U04 예지보전</div>
+          </div>
+          <div class="track track-c">
+            <div class="track-label">🅲 Gen AI</div>
+            <div class="track-items">U11 챗봇 · U17 마케팅</div>
+          </div>
+          <div class="track track-d">
+            <div class="track-label">🅳 공통 기반</div>
+            <div class="track-items">U16 데이터 품질 · U08 승객 세그멘테이션</div>
+          </div>
+        </div>
+        <div class="phase-kpi">
+          <div class="kpi-label">종료 KPI</div>
+          운영 모델 3개 · MLOps 파이프라인 1개
+        </div>
+      </div>
+      <div class="phase-card ph-2">
+        <div class="phase-card-header">
+          <div class="ph-dot">2</div>
+          <div>
+            <div class="ph-label">PHASE 2 · 중기</div>
+            <div class="ph-name">Pilot &amp; Scale</div>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="track track-a">
+            <div class="track-label">🅰 운영화 확대</div>
+            <div class="track-items">U05/U06 전 노선 · U07 이탈 예측</div>
+          </div>
+          <div class="track track-b">
+            <div class="track-label">🅱 수요·안전</div>
+            <div class="track-items">U03 혼잡도 · U02 OD 분석</div>
+          </div>
+          <div class="track track-c">
+            <div class="track-label">🅲 AI 고도화</div>
+            <div class="track-items">U13 MaaS 추천 · U18 LLM 어시스턴트 · U12 분실물 · U19 운전자 스코어링</div>
+          </div>
+          <div class="track track-d">
+            <div class="track-label">🅳 영상 AI PoC</div>
+            <div class="track-items">U09 CCTV (선별 역사)</div>
+          </div>
+        </div>
+        <div class="phase-kpi">
+          <div class="kpi-label">종료 KPI</div>
+          운영 모델 7~9개 · A/B 테스트 체계 구축
+        </div>
+      </div>
+      <div class="phase-card ph-3">
+        <div class="phase-card-header">
+          <div class="ph-dot">3</div>
+          <div>
+            <div class="ph-label">PHASE 3 · 장기</div>
+            <div class="ph-name">Production &amp; Optimize</div>
+          </div>
+        </div>
+        <div class="phase-body">
+          <div class="track track-a">
+            <div class="track-label">🅰 전사 확대</div>
+            <div class="track-items">전 노선 Champion-Challenger 운영</div>
+          </div>
+          <div class="track track-b">
+            <div class="track-label">🅱 운영 최적화</div>
+            <div class="track-items">U14 스케줄 최적화 · U03 전 역사</div>
+          </div>
+          <div class="track track-c">
+            <div class="track-label">🅲 영상 AI 전사</div>
+            <div class="track-items">U09/U10 CCTV 전사 · U15 동적 요금</div>
+          </div>
+          <div class="track track-d">
+            <div class="track-label">🅳 거버넌스</div>
+            <div class="track-items">AI 거버넌스 위원회 · 윤리 가이드</div>
+          </div>
+        </div>
+        <div class="phase-kpi">
+          <div class="kpi-label">종료 KPI</div>
+          운영 유즈케이스 12개+ · MLOps Level 2
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 9 — 시스템 아키텍처
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="slide-title">AI/ML 시스템 아키텍처</div>
+  <div class="slide-sub">Bronze → Silver → Gold 메달리온 아키텍처 + MLOps 7계층</div>
+  <div class="slide-content">
+    <div class="arch-layers">
+      <div class="arch-layer la1">
+        <div class="al-num">1</div>
+        <div class="al-name">Data Ingestion</div>
+        <div class="al-detail">CDC · Batch · API · File Interface — 운영계 AFC → 분석계 안전 복제 <span class="al-tag medal-bronze">Bronze</span></div>
+      </div>
+      <div class="arch-layer la2">
+        <div class="al-num">2</div>
+        <div class="al-name">Data Lake / Warehouse</div>
+        <div class="al-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
+      </div>
+      <div class="arch-layer la3">
+        <div class="al-num">3</div>
+        <div class="al-name">Feature Layer</div>
+        <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
+      </div>
+      <div class="arch-layer la4">
+        <div class="al-num">4</div>
+        <div class="al-name">ML Platform</div>
+        <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
+      </div>
+      <div class="arch-layer la5">
+        <div class="al-num">5</div>
+        <div class="al-name">Serving Layer</div>
+        <div class="al-detail">Batch Scoring · API Serving — Phase 1 배치 중심 → Phase 2 준실시간 확장</div>
+      </div>
+      <div class="arch-layer la6">
+        <div class="al-num">6</div>
+        <div class="al-name">Monitoring</div>
+        <div class="al-detail">Data Drift · Model Drift · KPI Monitoring — 데이터 변화 및 모델 성능 저하 자동 감시</div>
+      </div>
+      <div class="arch-layer la7">
+        <div class="al-num">7</div>
+        <div class="al-name">Business Application</div>
+        <div class="al-detail">Dashboard · Alert · Workflow — 단속·정비·CS·정산 업무 시스템 연결</div>
+      </div>
+    </div>
+    <div class="arch-note" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <span>전체 파이프라인에 MLOps 자동화 적용 · Champion-Challenger 모델 운영 · 자동 재학습 트리거</span>
+      <span style="display:inline-flex;gap:8px;flex-shrink:0;">
+        <a href="sub/AFC_AWS_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#FF9900,#e07000);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(255,180,0,0.4);
+                  box-shadow:0 2px 8px rgba(255,153,0,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          AWS 아키텍처 ↗
+        </a>
+        <a href="sub/AFC_Azure_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#0078D4,#005a9e);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(0,150,255,0.4);
+                  box-shadow:0 2px 8px rgba(0,120,212,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          Azure 아키텍처 ↗
+        </a>
+        <a href="sub/AFC_GCP_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#4285F4,#1a73e8);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(66,133,244,0.4);
+                  box-shadow:0 2px 8px rgba(66,133,244,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          GCP 아키텍처 ↗
+        </a>
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 10 — 위험 요소 및 완화 전략
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s9">
+  <div class="slide-title">AI/ML 고려사항</div>
+  <div class="slide-sub">영향도 × 발생 가능성 기반 주요 6대 위험 요소 관리</div>
+  <div class="slide-content">
+    <table class="risk-table">
+      <thead>
+        <tr>
+          <th>위험 등급</th>
+          <th>위험 요소</th>
+          <th>영향</th>
+          <th>완화 전략</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="risk-badge r-high">HIGH</span></td>
+          <td><span class="risk-factor">개인정보 (교통카드 ID) 유출</span></td>
+          <td>법적·평판 리스크 (대)</td>
+          <td class="risk-mitigation">Bronze 직후 가명화 · KMS 암호화 · Lake Formation FGAC 적용</td>
+        </tr>
+        <tr>
+          <td><span class="risk-badge r-high">HIGH</span></td>
+          <td><span class="risk-factor">Gen AI 환각·개인정보 유출</span></td>
+          <td>신뢰도 저하 (대)</td>
+          <td class="risk-mitigation">RAG + Guardrail + 응답 감사 로그 의무화</td>
+        </tr>
+        <tr>
+          <td><span class="risk-badge r-med">MED</span></td>
+          <td><span class="risk-factor">데이터 보강 지연</span></td>
+          <td>PoC 일정 지연</td>
+          <td class="risk-mitigation">외부 데이터(날씨·행사) 우선 계약 · IoT 센서 표준화 선행</td>
+        </tr>
+        <tr>
+          <td><span class="risk-badge r-med">MED</span></td>
+          <td><span class="risk-factor">모델 드리프트 (계절성·이벤트)</span></td>
+          <td>예측 정확도 하락</td>
+          <td class="risk-mitigation">Model Monitor + Champion/Challenger + 자동 재학습 파이프라인</td>
+        </tr>
+        <tr>
+          <td><span class="risk-badge r-med">MED</span></td>
+          <td><span class="risk-factor">노조·정책 협의 (요금·스케줄 AI)</span></td>
+          <td>운영화 지연</td>
+          <td class="risk-mitigation">Phase 3으로 후행 배치 · 시뮬레이션 전용 단계 우선 운영</td>
+        </tr>
+        <tr>
+          <td><span class="risk-badge r-low">LOW</span></td>
+          <td><span class="risk-factor">MLOps 내부 인력 부족</span></td>
+          <td>운영화 지연</td>
+          <td class="risk-mitigation">Phase 1 외부 파트너 활용 · Phase 2부터 내재화 로드맵 병행</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 11 — 검토대상 유즈케이스
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s10">
+  <div class="slide-title">검토대상 유즈케이스</div>
+  <div class="slide-sub">우선순위 등급 · AI 유형 · 기간 · 기대 효과 · 추진 단계</div>
+  <div class="slide-content">
+    <table class="rec-table">
+      <thead>
+        <tr>
+          <th>등급</th>
+          <th>유즈케이스</th>
+          <th>AI 유형</th>
+          <th>기간</th>
+          <th>1차 기대 효과</th>
+          <th>단계</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rec-top">
+          <td class="rec-stars">★★★</td>
+          <td class="rec-uc">U05 부정승차·이상거래 탐지</td>
+          <td class="ai-type">Anomaly Detection</td>
+          <td class="period-val">4~6개월</td>
+          <td class="rec-effect">매출 회수 +0.3~1.0%</td>
+          <td><span class="phase-p1">Phase 1</span></td>
+        </tr>
+        <tr class="rec-top">
+          <td class="rec-stars">★★★</td>
+          <td class="rec-uc">U01 시간대·역별 수요 예측</td>
+          <td class="ai-type">Forecasting</td>
+          <td class="period-val">4~6개월</td>
+          <td class="rec-effect">운영비 −3~7%</td>
+          <td><span class="phase-p1">Phase 1</span></td>
+        </tr>
+        <tr class="rec-top">
+          <td class="rec-stars">★★★</td>
+          <td class="rec-uc">U04 게이트·단말기 예지보전</td>
+          <td class="ai-type">Predictive AI</td>
+          <td class="period-val">6~9개월</td>
+          <td class="rec-effect">다운타임 −30~50%</td>
+          <td><span class="phase-p12">Phase 1~2</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars">★★★</td>
+          <td class="rec-uc">U11 LLM 민원 챗봇</td>
+          <td class="ai-type">NLP/LLM</td>
+          <td class="period-val">2~3개월</td>
+          <td class="rec-effect">CS 자동화 60%+</td>
+          <td><span class="phase-p1">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
+          <td class="rec-uc">U03 혼잡도 실시간 예측</td>
+          <td class="ai-type">Forecasting + CCTV</td>
+          <td class="period-val">5~7개월</td>
+          <td class="rec-effect">혼잡 민원 −15~25%</td>
+          <td><span class="phase-p2">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
+          <td class="rec-uc">U06 정산 오류 자동 탐지</td>
+          <td class="ai-type">Anomaly Detection</td>
+          <td class="period-val">4~5개월</td>
+          <td class="rec-effect">오정산 −50%+</td>
+          <td><span class="phase-p12">Phase 1~2</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
+          <td class="rec-uc">U13 MaaS 개인화 추천</td>
+          <td class="ai-type">Recommender</td>
+          <td class="period-val">6~8개월</td>
+          <td class="rec-effect">제휴 수익 +10~20%</td>
+          <td><span class="phase-p2">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
+          <td class="rec-uc">U17 Gen AI 마케팅 콘텐츠</td>
+          <td class="ai-type">Generative AI</td>
+          <td class="period-val">2개월</td>
+          <td class="rec-effect">제작 시간 −70%</td>
+          <td><span class="phase-p1">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
+          <td class="rec-uc">U19 운전자 운행패턴 스코어링</td>
+          <td class="ai-type">Clustering / Scoring</td>
+          <td class="period-val">5~8개월</td>
+          <td class="rec-effect">안전사고 리스크 −20~35% · 교육 효율↑</td>
+          <td><span class="phase-p12">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.35);">★</td>
+          <td class="rec-uc">U09 CCTV 이상행동 탐지</td>
+          <td class="ai-type">Computer Vision</td>
+          <td class="period-val">9~12개월</td>
+          <td class="rec-effect">사고 대응 시간 −40% (정성적)</td>
+          <td><span class="phase-p2">Phase 2~3</span></td>
+        </tr>
+        <tr>
+          <td class="rec-stars" style="color:rgba(240,140,0,0.35);">★</td>
+          <td class="rec-uc">U14 스케줄 최적화</td>
+          <td class="ai-type">Optimization</td>
+          <td class="period-val">6~9개월</td>
+          <td class="rec-effect">인건비 −2~5%</td>
+          <td><span class="phase-p3">Phase 3</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ── Controls ── -->
+<div class="controls">
+  <button class="ctrl-btn" id="btnPrev" title="이전 슬라이드 (←)">&#9664;</button>
+  <span class="slide-counter" id="counter">1 / 10</span>
+  <button class="ctrl-btn" id="btnNext" title="다음 슬라이드 (→)">&#9654;</button>
+</div>
+
+<div class="nav-dots" id="navDots"></div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const dotsWrap = document.getElementById('navDots');
+
+  // Create dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+
+  function updateUI() {
+    counter.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    current = ((n % total) + total) % total;
+    slides[current].classList.add('active');
+    updateUI();
+  }
+
+  document.getElementById('btnNext').addEventListener('click', () => goTo(current + 1));
+  document.getElementById('btnPrev').addEventListener('click', () => goTo(current - 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); goTo(current - 1);
+    }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End')  { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch swipe
+  let touchX = 0;
+  document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) dx < 0 ? goTo(current + 1) : goTo(current - 1);
+  });
+
+  updateUI();
+})();
+</script>
+<script>
+(function(){
+  var d = new Date();
+  var s = d.getFullYear() + '.' +
+          String(d.getMonth()+1).padStart(2,'0') + '.' +
+          String(d.getDate()).padStart(2,'0');
+  var el = document.getElementById('today-date');
+  if(el) el.textContent = s;
+})();
+</script></body>
+</html>

@@ -1,0 +1,1181 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시간대·역별 승차 수요 예측 Use Case</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── 상단 히어로 ── */
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #2e5090 60%, #1a5276 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -.02em;
+  }
+  .hero h2 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #aaccee;
+    margin-bottom: 20px;
+  }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+
+  /* ── 목차 네비 ── */
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 14px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover {
+    background: var(--accent);
+    color: var(--white);
+  }
+
+  /* ── 본문 래퍼 ── */
+  .wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* ── 섹션 카드 ── */
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .card-header .en {
+    font-size: 11.5px;
+    color: #aaccee;
+    margin-left: auto;
+  }
+  .card-body {
+    padding: 20px 24px;
+  }
+
+  /* ── 서브 섹션 ── */
+  .sub-section {
+    margin-bottom: 20px;
+  }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  /* ── 테이블 ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 9px 14px;
+    font-weight: 600;
+    text-align: left;
+    font-size: 12px;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); white-space: nowrap; }
+
+  /* ── 컬러 테이블 (벤치마크, 문제, 목표 등) ── */
+  .tbl-red    th { background: var(--red); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); }
+
+  /* ── 2열 그리드 ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  @media (max-width: 900px) {
+    .grid2, .grid3 { grid-template-columns: 1fr; }
+  }
+
+  /* ── 인포 박스 (기관별 적용) ── */
+  .info-box {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .info-box-header {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-box-body { padding: 14px 16px; }
+  .info-box-body p {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+
+  /* ── 코드 블록 (사용 안함, 호환용) ── */
+  .flow-block {
+    background: #1e2d3d;
+    color: #c8dff0;
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .flow-block .arrow { color: var(--accent); font-weight: 700; }
+  .flow-block .stage { color: #7ecbff; font-weight: 600; }
+  .flow-block .comment { color: #6e8fa8; }
+
+  /* ── 카드형 플로우 다이어그램 ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 14px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 380px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(30,60,100,.06);
+    border: 2px solid;
+    background: var(--white);
+    position: relative;
+  }
+  .flow-step .num-circle {
+    position: absolute;
+    left: -10px; top: -10px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+  .flow-step .step-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.4;
+  }
+  .flow-step .step-sub {
+    font-size: 10.5px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .flow-step .chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 7px;
+  }
+  .flow-step .chip {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 9px;
+    font-size: 10.5px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .flow-step .chip.star {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+    font-weight: 700;
+  }
+  /* 단계 색상 */
+  .flow-step.data    { border-color: var(--teal);   background:#e6f4f6; }
+  .flow-step.data    .num-circle { background: var(--teal); }
+  .flow-step.process { border-color: var(--blue);   background: var(--sky); }
+  .flow-step.process .num-circle { background: var(--blue); }
+  .flow-step.model   { border-color: var(--purple); background:#f5eafb; }
+  .flow-step.model   .num-circle { background: var(--purple); }
+  .flow-step.output  { border-color: var(--accent); background:#fff5e6; }
+  .flow-step.output  .num-circle { background: var(--accent); }
+  .flow-step.action  { border-color: var(--green);  background:#eaf7f0; }
+  .flow-step.action  .num-circle { background: var(--green); }
+  .flow-step.feedback{ border-color: var(--red);    background:#fbebe9; }
+  .flow-step.feedback .num-circle { background: var(--red); }
+
+  /* 화살표 */
+  .flow-arrow {
+    width: 2px;
+    height: 18px;
+    background: var(--accent);
+    position: relative;
+    margin: 2px 0;
+  }
+  .flow-arrow::after {
+    content: "";
+    position: absolute;
+    bottom: -1px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--accent);
+  }
+  .flow-arrow.feedback {
+    background: var(--red);
+  }
+  .flow-arrow.feedback::after {
+    border-top-color: var(--red);
+  }
+  .flow-arrow.feedback::before {
+    content: "피드백 루프";
+    position: absolute;
+    left: 14px; top: 2px;
+    font-size: 10px;
+    color: var(--red);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* 범례 */
+  .flow-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    width: 100%;
+  }
+  .flow-legend .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .flow-legend .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── 모델 카드 ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .model-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: var(--gray);
+  }
+  .model-card .name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 4px;
+  }
+  .model-card .desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .model-card .tag {
+    display: inline-block;
+    background: var(--purple);
+    color: var(--white);
+    font-size: 10px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-top: 6px;
+  }
+  .model-card.recommended {
+    border-color: var(--accent);
+    background: #fff8ee;
+  }
+  .model-card.recommended .name { color: var(--accent); }
+  .model-card.recommended .tag { background: var(--accent); }
+
+  /* ── KPI 뱃지 ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .kpi-card {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+  .kpi-card .kpi-cat {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .kpi-card .kpi-name { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .kpi-card .kpi-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .cat-model  { background:#e8f0fb; color:var(--navy); }
+  .cat-ops    { background:#eaf7f0; color:var(--green); }
+  .cat-cust   { background:#fff5e6; color:var(--accent); }
+  .cat-biz    { background:#f5eafb; color:var(--purple); }
+
+  /* ── 기대효과 칩 ── */
+  .effect-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .effect-card {
+    background: var(--sky);
+    border: 1px solid #b8d8f0;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .effect-card .ico { font-size: 24px; margin-bottom: 6px; }
+  .effect-card .et  { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .effect-card .ed  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* ── 요약 박스 ── */
+  .summary-box {
+    background: var(--sky);
+    border-left: 5px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 22px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: var(--navy);
+  }
+  .oneliner {
+    background: linear-gradient(135deg, var(--navy), #2e5090);
+    color: var(--white);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.8;
+  }
+  .oneliner strong { color: var(--accent); }
+
+  /* ── 푸터 ── */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ 히어로 ══════════════════ -->
+<div class="hero">
+  <div class="hero-badge">📊 Forecasting AI Use Case</div>
+  <h1>시간대·역별 승차 수요 예측</h1>
+  <h2>Station &amp; Time-based Passenger Demand Forecasting</h2>
+  <div class="hero-summary">
+    AFC 데이터를 기반으로 미래 승차량과 혼잡 위험을 사전에 예측하여,
+    교통 운영기관의 <strong>배차·혼잡관리·인력배치·고객안내</strong> 의사결정을 지원하는
+    대표적인 Forecasting AI 유즈케이스
+  </div>
+</div>
+
+<!-- ══════════════════ 목차 ══════════════════ -->
+<nav class="toc-bar">
+  <a href="#s1">1. 개요</a>
+  <a href="#s2">2. 벤치마크</a>
+  <a href="#s3">3. 업무 문제 &amp; 목표</a>
+  <a href="#s4">4. 데이터</a>
+  <a href="#s5">5. 모델링</a>
+  <a href="#s6">6. 기관별 적용</a>
+  <a href="#s7">7. Use Case 설계</a>
+  <a href="#s8">8. KPI</a>
+  <a href="#s9">9. 기대효과</a>
+  <a href="#s10">10. 추진 방안</a>
+  <a href="#s11">11. 운영</a>
+  <a href="#s12">12. 리스크</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ══════════════════ 1. 유즈케이스 개요 ══════════════════ -->
+<div class="card" id="s1">
+  <div class="card-header">
+    <span class="num">01</span>
+    <h3>유즈케이스 개요</h3>
+    <span class="en">Use Case Overview</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <colgroup><col style="width:160px"><col></colgroup>
+      <thead><tr><th>항목</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>유즈케이스명</td><td>시간대·역별 승차 수요 예측</td></tr>
+        <tr><td>영문명</td><td>Station &amp; Time-based Passenger Demand Forecasting</td></tr>
+        <tr><td>AI 유형</td><td>Forecasting &nbsp;|&nbsp; Time-series Prediction &nbsp;|&nbsp; Demand Modeling</td></tr>
+        <tr><td>적용 도메인</td><td>AFC &nbsp;|&nbsp; 도시철도 &nbsp;|&nbsp; 버스 &nbsp;|&nbsp; MaaS &nbsp;|&nbsp; 교통 운영</td></tr>
+        <tr><td>예측 단위</td><td>역별 · 노선별 · 시간대별 · 요일별 · 특수일별</td></tr>
+        <tr><td>주요 목적</td><td>혼잡 예측 &nbsp;|&nbsp; 배차계획 &nbsp;|&nbsp; 인력배치 &nbsp;|&nbsp; 관제운영 &nbsp;|&nbsp; 고객안내</td></tr>
+        <tr><td>주요 데이터</td><td>AFC 태그 데이터, 역별 승차량, 시간대, 요일, 공휴일, 이벤트, 날씨, 운행정보</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ 2. 벤치마크 ══════════════════ -->
+<div class="card" id="s2">
+  <div class="card-header">
+    <span class="num">02</span>
+    <h3>벤치마크 사례 요약</h3>
+    <span class="en">Benchmark Cases</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-teal">
+      <colgroup><col style="width:130px"><col style="width:180px"><col><col></colgroup>
+      <thead>
+        <tr><th>기관</th><th>사례 성격</th><th>주요 데이터</th><th>AFC 적용 시사점</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🇬🇧 TfL / London</td>
+          <td>역·노선 수요 및 혼잡 데이터 제공, 15분 단위 수요 분석</td>
+          <td>Tube journey, station footfall, NUMBAT, station entries/exits</td>
+          <td>15분 단위 역별 수요·혼잡 예측 모델 구축에 적합</td>
+        </tr>
+        <tr>
+          <td>🇺🇸 MTA / New York</td>
+          <td>Subway Origin-Destination Ridership Estimate 제공</td>
+          <td>MetroCard swipe, OMNY tap, 시간대별 OD 추정 데이터</td>
+          <td>승차역·목적역·시간대 기반 수요 패턴 분석 가능</td>
+        </tr>
+        <tr>
+          <td>🇯🇵 JR East / Japan</td>
+          <td>역 혼잡 예측 정보 제공 및 실시간 혼잡 정보 서비스</td>
+          <td>역 혼잡 예측, 열차 혼잡도, 디지털 사이니지, 앱 연계</td>
+          <td>예측 결과를 고객 안내와 현장 운영에 직접 활용</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ 3. 업무 문제 & 목표 ══════════════════ -->
+<div class="card" id="s3">
+  <div class="card-header">
+    <span class="num">03</span>
+    <h3>업무 문제 &amp; AI 적용 목표</h3>
+    <span class="en">Pain Points &amp; AI Objectives</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title" style="color:var(--red); border-color:var(--red)">⚠ 업무 문제 (Pain Point)</div>
+        <table class="tbl-red">
+          <thead><tr><th>문제</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>혼잡 사전 대응 한계</td><td>특정 역·시간대에 승객이 집중되어도 사후 대응에 머무름</td></tr>
+            <tr><td>배차계획 비효율</td><td>실제 수요보다 과소 또는 과다 배차 가능</td></tr>
+            <tr><td>현장 인력 배치 어려움</td><td>피크시간, 이벤트, 사고 상황에 따른 인력 수요 예측 부족</td></tr>
+            <tr><td>고객 안내 부족</td><td>승객에게 혼잡 예상 시간대나 대체 경로 안내가 어려움</td></tr>
+            <tr><td>정책 효과 검증 한계</td><td>요금제, 이벤트, 노선 변경이 수요에 미치는 영향 분석 부족</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title" style="color:var(--green); border-color:var(--green)">🎯 AI 적용 목표</div>
+        <table class="tbl-green">
+          <thead><tr><th>목표</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>역별 승차량 예측</td><td>특정 역의 시간대별 승차 수요를 예측</td></tr>
+            <tr><td>노선별 수요 예측</td><td>노선 단위의 시간대별 총 승차량 예측</td></tr>
+            <tr><td>피크시간 예측</td><td>출근·퇴근·행사 종료 시간대 수요 급증 예측</td></tr>
+            <tr><td>혼잡 위험 구간 도출</td><td>수요가 임계치를 초과할 역·구간을 사전 식별</td></tr>
+            <tr><td>운영계획 지원</td><td>배차, 관제, 인력, 안내, 정비 계획 수립 지원</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 4. 데이터 ══════════════════ -->
+<div class="card" id="s4">
+  <div class="card-header">
+    <span class="num">04</span>
+    <h3>데이터 구성</h3>
+    <span class="en">Data Configuration</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">🗂 기본 데이터</div>
+      <table class="tbl-accent">
+        <colgroup><col style="width:140px"><col><col></colgroup>
+        <thead><tr><th>데이터</th><th>설명</th><th>활용</th></tr></thead>
+        <tbody>
+          <tr><td>AFC 승차 태그</td><td>카드 ID, 승차역, 승차시각, 매체유형</td><td>시간대별 승차량 집계</td></tr>
+          <tr><td>하차 태그</td><td>하차역, 하차시각</td><td>OD 분석, 구간 수요 예측</td></tr>
+          <tr><td>역 마스터</td><td>역 ID, 노선, 환승 여부, 위치</td><td>역별 특성 반영</td></tr>
+          <tr><td>노선 마스터</td><td>노선 ID, 방향, 정차역</td><td>노선별 수요 예측</td></tr>
+          <tr><td>운행 데이터</td><td>열차/버스 운행횟수, 배차간격</td><td>공급 대비 수요 분석</td></tr>
+          <tr><td>캘린더</td><td>요일, 공휴일, 방학, 명절</td><td>주기성·계절성 반영</td></tr>
+          <tr><td>이벤트</td><td>경기, 공연, 축제, 집회</td><td>특수 수요 반영</td></tr>
+          <tr><td>날씨</td><td>강수, 기온, 폭염, 한파</td><td>외부 요인 반영</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section" style="margin-top:20px">
+      <div class="sub-title">📋 예측 데이터셋 예시</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>기준일자</th><th>시간대</th><th>역 ID</th><th>노선</th>
+              <th>승차량</th><th>요일</th><th>공휴일</th><th>날씨</th><th>이벤트</th><th>예측대상</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-05-01</td><td>08:00</td><td>ST001</td><td>Line A</td>
+              <td style="text-align:right">12,500</td><td>금</td><td>N</td><td>맑음</td><td>N</td><td>D+1 08:00 승차량</td>
+            </tr>
+            <tr>
+              <td>2026-05-01</td><td>18:00</td><td>ST020</td><td>Line B</td>
+              <td style="text-align:right">18,200</td><td>금</td><td>N</td><td>비</td><td>경기</td><td>D+1 18:00 승차량</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 5. 모델링 ══════════════════ -->
+<div class="card" id="s5">
+  <div class="card-header">
+    <span class="num">05</span>
+    <h3>분석·모델링 방식</h3>
+    <span class="en">Modeling Approach</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">🤖 모델 접근 방식</div>
+      <div class="model-grid">
+        <div class="model-card">
+          <div class="name">SARIMA / ARIMA</div>
+          <div class="desc">역별 시계열 예측, 설명 가능성 높음</div>
+          <span class="tag">기초</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Prophet</div>
+          <div class="desc">요일성·계절성·휴일 반영, 빠른 PoC</div>
+          <span class="tag">PoC</span>
+        </div>
+        <div class="model-card recommended">
+          <div class="name">⭐ XGBoost / LightGBM</div>
+          <div class="desc">시간·날씨·이벤트·역 특성 반영, 성능과 해석 균형</div>
+          <span class="tag">★ 권장</span>
+        </div>
+        <div class="model-card">
+          <div class="name">LSTM / GRU</div>
+          <div class="desc">장기 시계열 패턴 학습, 복잡한 시간 패턴 반영</div>
+          <span class="tag">고도화</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Temporal Fusion Transformer</div>
+          <div class="desc">다변량 시계열 예측, 고도화 단계에 적합</div>
+          <span class="tag">고도화</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Graph Neural Network</div>
+          <div class="desc">역·노선 네트워크 관계 반영, 환승·인접역 영향</div>
+          <span class="tag">확장</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section" style="margin-top:24px">
+      <div class="sub-title">🔄 추천 모델 구조 (초기 단계) — LightGBM/XGBoost + 시계열 Feature 권장</div>
+      <div class="flow">
+
+        <div class="flow-step data">
+          <div class="num-circle">1</div>
+          <div class="step-title">AFC 승차 데이터</div>
+          <div class="step-sub">카드 ID · 승차역 · 승차시각 · 매체유형</div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step process">
+          <div class="num-circle">2</div>
+          <div class="step-title">역별·시간대별 집계</div>
+          <div class="step-sub">15분 또는 1시간 단위 승차량 산출</div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step process">
+          <div class="num-circle">3</div>
+          <div class="step-title">Feature 결합</div>
+          <div class="chips">
+            <span class="chip">요일</span>
+            <span class="chip">공휴일</span>
+            <span class="chip">날씨</span>
+            <span class="chip">이벤트</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step model">
+          <div class="num-circle">4</div>
+          <div class="step-title">Baseline 모델 생성</div>
+          <div class="chips">
+            <span class="chip">전주 동일요일</span>
+            <span class="chip">최근 4주 평균</span>
+            <span class="chip">전년 동일일</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step model">
+          <div class="num-circle">5</div>
+          <div class="step-title">ML 모델 학습</div>
+          <div class="chips">
+            <span class="chip star">★ LightGBM</span>
+            <span class="chip">XGBoost</span>
+            <span class="chip">Prophet</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step output">
+          <div class="num-circle">6</div>
+          <div class="step-title">수요 예측 산출</div>
+          <div class="chips">
+            <span class="chip">D+1</span>
+            <span class="chip">D+7</span>
+            <span class="chip">월간</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step output">
+          <div class="num-circle">7</div>
+          <div class="step-title">혼잡 위험 역·시간대 도출</div>
+          <div class="step-sub">임계치 초과 구간 자동 식별</div>
+        </div>
+        <div class="flow-arrow"></div>
+
+        <div class="flow-step action">
+          <div class="num-circle">8</div>
+          <div class="step-title">운영 대시보드 제공</div>
+          <div class="step-sub">현업 의사결정 지원</div>
+        </div>
+
+        <div class="flow-legend">
+          <span class="lg"><span class="dot" style="background:var(--teal)"></span>데이터</span>
+          <span class="lg"><span class="dot" style="background:var(--blue)"></span>처리</span>
+          <span class="lg"><span class="dot" style="background:var(--purple)"></span>모델</span>
+          <span class="lg"><span class="dot" style="background:var(--accent)"></span>예측 산출</span>
+          <span class="lg"><span class="dot" style="background:var(--green)"></span>현업 활용</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 6. 기관별 적용 ══════════════════ -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">06</span>
+    <h3>기관별 적용 포인트</h3>
+    <span class="en">Application by Reference Agency</span>
+  </div>
+  <div class="card-body">
+    <div class="grid3">
+      <!-- TfL -->
+      <div class="info-box">
+        <div class="info-box-header" style="background:var(--navy)">🇬🇧 TfL형 적용</div>
+        <div class="info-box-body">
+          <p>정교한 수요 데이터 구조 기반 — 15분 단위 역별 수요로 역 혼잡, 승강장 부하, 열차 구간 부하까지 확장 가능</p>
+          <table>
+            <tbody>
+              <tr><td>예측 단위</td><td>15분 단위 역별 승차량</td></tr>
+              <tr><td>주요 활용</td><td>혼잡 예측, 역 내부 이동량 분석</td></tr>
+              <tr><td>AFC 전이</td><td>승차+하차+환승 데이터 기반 예측</td></tr>
+              <tr><td>확장 방향</td><td>플랫폼 혼잡 · 환승 동선 예측</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- MTA -->
+      <div class="info-box">
+        <div class="info-box-header" style="background:var(--teal)">🇺🇸 MTA NY형 적용</div>
+        <div class="info-box-body">
+          <p>하차 태그 없는 환경에서도 OD 수요 추정 — 다음 승차 위치·시간 간격으로 목적지·경로 추정 가능</p>
+          <table>
+            <tbody>
+              <tr><td>예측 단위</td><td>시간대별 Origin-Destination 수요</td></tr>
+              <tr><td>주요 활용</td><td>역별 승차, 노선 부하, 환승 수요</td></tr>
+              <tr><td>AFC 전이</td><td>태그 데이터 기반 OD 추정 모델</td></tr>
+              <tr><td>확장 방향</td><td>혼잡 구간 예측, 우회 안내</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- JR East -->
+      <div class="info-box">
+        <div class="info-box-header" style="background:var(--red)">🇯🇵 JR East형 적용</div>
+        <div class="info-box-body">
+          <p>예측 결과를 디지털 사이니지·앱을 통해 고객 안내로 연결 — 혼잡 분산과 고객 경험 개선 효과</p>
+          <table>
+            <tbody>
+              <tr><td>예측 단위</td><td>역 혼잡도, 열차 혼잡도</td></tr>
+              <tr><td>주요 활용</td><td>디지털 사이니지, 앱 안내</td></tr>
+              <tr><td>AFC 전이</td><td>예상 승차량 → 고객 안내 제공</td></tr>
+              <tr><td>확장 방향</td><td>이벤트 종료 후 분산 귀가 안내</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 7. Use Case 설계 ══════════════════ -->
+<div class="card" id="s7">
+  <div class="card-header">
+    <span class="num">07</span>
+    <h3>AFC 적용 Use Case 설계</h3>
+    <span class="en">Use Case Design</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">🔩 기능분해</div>
+        <table>
+          <colgroup><col style="width:110px"><col style="width:120px"><col></colgroup>
+          <thead><tr><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead>
+          <tbody>
+            <tr><td>수요 데이터 수집</td><td>AFC 거래 수집</td><td>승차/하차 태그, 시간, 역, 노선</td></tr>
+            <tr><td></td><td>외부 데이터 수집</td><td>날씨, 행사, 공휴일, 사고</td></tr>
+            <tr><td>Feature 생성</td><td>시간 Feature</td><td>시간대, 요일, 주말, 공휴일</td></tr>
+            <tr><td></td><td>공간 Feature</td><td>역, 노선, 환승역, 중심역 여부</td></tr>
+            <tr><td></td><td>이벤트 Feature</td><td>경기, 공연, 축제, 집회</td></tr>
+            <tr><td>수요예측 모델</td><td>단기 예측</td><td>D+1, D+7 시간대별 수요</td></tr>
+            <tr><td></td><td>중기 예측</td><td>월간, 시즌별 수요</td></tr>
+            <tr><td></td><td>특수일 예측</td><td>행사·명절·우천 시 수요</td></tr>
+            <tr><td>결과 활용</td><td>운영 대시보드</td><td>역별·시간대별 예측 수요</td></tr>
+            <tr><td></td><td>혼잡 알림</td><td>임계치 초과 시 알림</td></tr>
+            <tr><td></td><td>배차 지원</td><td>수요 기반 배차 검토</td></tr>
+            <tr><td></td><td>고객 안내</td><td>혼잡 예상 시간대 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">📋 주요 기능 요구사항</div>
+        <table class="tbl-purple">
+          <colgroup><col style="width:90px"><col></colgroup>
+          <thead><tr><th>ID</th><th>요구사항</th></tr></thead>
+          <tbody>
+            <tr><td>DEM-001</td><td>역별·시간대별 승차 수요를 예측해야 한다.</td></tr>
+            <tr><td>DEM-002</td><td>노선별·방향별 수요를 예측할 수 있어야 한다.</td></tr>
+            <tr><td>DEM-003</td><td>요일, 공휴일, 방학, 명절 등 캘린더 요인을 반영해야 한다.</td></tr>
+            <tr><td>DEM-004</td><td>날씨, 행사, 경기, 사고 등 외부 요인을 반영해야 한다.</td></tr>
+            <tr><td>DEM-005</td><td>실제 수요와 예측 수요를 비교하여 오차를 산출해야 한다.</td></tr>
+            <tr><td>DEM-006</td><td>혼잡 임계치 초과 예상 역·시간대를 표시해야 한다.</td></tr>
+            <tr><td>DEM-007</td><td>예측 결과를 운영 대시보드와 리포트로 제공해야 한다.</td></tr>
+            <tr><td>DEM-008</td><td>배차·인력·고객안내에 활용 가능한 API/파일을 제공해야 한다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 8. KPI ══════════════════ -->
+<div class="card" id="s8">
+  <div class="card-header">
+    <span class="num">08</span>
+    <h3>KPI 및 평가 기준</h3>
+    <span class="en">KPIs &amp; Evaluation</span>
+  </div>
+  <div class="card-body">
+    <div class="kpi-grid">
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">MAPE</div><div class="kpi-desc">실제 승차량 대비 예측 오차율</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">RMSE</div><div class="kpi-desc">큰 오차에 민감한 예측 성능 지표</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">Peak Accuracy</div><div class="kpi-desc">피크시간대 예측 정확도</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">Directional Accuracy</div><div class="kpi-desc">수요 증가/감소 방향 예측 정확도</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-ops">운영 효과</span><div class="kpi-name">혼잡 알림 정확도</div><div class="kpi-desc">혼잡 예상 알림의 적중률</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-ops">운영 효과</span><div class="kpi-name">배차계획 활용률</div><div class="kpi-desc">운영계획에 예측 결과가 반영된 비율</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-cust">고객 효과</span><div class="kpi-name">혼잡 민원 감소율</div><div class="kpi-desc">혼잡 관련 민원 감소</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-biz">업무 효과</span><div class="kpi-name">리포트 자동화율</div><div class="kpi-desc">수작업 수요분석 리포트 자동화 수준</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 9. 기대효과 ══════════════════ -->
+<div class="card" id="s9">
+  <div class="card-header">
+    <span class="num">09</span>
+    <h3>기대효과</h3>
+    <span class="en">Expected Benefits</span>
+  </div>
+  <div class="card-body">
+    <div class="effect-grid">
+      <div class="effect-card">
+        <div class="ico">🚇</div>
+        <div class="et">운영 효율</div>
+        <div class="ed">수요 기반 배차계획 수립</div>
+      </div>
+      <div class="effect-card">
+        <div class="ico">👥</div>
+        <div class="et">혼잡 완화</div>
+        <div class="ed">피크 시간대·혼잡역 사전 대응</div>
+      </div>
+      <div class="effect-card">
+        <div class="ico">📱</div>
+        <div class="et">고객 서비스</div>
+        <div class="ed">혼잡 예상 정보 제공, 대체 시간대 안내</div>
+      </div>
+      <div class="effect-card">
+        <div class="ico">🧑‍💼</div>
+        <div class="et">인력 운영</div>
+        <div class="ed">역무원·안내·안전 인력 배치 최적화</div>
+      </div>
+      <div class="effect-card">
+        <div class="ico">📊</div>
+        <div class="et">정책 지원</div>
+        <div class="ed">요금제·정기권·이벤트 교통대책 효과 분석</div>
+      </div>
+      <div class="effect-card">
+        <div class="ico">🔍</div>
+        <div class="et">데이터 기반 의사결정</div>
+        <div class="ed">경험 중심 → 예측 기반 운영으로 전환</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 10. 추진 방안 ══════════════════ -->
+<div class="card" id="s10">
+  <div class="card-header">
+    <span class="num">10</span>
+    <h3>추진 방안</h3>
+    <span class="en">Implementation Plan</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">🔬 범위</div>
+        <table>
+          <thead><tr><th>항목</th><th>권장 범위</th></tr></thead>
+          <tbody>
+            <tr><td>대상 역</td><td>혼잡 상위 역 10~20개</td></tr>
+            <tr><td>대상 노선</td><td>주요 노선 1~3개</td></tr>
+            <tr><td>데이터 기간</td><td>최근 1~3년 AFC 승차 데이터</td></tr>
+            <tr><td>예측 단위</td><td>15분 또는 1시간 단위</td></tr>
+            <tr><td>예측 기간</td><td>D+1, D+7</td></tr>
+            <tr><td>외부 변수</td><td>요일, 공휴일, 날씨, 주요 이벤트</td></tr>
+            <tr><td>검증 방식</td><td>최근 1~3개월 Back-testing</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">✅ 성공 기준</div>
+        <table class="tbl-green">
+          <thead><tr><th>구분</th><th>성공 기준</th></tr></thead>
+          <tbody>
+            <tr><td>모델 성능</td><td>Baseline 대비 MAPE 또는 RMSE 개선</td></tr>
+            <tr><td>피크 예측</td><td>출퇴근 피크 수요 증가/감소 방향 예측 가능</td></tr>
+            <tr><td>업무 활용</td><td>운영자가 혼잡 예상 역·시간대를 확인 가능</td></tr>
+            <tr><td>데이터 품질</td><td>역/노선/시간대 기준 집계 데이터 품질 확보</td></tr>
+            <tr><td>확산 가능성</td><td>Pilot 노선 또는 전 노선 확산 판단 가능</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 11. 운영 적용 ══════════════════ -->
+<div class="card" id="s11">
+  <div class="card-header">
+    <span class="num">11</span>
+    <h3>운영 적용 방안</h3>
+    <span class="en">Operational Deployment</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">🔄 운영 프로세스 — 일일 배치 + 피드백 루프</div>
+        <div class="flow">
+
+          <div class="flow-step data">
+            <div class="num-circle">1</div>
+            <div class="step-title">일일 AFC 데이터 적재</div>
+            <div class="step-sub">전일 거래 데이터 일괄 수집</div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step process">
+            <div class="num-circle">2</div>
+            <div class="step-title">역별·시간대별 수요 집계</div>
+            <div class="step-sub">집계 단위 정규화</div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step process">
+            <div class="num-circle">3</div>
+            <div class="step-title">외부 데이터 결합</div>
+            <div class="chips">
+              <span class="chip">날씨</span>
+              <span class="chip">공휴일</span>
+              <span class="chip">행사</span>
+              <span class="chip">사고/장애</span>
+            </div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step model">
+            <div class="num-circle">4</div>
+            <div class="step-title">수요예측 모델 실행</div>
+            <div class="step-sub">D+1 / D+7 / 월간 예측</div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step output">
+            <div class="num-circle">5</div>
+            <div class="step-title">혼잡 위험 역·시간대 산출</div>
+            <div class="step-sub">임계치 초과 알림 생성</div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step output">
+            <div class="num-circle">6</div>
+            <div class="step-title">운영 대시보드 제공</div>
+            <div class="step-sub">관제·운영팀 실시간 조회</div>
+          </div>
+          <div class="flow-arrow"></div>
+
+          <div class="flow-step action">
+            <div class="num-circle">7</div>
+            <div class="step-title">업무 반영</div>
+            <div class="chips">
+              <span class="chip">배차</span>
+              <span class="chip">인력 배치</span>
+              <span class="chip">고객 안내</span>
+            </div>
+          </div>
+          <div class="flow-arrow feedback"></div>
+
+          <div class="flow-step feedback">
+            <div class="num-circle">8</div>
+            <div class="step-title">실적 비교 · 모델 성능 모니터링</div>
+            <div class="step-sub">오차 분석 → ②~④ 재학습 피드백</div>
+          </div>
+
+          <div class="flow-legend">
+            <span class="lg"><span class="dot" style="background:var(--teal)"></span>데이터</span>
+            <span class="lg"><span class="dot" style="background:var(--blue)"></span>처리</span>
+            <span class="lg"><span class="dot" style="background:var(--purple)"></span>모델</span>
+            <span class="lg"><span class="dot" style="background:var(--accent)"></span>산출</span>
+            <span class="lg"><span class="dot" style="background:var(--green)"></span>업무 반영</span>
+            <span class="lg"><span class="dot" style="background:var(--red)"></span>피드백</span>
+          </div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">👤 Human Review 기준</div>
+        <table>
+          <thead><tr><th>항목</th><th>검토 기준</th></tr></thead>
+          <tbody>
+            <tr><td>예측 급증</td><td>과거 평균 대비 일정 비율 이상 증가</td></tr>
+            <tr><td>예측 급감</td><td>과거 평균 대비 일정 비율 이상 감소</td></tr>
+            <tr><td>특수일</td><td>경기, 공연, 명절, 대형 행사 발생일</td></tr>
+            <tr><td>데이터 이상</td><td>특정 역 또는 시간대 데이터 누락</td></tr>
+            <tr><td>모델 오차</td><td>전일 또는 전주 예측 오차가 큰 역</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 12. 리스크 ══════════════════ -->
+<div class="card" id="s12">
+  <div class="card-header">
+    <span class="num">12</span>
+    <h3>리스크 및 대응방안</h3>
+    <span class="en">Risks &amp; Mitigations</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-red">
+      <colgroup><col style="width:170px"><col style="width:170px"><col></colgroup>
+      <thead><tr><th>리스크</th><th>영향</th><th>대응방안</th></tr></thead>
+      <tbody>
+        <tr><td>외부 이벤트 데이터 누락</td><td>특수일 예측 실패</td><td>수작업 이벤트 등록 기능 제공</td></tr>
+        <tr><td>노선/역 코드 변경</td><td>데이터 집계 오류</td><td>마스터 변경 이력 관리</td></tr>
+        <tr><td>하차 태그 부재</td><td>OD 분석 한계</td><td>MTA형 목적지 추정 모델 적용</td></tr>
+        <tr><td>모델 드리프트</td><td>계절성·정책 변화에 따른 성능 저하</td><td>월간 성능 점검 및 정기 재학습</td></tr>
+        <tr><td>현업 활용 저조</td><td>예측 결과가 운영계획에 미반영</td><td>대시보드와 업무 프로세스 연계</td></tr>
+        <tr><td>개인정보 이슈</td><td>카드 ID 및 이동경로 데이터 민감성</td><td>비식별화, 집계 단위 분석, 접근권한 통제</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════ 13. 요약 ══════════════════ -->
+<div class="card">
+  <div class="card-header">
+    <span class="num">13</span>
+    <h3>요약</h3>
+  </div>
+  <div class="card-body">
+    <div class="oneliner">
+      시간대·역별 승차 수요 예측은 AFC 데이터를 기반으로 <strong>미래 승차량과 혼잡 위험을 사전에 예측</strong>하여,
+      교통 운영기관의 <strong>배차·혼잡관리·인력배치·고객안내</strong> 의사결정을 지원하는
+      대표적인 <strong>Forecasting AI 유즈케이스</strong>이다.
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<div class="footer">
+  AFC 기반 AI Use Case &nbsp;|&nbsp; 시간대·역별 승차 수요 예측 &nbsp;|&nbsp; Station &amp; Time-based Passenger Demand Forecasting
+</div>
+
+<style>
+.close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>

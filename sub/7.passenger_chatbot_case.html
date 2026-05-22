@@ -1,0 +1,1126 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>승객 민원 챗봇·음성 응대 Use Case</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1a0a30 0%, #3d1a6e 50%, #1a375e 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--purple);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #c8aaee; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 14px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--accent); color: var(--white); }
+
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-body { padding: 20px 24px; }
+
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); white-space: nowrap; }
+
+  .tbl-red    th { background: var(--red); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .code-block {
+    background: #0d1b2a;
+    color: #a8d8ea;
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .code-block .kw  { color: #c792ea; font-weight: 600; }
+  .code-block .fn  { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .cmt { color: #546e7a; font-style: italic; }
+  .code-block .num { color: #f78c6c; }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 14px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(30,60,100,.06);
+    border: 2px solid;
+    background: var(--white);
+    position: relative;
+  }
+  .flow-step .num-circle {
+    position: absolute;
+    left: -10px; top: -10px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+  .flow-step .step-title { font-size: 12.5px; font-weight: 700; color: var(--navy); line-height: 1.4; }
+  .flow-step .step-sub { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .flow-step .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 7px; }
+  .flow-step .chip {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2px 9px;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .flow-arrow { font-size: 18px; color: var(--purple); margin: 6px 0; font-weight: 700; }
+
+  .h-flow { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 10px 0; }
+  .h-step {
+    flex: 1;
+    min-width: 140px;
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .h-step .h-icon { font-size: 26px; margin-bottom: 6px; }
+  .h-step .h-label { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.4; margin-bottom: 4px; }
+  .h-step .h-sub { font-size: 10.5px; color: var(--muted); }
+  .h-arrow { display: flex; align-items: center; padding: 0 6px; font-size: 18px; color: var(--purple); font-weight: 700; flex-shrink: 0; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+  .kpi-card {
+    background: linear-gradient(135deg, #f8fafd 0%, #eef2f7 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 14px;
+    text-align: center;
+  }
+  .kpi-card .kpi-icon { font-size: 24px; margin-bottom: 6px; }
+  .kpi-card .kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--purple); line-height: 1.2; }
+  .kpi-card .kpi-unit { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-card .kpi-label { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .kpi-card .kpi-desc { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+
+  .channel-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .channel-grid { grid-template-columns: 1fr 1fr; } }
+  .channel-card {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .channel-card:hover { box-shadow: 0 4px 14px rgba(106,13,145,.12); border-color: var(--purple); }
+  .channel-card .ch-icon { font-size: 28px; margin-bottom: 8px; }
+  .channel-card .ch-name { font-size: 12.5px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .channel-card .ch-desc { font-size: 10.5px; color: var(--muted); }
+
+  .intent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .intent-grid { grid-template-columns: 1fr 1fr; } }
+  .intent-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px; border-left: 4px solid var(--purple); }
+  .intent-card .intent-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .intent-card .intent-icon { font-size: 20px; }
+  .intent-card .intent-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .intent-card .intent-pct { margin-left: auto; font-size: 11px; font-weight: 700; background: rgba(106,13,145,.1); color: var(--purple); padding: 2px 8px; border-radius: 10px; }
+  .intent-card ul { list-style: none; font-size: 11.5px; color: var(--muted); }
+  .intent-card ul li::before { content: "·  "; color: var(--purple); }
+
+  .inst-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .inst-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .inst-card-header { padding: 10px 16px; font-size: 13px; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 8px; }
+  .inst-card-body { padding: 14px 16px; font-size: 12.5px; color: var(--muted); line-height: 1.7; }
+  .inst-card-body .kpi-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .inst-card-body .kpi-badge { background: var(--gray); border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; font-size: 11.5px; font-weight: 700; color: var(--navy); }
+
+  .stage-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 900px) { .stage-grid { grid-template-columns: 1fr; } }
+  .stage-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .stage-card-header { padding: 12px 16px; font-size: 13.5px; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 8px; }
+  .stage-card-body { padding: 14px 16px; }
+  .stage-card-body ul { list-style: none; font-size: 12.5px; color: var(--muted); line-height: 1.8; }
+  .stage-card-body ul li::before { content: "✓  "; color: var(--green); font-weight: 700; }
+  .stage-kpi { margin-top: 12px; padding: 8px 12px; background: var(--gray); border-radius: 8px; font-size: 11.5px; color: var(--navy); font-weight: 600; }
+
+  .privacy-box {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff3e0 100%);
+    border: 1px solid rgba(240,140,0,0.3);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-top: 16px;
+  }
+  .privacy-box .priv-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .privacy-box ul { list-style: none; font-size: 12.5px; color: #6b4f00; line-height: 1.8; }
+  .privacy-box ul li::before { content: "⚠️  "; }
+
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+  .badge-green  { background: rgba(23,123,78,.12);  color: var(--green);  border: 1px solid rgba(23,123,78,.3); }
+  .badge-red    { background: rgba(192,57,43,.12);  color: var(--red);    border: 1px solid rgba(192,57,43,.3); }
+  .badge-blue   { background: rgba(46,109,164,.12); color: var(--blue);   border: 1px solid rgba(46,109,164,.3); }
+  .badge-purple { background: rgba(106,13,145,.12); color: var(--purple); border: 1px solid rgba(106,13,145,.3); }
+  .badge-accent { background: rgba(240,140,0,.12);  color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
+  .badge-teal   { background: rgba(0,122,135,.12);  color: var(--teal);   border: 1px solid rgba(0,122,135,.3); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag { background: var(--gray); border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; font-size: 12px; color: var(--muted); }
+  .tag.hl { background: rgba(106,13,145,.08); border-color: rgba(106,13,145,.25); color: var(--purple); font-weight: 600; }
+
+  .ul-disc { list-style: disc; padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  .ul-disc li { margin-bottom: 4px; }
+  .ul-disc li strong { color: var(--navy); }
+  .ol-num { list-style: decimal; padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  .ol-num li { margin-bottom: 4px; }
+  .ol-num li strong { color: var(--navy); }
+
+  .warn-box { background: rgba(192,57,43,.06); border: 1px solid rgba(192,57,43,.2); border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--red); margin-top: 12px; }
+  .em-box { background: rgba(106,13,145,.06); border: 1px solid rgba(106,13,145,.2); border-left: 4px solid var(--purple); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
+
+  p { font-size: 13px; line-height: 1.8; color: var(--muted); margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">UC-T7 · NLP / LLM / RAG</div>
+  <h1>승객 민원 챗봇·음성 응대</h1>
+  <h2>Passenger Complaint Chatbot &amp; Voice Response</h2>
+  <div class="hero-summary">
+    AFC 승객의 요금 문의·카드 오류·환승 불편·분실물·안전 신고 등 다양한 민원을 AI 챗봇과 음성 에이전트가
+    24/7 자동 응대함으로써 <strong>콜센터 비용 절감, 평균 처리시간 단축, 고객 만족도 향상</strong>을 동시에 달성한다.
+    RAG(Retrieval-Augmented Generation) 기반 지식 검색과 LLM 생성을 결합하여
+    환각(Hallucination) 위험을 최소화하고, 복잡한 민원은 자동으로 상담원에게 이관한다.
+  </div>
+</div>
+
+<nav class="toc-bar">
+  <a href="#s01">1. 개요</a>
+  <a href="#s02">2. 비즈니스 문제</a>
+  <a href="#s03">3. 글로벌 사례</a>
+  <a href="#s04">4. 지원 채널</a>
+  <a href="#s05">5. 의도 분류</a>
+  <a href="#s06">6. RAG 파이프라인</a>
+  <a href="#s07">7. 시스템 아키텍처</a>
+  <a href="#s08">8. 가드레일</a>
+  <a href="#s09">9. 데이터·전처리</a>
+  <a href="#s10">10. 모델링</a>
+  <a href="#s11">11. KPI</a>
+  <a href="#s12">12. 도입 로드맵</a>
+  <a href="#s13">13. 위험·완화</a>
+  <a href="#s14">14. 기대 효과</a>
+</nav>
+
+<div class="wrapper">
+
+<div class="card" id="s01">
+  <div class="card-header">
+    <span class="num">01</span>
+    <h3>유즈케이스 개요</h3>
+    <span class="en">Use Case Overview</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <tr><td>유즈케이스 ID</td><td>UC-T7</td></tr>
+      <tr><td>유즈케이스명</td><td><strong>승객 민원 챗봇·음성 응대 (Passenger Chatbot &amp; Voice Agent)</strong></td></tr>
+      <tr><td>대상 도메인</td><td>D6 · 고객 서비스 (Customer Service)</td></tr>
+      <tr><td>AI 기술 유형</td><td><span class="badge badge-purple">NLP/LLM</span><span class="badge badge-blue">RAG</span><span class="badge badge-teal">Intent Classification</span><span class="badge badge-accent">TTS/STT</span></td></tr>
+      <tr><td>비즈니스 목표</td><td>콜센터 운영비 30% 이상 절감 / 1차 해결률 60% 이상 달성 / 평균 응답시간 ≤3초</td></tr>
+      <tr><td>우선순위</td><td><span class="badge badge-accent">★★★★☆ (4/5)</span> — 비용 절감·고객 만족 동시 효과, 단기 구현 가능</td></tr>
+      <tr><td>구현 난이도</td><td><span class="badge badge-blue">중간 (Medium)</span> — LLM API + RAG 파이프라인 + 채널 통합 필요</td></tr>
+      <tr><td>예상 투자회수기간</td><td>18~24개월 (콜센터 FTE 절감 + CSAT 향상 효과 포함)</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" id="s02">
+  <div class="card-header">
+    <span class="num">02</span>
+    <h3>비즈니스 문제 정의</h3>
+    <span class="en">Problem Statement</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">현재 상황 (AS-IS)</div>
+      <div class="grid2">
+        <table class="tbl-red">
+          <tr><th colspan="2">운영 비효율</th></tr>
+          <tr><td>콜센터 평균 대기</td><td>3~8분 (피크 타임 10분+)</td></tr>
+          <tr><td>반복 문의 비율</td><td>전체 인바운드의 65~75%</td></tr>
+          <tr><td>야간·주말 대응</td><td>운영 인력 부족 → 응답 지연</td></tr>
+          <tr><td>다국어 지원</td><td>영어·한국어 외 제한적</td></tr>
+        </table>
+        <table class="tbl-red">
+          <tr><th colspan="2">비용 구조</th></tr>
+          <tr><td>상담원 인건비</td><td>연간 콜센터 운영비의 70~80%</td></tr>
+          <tr><td>채널 파편화</td><td>전화·앱·키오스크 별도 운영</td></tr>
+          <tr><td>지식 관리</td><td>FAQ 업데이트 지연, 상담원별 편차</td></tr>
+          <tr><td>민원 분석</td><td>비정형 텍스트 분석 미흡</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">개선 방향 (TO-BE)</div>
+      <ul class="ul-disc">
+        <li><strong>멀티채널 통합 AI 챗봇</strong>으로 반복 문의 70% 자동화</li>
+        <li><strong>RAG 기반 지식 검색</strong>으로 정확한 요금·환승 정보 제공 (환각률 &lt;1%)</li>
+        <li>24/7 무중단 응대 → 야간·주말 고객 경험 개선</li>
+        <li>상담원은 고난도·감성 민원에만 집중 → 업무 품질 향상</li>
+        <li>민원 빅데이터 분석 → AFC 서비스 개선 인사이트 확보</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s03">
+  <div class="card-header">
+    <span class="num">03</span>
+    <h3>글로벌 도입 사례</h3>
+    <span class="en">Global Reference Cases</span>
+  </div>
+  <div class="card-body">
+    <div class="inst-grid">
+      <div class="inst-card">
+        <div class="inst-card-header" style="background: linear-gradient(135deg, #003087, #0057a8);">
+          🇫🇷 SNCF · Léa Chatbot (프랑스)
+        </div>
+        <div class="inst-card-body">
+          <p>프랑스 국철 SNCF의 Léa 챗봇은 웹·모바일 앱을 통해 열차 조회, 예약, 환불, 민원 접수를 자동화한다. NLU 기반 의도 분류 + 지식 그래프 결합으로 복잡한 다단계 문의도 처리.</p>
+          <div class="kpi-row">
+            <span class="kpi-badge">1차 해결률 72%</span>
+            <span class="kpi-badge">월 처리 200만 건</span>
+            <span class="kpi-badge">CSAT 4.2/5</span>
+            <span class="kpi-badge">상담원 전환율 28%</span>
+          </div>
+        </div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-card-header" style="background: linear-gradient(135deg, #1e4d8c, #2563bd);">
+          🇺🇸 Amtrak · Julie Voice Agent (미국)
+        </div>
+        <div class="inst-card-body">
+          <p>Amtrak의 음성 AI 에이전트 Julie는 전화 인바운드의 80%를 자동화. 예약·일정·환불·분실물 안내를 음성으로 처리하며, 복잡 건은 실시간 상담원 전환.</p>
+          <div class="kpi-row">
+            <span class="kpi-badge">전화 자동화 80%</span>
+            <span class="kpi-badge">연 운영비 절감 $5M+</span>
+            <span class="kpi-badge">평균 응답 ≤2초</span>
+          </div>
+        </div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-card-header" style="background: linear-gradient(135deg, #006e33, #009b4a);">
+          🇳🇱 NS · Sara Chatbot (네덜란드)
+        </div>
+        <div class="inst-card-body">
+          <p>네덜란드 철도(NS)의 Sara는 여행 보상 청구를 92% 자동 처리. 지연 보상 신청에 특화되어 OV-chipkaart 데이터와 실시간 연동, 즉각 보상 지급.</p>
+          <div class="kpi-row">
+            <span class="kpi-badge">보상 자동화 92%</span>
+            <span class="kpi-badge">처리 시간 24h→5분</span>
+            <span class="kpi-badge">고객 만족 +31%</span>
+          </div>
+        </div>
+      </div>
+      <div class="inst-card">
+        <div class="inst-card-header" style="background: linear-gradient(135deg, #2d5a8e, #3a7abd);">
+          🇰🇷 서울교통공사 · 또타 (국내)
+        </div>
+        <div class="inst-card-body">
+          <p>서울 지하철 또타 앱의 AI 안내 챗봇은 노선 안내, 분실물, 민원 접수를 자동화. T머니·카드 오류 안내에서 높은 활용률을 기록하며 국내 AFC 챗봇 선도 사례.</p>
+          <div class="kpi-row">
+            <span class="kpi-badge">월 100만+ 이용</span>
+            <span class="kpi-badge">분실물 안내 자동화</span>
+            <span class="kpi-badge">T머니 오류 처리</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s04">
+  <div class="card-header">
+    <span class="num">04</span>
+    <h3>멀티채널 지원 범위</h3>
+    <span class="en">Multi-Channel Coverage</span>
+  </div>
+  <div class="card-body">
+    <div class="channel-grid">
+      <div class="channel-card">
+        <div class="ch-icon">💬</div>
+        <div class="ch-name">웹챗</div>
+        <div class="ch-desc">공식 홈페이지 플로팅 채팅 위젯, 실시간 응답</div>
+      </div>
+      <div class="channel-card">
+        <div class="ch-icon">📱</div>
+        <div class="ch-name">모바일 앱</div>
+        <div class="ch-desc">iOS / Android 앱 내 챗봇, 푸시 알림 연동</div>
+      </div>
+      <div class="channel-card">
+        <div class="ch-icon">🟡</div>
+        <div class="ch-name">카카오톡</div>
+        <div class="ch-desc">카카오 채널 API 연동, 친숙한 UX로 접근성 극대화</div>
+      </div>
+      <div class="channel-card">
+        <div class="ch-icon">🖥️</div>
+        <div class="ch-name">키오스크</div>
+        <div class="ch-desc">역사 내 터치 키오스크, 화면·음성 동시 출력</div>
+      </div>
+      <div class="channel-card">
+        <div class="ch-icon">📞</div>
+        <div class="ch-name">음성 전화</div>
+        <div class="ch-desc">IVR 대체 AI 음성 에이전트, STT/TTS 처리</div>
+      </div>
+    </div>
+    <div class="em-box" style="margin-top:16px;">
+      <strong>통합 세션 관리</strong>: 채널 간 컨텍스트를 유지하여 웹챗에서 시작한 문의를 카카오톡에서 이어서 처리 가능. 상담원 이관 시 전체 대화 이력이 함께 전달된다.
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s05">
+  <div class="card-header">
+    <span class="num">05</span>
+    <h3>주요 의도(Intent) 분류</h3>
+    <span class="en">Intent Classification</span>
+  </div>
+  <div class="card-body">
+    <div class="intent-grid">
+      <div class="intent-card">
+        <div class="intent-header">
+          <span class="intent-icon">🚉</span>
+          <span class="intent-name">운행 정보</span>
+          <span class="intent-pct">28%</span>
+        </div>
+        <ul>
+          <li>열차 시간표·지연 안내</li>
+          <li>환승 경로·소요 시간</li>
+          <li>역사 시설 안내</li>
+        </ul>
+      </div>
+      <div class="intent-card">
+        <div class="intent-header">
+          <span class="intent-icon">💳</span>
+          <span class="intent-name">요금·카드</span>
+          <span class="intent-pct">24%</span>
+        </div>
+        <ul>
+          <li>요금 계산·환급 조회</li>
+          <li>T머니·교통카드 오류</li>
+          <li>정기권·할인 혜택</li>
+        </ul>
+      </div>
+      <div class="intent-card">
+        <div class="intent-header">
+          <span class="intent-icon">📝</span>
+          <span class="intent-name">민원 접수</span>
+          <span class="intent-pct">18%</span>
+        </div>
+        <ul>
+          <li>서비스 불만·건의</li>
+          <li>지연 보상 신청</li>
+          <li>직원 응대 불편</li>
+        </ul>
+      </div>
+      <div class="intent-card">
+        <div class="intent-header">
+          <span class="intent-icon">🎒</span>
+          <span class="intent-name">분실물</span>
+          <span class="intent-pct">15%</span>
+        </div>
+        <ul>
+          <li>분실물 접수·조회</li>
+          <li>습득물 반환 절차</li>
+          <li>관할 역사 안내</li>
+        </ul>
+      </div>
+      <div class="intent-card">
+        <div class="intent-header">
+          <span class="intent-icon">🆘</span>
+          <span class="intent-name">안전 신고</span>
+          <span class="intent-pct">8%</span>
+        </div>
+        <ul>
+          <li>위험 상황 신고</li>
+          <li>의심 물품 안내</li>
+          <li>응급 처치 연결</li>
+        </ul>
+      </div>
+      <div class="intent-card" style="border-left-color:var(--muted);">
+        <div class="intent-header">
+          <span class="intent-icon">👤</span>
+          <span class="intent-name">상담원 이관</span>
+          <span class="intent-pct">7%</span>
+        </div>
+        <ul>
+          <li>복잡·감성 민원</li>
+          <li>법적·법률 문의</li>
+          <li>이관 불가 고난도</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn-box">
+      ⚠️ 안전 신고(8%) 및 법적 분쟁성 민원은 즉시 상담원 이관 처리. AI 자동 응답 금지 영역으로 설정.
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s06">
+  <div class="card-header">
+    <span class="num">06</span>
+    <h3>RAG 파이프라인 설계</h3>
+    <span class="en">Retrieval-Augmented Generation Pipeline</span>
+  </div>
+  <div class="card-body">
+    <div class="flow">
+      <div class="flow-step" style="border-color:var(--teal);">
+        <div class="num-circle" style="background:var(--teal);">1</div>
+        <div class="step-title">지식 베이스 구축</div>
+        <div class="step-sub">Knowledge Base Indexing</div>
+        <div class="chips">
+          <span class="chip">FAQ 문서</span><span class="chip">요금 테이블</span><span class="chip">노선도</span><span class="chip">운영 규정</span><span class="chip">민원 이력</span>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step" style="border-color:var(--blue);">
+        <div class="num-circle" style="background:var(--blue);">2</div>
+        <div class="step-title">쿼리 전처리</div>
+        <div class="step-sub">Query Pre-processing</div>
+        <div class="chips">
+          <span class="chip">의도 분류 (NLU)</span><span class="chip">개체명 인식 (NER)</span><span class="chip">쿼리 확장/재작성</span>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step" style="border-color:var(--purple);">
+        <div class="num-circle" style="background:var(--purple);">3</div>
+        <div class="step-title">하이브리드 검색</div>
+        <div class="step-sub">Hybrid Retrieval (Dense + Sparse)</div>
+        <div class="chips">
+          <span class="chip">벡터 유사도 검색</span><span class="chip">BM25 키워드 검색</span><span class="chip">Top-K 재랭킹</span>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step" style="border-color:var(--accent);">
+        <div class="num-circle" style="background:var(--accent);">4</div>
+        <div class="step-title">컨텍스트 조립</div>
+        <div class="step-sub">Context Assembly</div>
+        <div class="chips">
+          <span class="chip">검색 청크 주입</span><span class="chip">대화 이력 포함</span><span class="chip">사용자 프로필</span>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step" style="border-color:var(--green);">
+        <div class="num-circle" style="background:var(--green);">5</div>
+        <div class="step-title">LLM 응답 생성</div>
+        <div class="step-sub">Generation (with Guardrails)</div>
+        <div class="chips">
+          <span class="chip">Claude / GPT-4</span><span class="chip">온도 0.2 (사실형)</span><span class="chip">가드레일 필터</span>
+        </div>
+      </div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step" style="border-color:var(--teal);">
+        <div class="num-circle" style="background:var(--teal);">6</div>
+        <div class="step-title">응답 후처리 &amp; 피드백</div>
+        <div class="step-sub">Post-processing &amp; Feedback Loop</div>
+        <div class="chips">
+          <span class="chip">출처 표기</span><span class="chip">자신감 점수</span><span class="chip">피드백 수집</span><span class="chip">지식 업데이트</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s07">
+  <div class="card-header">
+    <span class="num">07</span>
+    <h3>시스템 아키텍처</h3>
+    <span class="en">System Architecture</span>
+  </div>
+  <div class="card-body">
+    <div class="h-flow">
+      <div class="h-step">
+        <div class="h-icon">📡</div>
+        <div class="h-label">채널 레이어</div>
+        <div class="h-sub">웹챗·앱·카카오톡·키오스크·전화</div>
+      </div>
+      <div class="h-arrow">→</div>
+      <div class="h-step">
+        <div class="h-icon">🔀</div>
+        <div class="h-label">API 게이트웨이</div>
+        <div class="h-sub">인증·Rate Limit·라우팅</div>
+      </div>
+      <div class="h-arrow">→</div>
+      <div class="h-step">
+        <div class="h-icon">🧠</div>
+        <div class="h-label">NLU 엔진</div>
+        <div class="h-sub">의도 분류·NER·대화 관리</div>
+      </div>
+      <div class="h-arrow">→</div>
+      <div class="h-step">
+        <div class="h-icon">🔍</div>
+        <div class="h-label">RAG 검색</div>
+        <div class="h-sub">벡터 DB + BM25 하이브리드</div>
+      </div>
+      <div class="h-arrow">→</div>
+      <div class="h-step">
+        <div class="h-icon">✨</div>
+        <div class="h-label">LLM 생성</div>
+        <div class="h-sub">Claude/GPT-4 + 가드레일</div>
+      </div>
+      <div class="h-arrow">→</div>
+      <div class="h-step">
+        <div class="h-icon">🗄️</div>
+        <div class="h-label">백엔드 연동</div>
+        <div class="h-sub">AFC DB·CRM·분실물 시스템</div>
+      </div>
+    </div>
+    <div class="sub-section" style="margin-top:20px;">
+      <div class="sub-title">핵심 인프라 구성</div>
+      <table>
+        <tr><th>컴포넌트</th><th>기술 스택</th><th>역할</th></tr>
+        <tr><td>벡터 데이터베이스</td><td>Chroma / Pinecone / OpenSearch</td><td>RAG 지식 검색 임베딩 저장</td></tr>
+        <tr><td>LLM 플랫폼</td><td>Anthropic Claude API / Azure OpenAI</td><td>자연어 응답 생성</td></tr>
+        <tr><td>STT/TTS</td><td>AWS Transcribe / Google STT / Clova</td><td>음성 채널 변환</td></tr>
+        <tr><td>대화 관리</td><td>Rasa / AWS Lex / Custom Dialog Manager</td><td>컨텍스트·세션 관리</td></tr>
+        <tr><td>메시지 브로커</td><td>Kafka / SQS</td><td>비동기 채널 메시지 처리</td></tr>
+        <tr><td>이관 시스템</td><td>Genesys / Twilio Flex</td><td>상담원 실시간 이관</td></tr>
+        <tr><td>관측·모니터링</td><td>Prometheus + Grafana / CloudWatch</td><td>레이턴시·품질 실시간 추적</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s08">
+  <div class="card-header">
+    <span class="num">08</span>
+    <h3>LLM 가드레일 설계</h3>
+    <span class="en">LLM Guardrail Design</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">입력 가드레일 (Input Guardrail)</div>
+      <div class="code-block"><span class="kw">function</span> <span class="fn">inputGuardrail</span>(userMessage) {
+  <span class="cmt">// 1. PII 감지 및 마스킹</span>
+  <span class="kw">if</span> (<span class="fn">detectPII</span>(userMessage)) {
+    userMessage = <span class="fn">maskPII</span>(userMessage);  <span class="cmt">// 카드번호, 주민번호 등</span>
+  }
+
+  <span class="cmt">// 2. 긴급·안전 트리거 즉시 이관</span>
+  <span class="kw">if</span> (<span class="fn">detectEmergencyTrigger</span>(userMessage)) {
+    <span class="kw">return</span> <span class="fn">escalateToHuman</span>(<span class="str">"EMERGENCY"</span>);
+  }
+
+  <span class="cmt">// 3. 주제 범위 외 질문 차단</span>
+  <span class="kw">if</span> (<span class="fn">isOutOfScope</span>(userMessage)) {
+    <span class="kw">return</span> <span class="fn">rejectWithGuide</span>(<span class="str">"교통·AFC 관련 문의만 처리 가능합니다."</span>);
+  }
+
+  <span class="kw">return</span> userMessage;
+}</div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">출력 가드레일 (Output Guardrail)</div>
+      <div class="code-block"><span class="kw">function</span> <span class="fn">outputGuardrail</span>(llmResponse, retrievedDocs) {
+  <span class="cmt">// 1. 자신감 점수 기반 응답 제어</span>
+  <span class="kw">if</span> (llmResponse.confidence &lt; <span class="num">0.7</span>) {
+    <span class="kw">return</span> <span class="fn">escalateToHuman</span>(<span class="str">"LOW_CONFIDENCE"</span>);
+  }
+
+  <span class="cmt">// 2. 환각 탐지: 출처 없는 사실 주장 차단</span>
+  <span class="kw">if</span> (!<span class="fn">isGroundedInDocs</span>(llmResponse, retrievedDocs)) {
+    <span class="kw">return</span> <span class="fn">fallbackToFAQ</span>();  <span class="cmt">// RAG 문서 기반 응답으로 대체</span>
+  }
+
+  <span class="cmt">// 3. 금지 토픽 후처리 (법적 조언, 환불 보장 등)</span>
+  <span class="fn">filterProhibitedTopics</span>(llmResponse);
+
+  <span class="cmt">// 4. 출처 및 면책 조항 자동 첨부</span>
+  <span class="kw">return</span> <span class="fn">appendDisclaimer</span>(llmResponse, retrievedDocs.sources);
+}</div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">가드레일 체계 요약</div>
+      <table class="tbl-purple">
+        <tr><th>분류</th><th>항목</th><th>처리 방식</th></tr>
+        <tr><td>PII 보호</td><td>카드번호·주민번호·연락처</td><td>입력 단계 마스킹, 로그 저장 금지</td></tr>
+        <tr><td>긴급 이관</td><td>안전·의료·법적 분쟁</td><td>즉시 상담원 전환 + 알림</td></tr>
+        <tr><td>환각 차단</td><td>근거 없는 사실 주장</td><td>RAG 출처 검증 후 미일치 시 거부</td></tr>
+        <tr><td>자신감 임계</td><td>신뢰도 &lt; 0.7</td><td>불확실 시 이관 또는 재문의 유도</td></tr>
+        <tr><td>주제 범위</td><td>AFC 외 무관 질문</td><td>정중한 거절 + 안내 메시지</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s09">
+  <div class="card-header">
+    <span class="num">09</span>
+    <h3>데이터 소스 및 전처리</h3>
+    <span class="en">Data Sources &amp; Preprocessing</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div>
+        <div class="sub-title">RAG 지식 베이스 데이터</div>
+        <table class="tbl-teal">
+          <tr><th>데이터 유형</th><th>갱신 주기</th><th>형태</th></tr>
+          <tr><td>FAQ 문서</td><td>월 1회+</td><td>PDF / HTML</td></tr>
+          <tr><td>요금 체계 테이블</td><td>변경 시</td><td>정형 DB</td></tr>
+          <tr><td>노선·시간표</td><td>일 1회</td><td>GTFS / JSON</td></tr>
+          <tr><td>규정·고시</td><td>변경 시</td><td>PDF</td></tr>
+          <tr><td>분실물 DB</td><td>실시간</td><td>REST API</td></tr>
+          <tr><td>과거 민원 이력</td><td>배치</td><td>텍스트 DB</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="sub-title">전처리 파이프라인</div>
+        <ol class="ol-num">
+          <li><strong>문서 파싱</strong>: PDF/HTML → 청크 분리 (512 토큰 단위, 20% 오버랩)</li>
+          <li><strong>임베딩 생성</strong>: text-embedding-3-large 또는 multilingual-e5-large</li>
+          <li><strong>벡터 인덱싱</strong>: HNSW 알고리즘으로 근사 최근접 이웃 구성</li>
+          <li><strong>메타데이터 태깅</strong>: 문서 유형·날짜·우선순위 부여</li>
+          <li><strong>갱신 자동화</strong>: 데이터 변경 이벤트 감지 → 증분 인덱싱</li>
+          <li><strong>품질 검증</strong>: 검색 정밀도(Precision@5) 주기적 평가</li>
+        </ol>
+      </div>
+    </div>
+    <div class="privacy-box">
+      <div class="priv-title">⚠️ 개인정보 처리 원칙</div>
+      <ul>
+        <li>대화 이력은 세션 종료 후 90일 보관 후 자동 파기 (개인정보보호법 준수)</li>
+        <li>카드번호·주민번호 등 민감 정보는 입력 즉시 마스킹, 벡터 DB에 저장 불가</li>
+        <li>민원 학습 데이터는 개인식별정보 제거 후 익명화 처리</li>
+        <li>음성 데이터는 STT 변환 완료 후 즉시 삭제 (녹음 보관 별도 동의 필요)</li>
+        <li>EU GDPR / 국내 개인정보보호법 이중 준수 체계</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s10">
+  <div class="card-header">
+    <span class="num">10</span>
+    <h3>모델링 전략</h3>
+    <span class="en">Modeling Strategy</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">구성 모델 스택</div>
+      <table>
+        <tr><th>역할</th><th>모델</th><th>비고</th></tr>
+        <tr><td>의도 분류 (NLU)</td><td>Fine-tuned BERT / KoBERT</td><td>한국어 특화 미세조정, 6클래스</td></tr>
+        <tr><td>개체명 인식 (NER)</td><td>NER-KoBERT / CRF Layer</td><td>역명·카드종류·날짜 추출</td></tr>
+        <tr><td>임베딩 (RAG)</td><td>multilingual-e5-large</td><td>512토큰, 한·영 이중언어 지원</td></tr>
+        <tr><td>재랭킹</td><td>Cross-Encoder (ko-reranker)</td><td>Top-20 → Top-5 정밀 재순위</td></tr>
+        <tr><td>생성 (LLM)</td><td>Claude 3.5 Sonnet / GPT-4o</td><td>온도 0.1~0.3, 사실형 응답</td></tr>
+        <tr><td>감정 분석</td><td>KoBERT Sentiment</td><td>부정 감정 감지 → 이관 트리거</td></tr>
+        <tr><td>STT</td><td>Clova Speech / Whisper Large</td><td>한국어 WER &lt;5% 목표</td></tr>
+        <tr><td>TTS</td><td>Clova Voice / Google WaveNet</td><td>자연스러운 한국어 음성 합성</td></tr>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">지속 학습(Continual Learning) 전략</div>
+      <ul class="ul-disc">
+        <li><strong>Active Learning</strong>: 낮은 자신감 샘플을 큐에 수집 → 주 1회 전문가 레이블링 → 파인튜닝</li>
+        <li><strong>지식 갱신</strong>: FAQ·요금 변경 감지 시 자동 증분 인덱싱 (Trigger-based)</li>
+        <li><strong>A/B 테스트</strong>: 신규 모델을 5~10% 트래픽으로 섀도 테스트 후 점진적 배포</li>
+        <li><strong>드리프트 감지</strong>: 의도 분류 정확도, 1차 해결률 주간 모니터링</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s11">
+  <div class="card-header">
+    <span class="num">11</span>
+    <h3>핵심 성과지표 (KPI)</h3>
+    <span class="en">Key Performance Indicators</span>
+  </div>
+  <div class="card-body">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-value">60%+</div>
+        <div class="kpi-unit">목표치</div>
+        <div class="kpi-label">1차 해결률</div>
+        <div class="kpi-desc">상담원 미이관 자동 해결 비율</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-value">≤3초</div>
+        <div class="kpi-unit">P95 응답 시간</div>
+        <div class="kpi-label">응답 속도</div>
+        <div class="kpi-desc">LLM 생성 포함 엔드투엔드</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">😊</div>
+        <div class="kpi-value">4.0+</div>
+        <div class="kpi-unit">5점 만점</div>
+        <div class="kpi-label">고객 만족도 (CSAT)</div>
+        <div class="kpi-desc">챗봇 응대 후 즉시 평가</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🛡️</div>
+        <div class="kpi-value">&lt;1%</div>
+        <div class="kpi-unit">임계치</div>
+        <div class="kpi-label">환각률</div>
+        <div class="kpi-desc">RAG 미근거 사실 주장 비율</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-value">30%+</div>
+        <div class="kpi-unit">절감 목표</div>
+        <div class="kpi-label">콜센터 비용 절감</div>
+        <div class="kpi-desc">FTE 전환 포함 운영비</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🕐</div>
+        <div class="kpi-value">99.9%</div>
+        <div class="kpi-unit">SLA</div>
+        <div class="kpi-label">서비스 가용성</div>
+        <div class="kpi-desc">24/7 무중단 운영 목표</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-value">92%+</div>
+        <div class="kpi-unit">목표치</div>
+        <div class="kpi-label">의도 분류 정확도</div>
+        <div class="kpi-desc">NLU 6클래스 분류 정확도</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-value">&lt;5%</div>
+        <div class="kpi-unit">임계치</div>
+        <div class="kpi-label">STT 단어 오류율</div>
+        <div class="kpi-desc">한국어 음성 인식 정확도</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s12">
+  <div class="card-header">
+    <span class="num">12</span>
+    <h3>도입 로드맵</h3>
+    <span class="en">Implementation Roadmap</span>
+  </div>
+  <div class="card-body">
+    <div class="stage-grid">
+      <div class="stage-card">
+        <div class="stage-card-header" style="background: var(--green);">
+          🌱 Phase 1 · PoC (0~6개월)
+        </div>
+        <div class="stage-card-body">
+          <ul>
+            <li>FAQ 기반 RAG 파이프라인 구축</li>
+            <li>웹챗 단일 채널 파일럿</li>
+            <li>상위 3개 의도 분류 구현</li>
+            <li>가드레일 기본 설계·적용</li>
+            <li>A/B 테스트 프레임워크 구축</li>
+          </ul>
+          <div class="stage-kpi">🎯 목표: 1차 해결률 40%+ | CSAT 3.5+</div>
+        </div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-card-header" style="background: var(--blue);">
+          🚀 Phase 2 · Pilot (7~15개월)
+        </div>
+        <div class="stage-card-body">
+          <ul>
+            <li>멀티채널 확장 (앱·카카오톡)</li>
+            <li>6개 의도 분류 완성</li>
+            <li>지속 학습 파이프라인 가동</li>
+            <li>AFC DB·CRM 실시간 연동</li>
+            <li>감정 분석 → 이관 자동화</li>
+          </ul>
+          <div class="stage-kpi">🎯 목표: 1차 해결률 60%+ | CSAT 4.0+</div>
+        </div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-card-header" style="background: var(--purple);">
+          🏆 Phase 3 · Production (16개월+)
+        </div>
+        <div class="stage-card-body">
+          <ul>
+            <li>전채널 통합 (키오스크·음성)</li>
+            <li>다국어 지원 (영어·중국어)</li>
+            <li>LLM 자체 파인튜닝 적용</li>
+            <li>민원 빅데이터 분석 대시보드</li>
+            <li>ROI 기반 지속 고도화</li>
+          </ul>
+          <div class="stage-kpi">🎯 목표: 1차 해결률 75%+ | 콜센터 비용 30%↓</div>
+        </div>
+      </div>
+    </div>
+    <div class="em-box" style="margin-top:16px;">
+      <strong>선행 조건</strong>: AFC 데이터 거버넌스 체계 확립 및 개인정보 처리 방침 업데이트가 Phase 1 착수 전 완료되어야 한다.
+    </div>
+  </div>
+</div>
+
+<div class="card" id="s13">
+  <div class="card-header">
+    <span class="num">13</span>
+    <h3>위험 요소 및 완화 전략</h3>
+    <span class="en">Risk &amp; Mitigation</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <tr><th>위험 등급</th><th>위험 요소</th><th>영향</th><th>완화 전략</th></tr>
+      <tr>
+        <td><span class="badge badge-red">HIGH</span></td>
+        <td>LLM 환각으로 잘못된 요금 안내</td>
+        <td>고객 불신·법적 클레임</td>
+        <td>RAG 출처 검증 + 자신감 임계 + 면책 문구 의무화</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">HIGH</span></td>
+        <td>개인정보 유출·PII 처리 위반</td>
+        <td>법적 제재·신뢰 손상</td>
+        <td>입력 단계 PII 마스킹 + 90일 자동 파기 + 암호화 저장</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-accent">MED</span></td>
+        <td>의도 분류 오류로 잘못된 응답 제공</td>
+        <td>사용자 불만족·이탈</td>
+        <td>자신감 기반 이관 + 피드백 루프 + 월 재학습</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-accent">MED</span></td>
+        <td>LLM API 장애 시 서비스 중단</td>
+        <td>24/7 가용성 위협</td>
+        <td>멀티 LLM 폴백(Claude↔GPT-4) + 룰베이스 백업 응답</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-accent">MED</span></td>
+        <td>상담원 저항·업무 프로세스 변화</td>
+        <td>도입 지연·활용도 저하</td>
+        <td>변화 관리 프로그램 + 상담원 업스킬링 교육</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">LOW</span></td>
+        <td>프롬프트 인젝션 공격</td>
+        <td>시스템 악용·데이터 유출</td>
+        <td>입력 필터링 + 역할 경계 강제 + 레드팀 테스팅</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" id="s14">
+  <div class="card-header">
+    <span class="num">14</span>
+    <h3>기대 효과 및 투자 가치</h3>
+    <span class="en">Expected Benefits &amp; ROI</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div>
+        <div class="sub-title">운영 효율 개선</div>
+        <table class="tbl-green">
+          <tr><th>항목</th><th>개선 효과</th></tr>
+          <tr><td>콜센터 인바운드 감소</td><td>반복 문의 70% 자동 처리 → FTE 최적화</td></tr>
+          <tr><td>평균 처리 시간</td><td>인간 응대 5~8분 → AI 응대 &lt;1분</td></tr>
+          <tr><td>야간·주말 서비스</td><td>무인 24/7 자동 응대 실현</td></tr>
+          <tr><td>상담원 생산성</td><td>고난도 민원 집중 → 해결률·전문성 향상</td></tr>
+          <tr><td>민원 분석</td><td>실시간 트렌드 파악 → 서비스 개선 인사이트</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="sub-title">재무 효과 (연간 추정)</div>
+        <table class="tbl-purple">
+          <tr><th>항목</th><th>추정 효과</th></tr>
+          <tr><td>콜센터 운영비</td><td>30~40% 절감 (FTE 감축·시간 단축)</td></tr>
+          <tr><td>고객 이탈 방지</td><td>CSAT 향상 → 재이용률 +2~5%</td></tr>
+          <tr><td>민원 처리 비용</td><td>건당 비용 70% 감소 (AI vs 인간)</td></tr>
+          <tr><td>초과 근무 절감</td><td>피크 타임 대응 인력 최적화</td></tr>
+          <tr><td>투자 회수 기간</td><td>18~24개월 (중·대규모 AFC 기준)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="sub-section" style="margin-top:20px;">
+      <div class="sub-title">전략적 가치</div>
+      <ul class="ul-disc">
+        <li><strong>고객 경험 차별화</strong>: 응답 속도·정확도·가용성 3요소 동시 개선으로 타 교통 기관 대비 경쟁 우위 확보</li>
+        <li><strong>데이터 자산화</strong>: 누적 대화 데이터 분석을 통한 AFC 서비스 개선 및 신규 Use Case 발굴 기반</li>
+        <li><strong>확장 가능성</strong>: 챗봇 플랫폼 인프라는 다른 AI Use Case(수요 예측 알림, 정비 안내 등)로 재활용 가능</li>
+        <li><strong>국제 기준 부합</strong>: SNCF·Amtrak·NS 등 글로벌 선진 사례와 동등한 AI 서비스 수준 달성</li>
+      </ul>
+    </div>
+    <div class="tag-list">
+      <span class="tag hl">NLP / LLM</span>
+      <span class="tag hl">RAG</span>
+      <span class="tag hl">Intent Classification</span>
+      <span class="tag hl">TTS / STT</span>
+      <span class="tag">멀티채널 통합</span>
+      <span class="tag">가드레일</span>
+      <span class="tag">개인정보 보호</span>
+      <span class="tag">지속 학습</span>
+      <span class="tag">24/7 자동화</span>
+      <span class="tag">SNCF Léa</span>
+      <span class="tag">Amtrak Julie</span>
+      <span class="tag">NS Sara</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.card[id]');
+  const navLinks = document.querySelectorAll('.toc-bar a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.style.background = '');
+        const active = document.querySelector(`.toc-bar a[href="#${entry.target.id}"]`);
+        if (active) active.style.background = 'rgba(240,140,0,.25)';
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+<style>
+.close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>

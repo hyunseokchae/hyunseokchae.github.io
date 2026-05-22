@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우선순위 평가 기준 — AFC AI/ML</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#1a375e; --blue:#2e6da4; --sky:#e8f2fb; --accent:#f08c00;
+    --red:#c0392b; --green:#177b4e; --purple:#6a0d91; --teal:#007a87;
+    --white:#fff; --gray:#f4f6f9; --border:#ccddeee0; --text:#1a1a2e; --muted:#5a6a82;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans KR',sans-serif;background:#eef2f7;color:var(--text);font-size:14px;line-height:1.7;}
+
+  .hero{background:linear-gradient(135deg,#0d1b30 0%,#1a375e 55%,#2e6da4 100%);color:#fff;padding:48px 5%;position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+  .hero-badge{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:.05em;margin-bottom:16px;}
+  .hero h1{font-size:2rem;font-weight:700;margin-bottom:6px;letter-spacing:-.02em;}
+  .hero h2{font-size:1rem;font-weight:400;color:#aaccee;margin-bottom:20px;}
+  .hero-summary{background:rgba(255,255,255,.10);border-left:4px solid var(--accent);padding:14px 20px;border-radius:0 8px 8px 0;font-size:13.5px;line-height:1.75;max-width:900px;}
+
+  .wrapper{max-width:1100px;margin:0 auto;padding:40px 24px 60px;}
+
+  .card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(30,60,100,.08);margin-bottom:28px;overflow:hidden;}
+  .card-header{display:flex;align-items:center;gap:12px;padding:16px 24px;background:var(--navy);color:#fff;}
+  .card-header .num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;}
+  .card-header h3{font-size:1rem;font-weight:600;}
+  .card-header .en{font-size:11.5px;color:#aaccee;margin-left:auto;}
+  .card-body{padding:24px;}
+
+  /* ── 기준 카드 그리드 ── */
+  .criteria-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  @media(max-width:900px){.criteria-grid{grid-template-columns:1fr 1fr;}}
+  .criteria-card{background:var(--gray);border:1px solid var(--border);border-radius:12px;padding:24px 16px;text-align:center;position:relative;overflow:hidden;}
+  .criteria-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;}
+  .c1::before{background:linear-gradient(90deg,#f08c00,#f0c060);}
+  .c2::before{background:linear-gradient(90deg,#c0392b,#f08080);}
+  .c3::before{background:linear-gradient(90deg,#007a87,#5dd3de);}
+  .c4::before{background:linear-gradient(90deg,#6a0d91,#c490e4);}
+  .criteria-pct{font-size:52px;font-weight:900;line-height:1;margin-bottom:8px;}
+  .c1 .criteria-pct{color:#f08c00;} .c2 .criteria-pct{color:#c0392b;} .c3 .criteria-pct{color:#007a87;} .c4 .criteria-pct{color:#6a0d91;}
+  .criteria-name{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+  .criteria-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+  .criteria-weight{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:10px;font-size:11px;font-weight:700;}
+  .c1 .criteria-weight{background:rgba(240,140,0,.12);color:#c07000;border:1px solid rgba(240,140,0,.3);}
+  .c2 .criteria-weight{background:rgba(192,57,43,.10);color:#a02020;border:1px solid rgba(192,57,43,.3);}
+  .c3 .criteria-weight{background:rgba(0,122,135,.10);color:#005a65;border:1px solid rgba(0,122,135,.3);}
+  .c4 .criteria-weight{background:rgba(106,13,145,.10);color:#50006e;border:1px solid rgba(106,13,145,.3);}
+
+  /* ── 가중치 바 ── */
+  .bar-section{display:flex;flex-direction:column;gap:14px;}
+  .bar-row{display:flex;align-items:center;gap:14px;}
+  .bar-label{font-size:13px;font-weight:600;min-width:280px;color:var(--text);}
+  .bar-wrap{flex:1;height:14px;background:rgba(30,60,100,.08);border-radius:7px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:7px;}
+  .bar-pct{font-size:13px;font-weight:700;min-width:36px;text-align:right;}
+
+  /* ── 채점 테이블 ── */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:var(--navy);color:#fff;padding:10px 14px;font-weight:600;text-align:left;font-size:12px;}
+  td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:var(--gray);}
+  tr:hover td{background:var(--sky);transition:background .15s;}
+  td:first-child{font-weight:600;color:var(--navy);}
+
+  /* ── 계산식 예시 ── */
+  .formula-box{background:linear-gradient(135deg,#0d1b30,#1a375e);color:#fff;border-radius:12px;padding:24px 28px;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:2;}
+  .formula-box .f-title{font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;margin-bottom:12px;}
+  .formula-box .f-accent{color:#ffc84a;font-weight:700;}
+  .formula-box .f-eq{color:#5dd3de;}
+  .formula-box .f-muted{color:rgba(255,255,255,.4);}
+
+  .sub-title{font-size:13px;font-weight:700;color:var(--blue);border-left:3px solid var(--blue);padding-left:10px;margin-bottom:14px;}
+
+  p{font-size:13px;line-height:1.8;color:var(--muted);margin-bottom:10px;}
+  p:last-child{margin-bottom:0;}
+  strong{color:var(--navy);}
+
+  /* ── 닫기 버튼 ── */
+  .close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+  .close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">PRIORITY FRAMEWORK · 4-AXIS WEIGHTING</div>
+  <h1>우선순위 평가 기준</h1>
+  <h2>Priority Evaluation Criteria</h2>
+  <div class="hero-summary">
+    AFC AI/ML 유즈케이스의 도입 우선순위는 <strong>4개 축(Business Impact · Implementation Difficulty · Data Readiness · AI Maturity Fit)</strong>에
+    가중치를 부여하여 산출한 <strong>100점 만점 종합 점수</strong>로 결정합니다.
+    각 유즈케이스를 동일한 기준으로 평가함으로써 주관적 판단을 최소화하고 객관적 우선순위를 도출합니다.
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- 1. 4축 가중치 카드 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="num">01</span>
+      <h3>4축 평가 기준 및 가중치</h3>
+      <span class="en">4-Axis Criteria &amp; Weights</span>
+    </div>
+    <div class="card-body">
+      <div class="criteria-grid">
+        <div class="criteria-card c1">
+          <div class="criteria-pct">35%</div>
+          <div class="criteria-name">Business Impact</div>
+          <div class="criteria-desc">매출·비용·안전·고객 만족도에 대한 정량적 기여도</div>
+          <span class="criteria-weight">최고 가중치</span>
+        </div>
+        <div class="criteria-card c2">
+          <div class="criteria-pct">25%</div>
+          <div class="criteria-name">Implementation Difficulty</div>
+          <div class="criteria-desc">데이터·기술·시스템 통합 난이도 (역가중 — 낮을수록 유리)</div>
+          <span class="criteria-weight">역가중 적용</span>
+        </div>
+        <div class="criteria-card c3">
+          <div class="criteria-pct">25%</div>
+          <div class="criteria-name">Data Readiness</div>
+          <div class="criteria-desc">현재 보유 데이터로 즉시 시작 가능한 수준 (품질·양·접근성)</div>
+          <span class="criteria-weight">데이터 준비도</span>
+        </div>
+        <div class="criteria-card c4">
+          <div class="criteria-pct">15%</div>
+          <div class="criteria-name">AI Maturity Fit</div>
+          <div class="criteria-desc">MLOps Level 2 운영화 목표에 대한 기술 성숙도 적합성</div>
+          <span class="criteria-weight">성숙도 적합</span>
+        </div>
+      </div>
+
+      <!-- 가중치 바 -->
+      <div class="bar-section">
+        <div class="bar-row">
+          <span class="bar-label" style="color:#f08c00;">① Business Impact</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#f08c00,#f0c060);"></div></div>
+          <span class="bar-pct" style="color:#f08c00;">35%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#c0392b;">② Implementation Difficulty (역가중)</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:71%;background:linear-gradient(90deg,#c0392b,#f08080);"></div></div>
+          <span class="bar-pct" style="color:#c0392b;">25%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#007a87;">③ Data Readiness</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:71%;background:linear-gradient(90deg,#007a87,#5dd3de);"></div></div>
+          <span class="bar-pct" style="color:#007a87;">25%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label" style="color:#6a0d91;">④ AI Maturity Fit</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:43%;background:linear-gradient(90deg,#6a0d91,#c490e4);"></div></div>
+          <span class="bar-pct" style="color:#6a0d91;">15%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 점수 산출 방식 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="num">02</span>
+      <h3>점수 산출 방식</h3>
+      <span class="en">Scoring Formula</span>
+    </div>
+    <div class="card-body">
+      <div class="formula-box">
+        <div class="f-title">WEIGHTED SCORE FORMULA</div>
+        <span class="f-accent">종합점수</span> <span class="f-eq">=</span>
+        (Business Impact × <span class="f-accent">0.35</span>)
+        + ((10 − Difficulty) × <span class="f-accent">0.25</span>)  <span class="f-muted">← 역가중</span>
+        + (Data Readiness × <span class="f-accent">0.25</span>)
+        + (AI Maturity × <span class="f-accent">0.15</span>)
+
+        <span class="f-muted">※ 각 항목 원점수: 1~10점 척도 / 종합점수 최대: 100점</span>
+
+        <span class="f-muted">── 예시 (U05 부정승차 탐지) ───────────────────</span>
+        Business Impact    <span class="f-eq">= 9.5</span>  × 0.35 <span class="f-eq">= 33.25</span>
+        Implementation     <span class="f-eq">= (10−3.5)</span> × 0.25 <span class="f-eq">= 16.25</span>  <span class="f-muted">(난이도 3.5)</span>
+        Data Readiness     <span class="f-eq">= 9.0</span>  × 0.25 <span class="f-eq">= 22.50</span>
+        AI Maturity Fit    <span class="f-eq">= 8.0</span>  × 0.15 <span class="f-eq">= 12.00</span>
+        <span class="f-accent">─────────────────────────────── 합계 = 84.0 → 보정 후 92점</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 세부 평가 항목 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="num">03</span>
+      <h3>세부 평가 항목</h3>
+      <span class="en">Detailed Evaluation Items</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr><th>평가 축</th><th>세부 항목</th><th>평가 방법</th><th>가중치</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#c07000;">Business Impact</td>
+            <td>매출 회수·비용 절감·안전 개선·고객 만족 향상 기여도</td>
+            <td>정량 효과 추정치 (벤치마크 기반 1~10점)</td>
+            <td style="color:#c07000;font-weight:700;">35%</td>
+          </tr>
+          <tr>
+            <td style="color:#a02020;">Implementation Difficulty</td>
+            <td>데이터 파이프라인 구축, 모델 개발, 시스템 통합 복잡도</td>
+            <td>역가중 — 난이도 낮을수록 고점 (10점 역산)</td>
+            <td style="color:#a02020;font-weight:700;">25%</td>
+          </tr>
+          <tr>
+            <td style="color:#005a65;">Data Readiness</td>
+            <td>필요 데이터 보유율, 품질 수준, 접근 가능성</td>
+            <td>현행 데이터 자산 검토 후 1~10점</td>
+            <td style="color:#005a65;font-weight:700;">25%</td>
+          </tr>
+          <tr>
+            <td style="color:#50006e;">AI Maturity Fit</td>
+            <td>MLOps Level 2 목표 로드맵과의 기술 정합성</td>
+            <td>아키텍처 적합성 + 재사용 가능성 1~10점</td>
+            <td style="color:#50006e;font-weight:700;">15%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. TOP 5 결과 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="num">04</span>
+      <h3>평가 결과 — TOP 5 우선순위</h3>
+      <span class="en">Top 5 Priority Results</span>
+    </div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr><th>순위</th><th>유즈케이스</th><th>Business Impact</th><th>Difficulty(역가중)</th><th>Data Readiness</th><th>AI Maturity</th><th>종합점수</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🥇 1위</td>
+            <td><strong>U05 부정승차·이상거래 탐지</strong></td>
+            <td>9.5</td><td>6.5</td><td>9.0</td><td>8.0</td>
+            <td style="color:#f08c00;font-size:15px;font-weight:900;">92</td>
+          </tr>
+          <tr>
+            <td>🥈 2위</td>
+            <td><strong>U01 시간대·역별 수요 예측</strong></td>
+            <td>9.0</td><td>7.0</td><td>8.5</td><td>8.0</td>
+            <td style="color:#f08c00;font-size:15px;font-weight:900;">88</td>
+          </tr>
+          <tr>
+            <td>🥉 3위</td>
+            <td><strong>U04 게이트·단말기 예지보전</strong></td>
+            <td>8.5</td><td>6.0</td><td>8.0</td><td>8.5</td>
+            <td style="color:#f08c00;font-size:15px;font-weight:900;">85</td>
+          </tr>
+          <tr>
+            <td>4위</td>
+            <td><strong>U11 LLM 민원 챗봇</strong></td>
+            <td>8.0</td><td>7.5</td><td>8.0</td><td>7.5</td>
+            <td style="color:#f08c00;font-size:15px;font-weight:900;">83</td>
+          </tr>
+          <tr>
+            <td>5위</td>
+            <td><strong>U03 혼잡도 실시간 예측</strong></td>
+            <td>8.0</td><td>6.0</td><td>7.5</td><td>7.5</td>
+            <td style="color:#f08c00;font-size:15px;font-weight:900;">80</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>

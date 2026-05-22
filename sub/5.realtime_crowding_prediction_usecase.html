@@ -1,0 +1,769 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실시간 혼잡도 예측 유즈케이스</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1a375e; --blue: #2e6da4; --sky: #e8f2fb; --accent: #f08c00;
+  --red: #c0392b; --green: #177b4e; --purple: #6a0d91; --teal: #007a87;
+  --white: #ffffff; --gray: #f4f6f9; --border: #ccddeee0;
+  --text: #1a1a2e; --muted: #5a6a82;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans KR', sans-serif; color: var(--text); background: var(--gray); }
+
+/* NAV */
+#toc { position: sticky; top: 0; z-index: 100; background: var(--navy); display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+#toc a { color: #c8d8ee; font-size: .72rem; text-decoration: none; padding: 4px 9px; border-radius: 4px; white-space: nowrap; }
+#toc a:hover { background: var(--blue); color: #fff; }
+
+/* HERO */
+.hero { background: linear-gradient(135deg, #1a1f3c 0%, #1a375e 50%, #5c1f0a 100%); color: #fff; padding: 52px 32px 40px; }
+.hero h1 { font-size: 1.85rem; font-weight: 700; margin-bottom: 10px; }
+.hero p { font-size: 1rem; color: #b8d4ee; line-height: 1.7; max-width: 860px; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.badge { background: rgba(255,255,255,.15); color: #fff; font-size: .75rem; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,.25); }
+
+/* SECTIONS */
+.section { background: var(--white); border-radius: 14px; padding: 32px 28px; margin: 20px auto; max-width: 1000px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; padding-bottom: 14px; border-bottom: 2px solid var(--sky); }
+.section-num { background: var(--navy); color: #fff; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 700; flex-shrink: 0; }
+.section-header h2 { font-size: 1.2rem; color: var(--navy); }
+.subsection { margin-top: 22px; }
+.subsection h3 { font-size: 1rem; color: var(--blue); margin-bottom: 12px; padding-left: 10px; border-left: 3px solid var(--blue); }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-top: 10px; }
+th { background: var(--navy); color: #fff; padding: 9px 12px; text-align: left; font-weight: 500; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:nth-child(even) td { background: var(--gray); }
+td strong { color: var(--navy); }
+.tbl-blue   th { background: var(--blue); }
+.tbl-teal   th { background: var(--teal); }
+.tbl-accent th { background: var(--accent); }
+.tbl-green  th { background: var(--green); }
+.tbl-purple th { background: var(--purple); }
+.tbl-red    th { background: var(--red); }
+
+/* BENCHMARK CARDS */
+.bench-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 18px; }
+.bench-card { background: var(--gray); border-radius: 10px; padding: 20px; border-top: 4px solid var(--blue); }
+.bench-card.intl { border-top-color: var(--teal); }
+.bench-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; color: var(--blue); }
+.bench-card.intl .bench-label { color: var(--teal); }
+.bench-card h4 { color: var(--navy); font-size: .95rem; margin-bottom: 8px; }
+.bench-card ul { padding-left: 16px; }
+.bench-card li { font-size: .83rem; color: var(--muted); line-height: 1.7; }
+
+/* GENERAL CARDS */
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.card-grid.grid2 { grid-template-columns: repeat(2, 1fr); }
+.card { background: var(--gray); border-radius: 10px; padding: 16px 18px; border-top: 4px solid var(--blue); }
+.card h4 { color: var(--navy); font-size: .92rem; margin-bottom: 6px; }
+.card p, .card li { font-size: .83rem; color: var(--muted); line-height: 1.6; }
+.card ul { padding-left: 16px; }
+.card-header { background: var(--navy); color: #fff; border-radius: 10px 10px 0 0; padding: 10px 16px; margin: -16px -18px 14px; font-weight: 600; font-size: .88rem; }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.kpi-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.kpi-cat { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 6px; }
+.cat-acc  { background: #e8f2fb; color: var(--blue); }
+.cat-det  { background: #f5eafb; color: var(--purple); }
+.cat-ops  { background: #eaf7f0; color: var(--green); }
+.cat-safe { background: #fbebe9; color: var(--red); }
+.cat-sys  { background: #fff5e6; color: var(--accent); }
+.cat-data { background: #e6f4f6; color: var(--teal); }
+.kpi-name { font-size: .92rem; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+.kpi-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+/* FLOW */
+.flow { display: flex; flex-direction: column; align-items: center; background: #f8fafd; border: 1px solid var(--border); border-radius: 12px; padding: 18px 14px; }
+.flow-step { width: 100%; max-width: 440px; border-radius: 10px; padding: 10px 14px; text-align: center; border: 2px solid; position: relative; }
+.flow-step.data     { border-color: var(--teal);   background: #e6f4f6; }
+.flow-step.process  { border-color: var(--blue);   background: var(--sky); }
+.flow-step.model    { border-color: var(--purple); background: #f5eafb; }
+.flow-step.output   { border-color: var(--accent); background: #fff5e6; }
+.flow-step.action   { border-color: var(--green);  background: #eaf7f0; }
+.flow-title { font-size: .9rem; font-weight: 700; }
+.flow-sub   { font-size: .78rem; color: var(--muted); margin-top: 3px; }
+.flow-arrow { width: 2px; height: 18px; background: var(--accent); position: relative; margin: 2px 0; }
+.flow-arrow::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--accent); }
+.num-circle { position: absolute; top: -10px; left: -10px; width: 22px; height: 22px; background: var(--navy); color: #fff; border-radius: 50%; font-size: .72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 6px; }
+.chip  { font-size: .7rem; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,.7); color: var(--navy); border: 1px solid rgba(0,0,0,.1); }
+.flow-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; justify-content: center; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: .75rem; color: var(--muted); }
+.legend-dot  { width: 12px; height: 12px; border-radius: 3px; border: 2px solid; }
+
+/* USECASE CARDS */
+.usecase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+.usecase-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; border-left: 4px solid var(--blue); }
+.usecase-card.safety { border-left-color: var(--red); }
+.usecase-card.ops    { border-left-color: var(--green); }
+.usecase-card.mobile { border-left-color: var(--purple); }
+.usecase-card.auto   { border-left-color: var(--accent); }
+.usecase-card h5 { font-size: .88rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.usecase-card p  { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+.usecase-card .uc-tag { font-size: .68rem; padding: 2px 7px; border-radius: 8px; font-weight: 600; display: inline-block; margin-bottom: 5px; background: #e8f2fb; color: var(--blue); }
+.usecase-card.safety .uc-tag { background: #fbebe9; color: var(--red); }
+.usecase-card.ops    .uc-tag { background: #eaf7f0; color: var(--green); }
+.usecase-card.mobile .uc-tag { background: #f5eafb; color: var(--purple); }
+.usecase-card.auto   .uc-tag { background: #fff5e6; color: var(--accent); }
+
+/* LEVEL CARDS */
+.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
+.level-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 14px 12px; text-align: center; }
+.level-badge { font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 8px; }
+.lv1 { background: #e6f4f6; color: var(--teal); }
+.lv2 { background: #e8f2fb; color: var(--blue); }
+.lv3 { background: #f5eafb; color: var(--purple); }
+.lv4 { background: #fbebe9; color: var(--red); }
+.lv5 { background: #eaf7f0; color: var(--green); }
+.level-title { font-size: .82rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.level-desc  { font-size: .73rem; color: var(--muted); line-height: 1.5; }
+
+/* STAGE CARDS */
+.stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+.stage-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px 14px; }
+.stage-num  { background: var(--navy); color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.stage-title { font-size: .85rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.stage-tag   { font-size: .7rem; padding: 2px 8px; border-radius: 8px; background: var(--sky); color: var(--blue); font-weight: 600; display: inline-block; margin-bottom: 6px; }
+.stage-desc  { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
+/* ONELINER */
+.oneliner { background: linear-gradient(135deg, #1a1f3c, #1a375e, #5c1f0a); color: #fff; border-radius: 12px; padding: 24px 28px; line-height: 1.9; font-size: .95rem; }
+.oneliner strong { color: #ffc875; }
+
+@media (max-width: 700px) {
+  .bench-grid, .card-grid, .usecase-grid { grid-template-columns: 1fr; }
+  .kpi-grid  { grid-template-columns: repeat(2, 1fr); }
+  .level-grid { grid-template-columns: repeat(2, 1fr); }
+  .stage-grid { grid-template-columns: 1fr; }
+  .hero h1   { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="toc">
+  <a href="#s1">① 개요</a>
+  <a href="#s2">② 벤치마크</a>
+  <a href="#s3">③ 업무문제&목표</a>
+  <a href="#s4">④ 데이터</a>
+  <a href="#s5">⑤ 모델링</a>
+  <a href="#s6">⑥ 핵심Feature</a>
+  <a href="#s7">⑦ 예측수준</a>
+  <a href="#s8">⑧ UseCase설계</a>
+  <a href="#s9">⑨ KPI</a>
+  <a href="#s10">⑩ 추진방안</a>
+  <a href="#s11">⑪ 리스크</a>
+  <a href="#s12">⑫ 기술스택&운영</a>
+  <a href="#s13">⑬ 기대효과</a>
+  <a href="#s14">⑭ 요약</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>실시간 혼잡도 예측</h1>
+  <p>AFC·CCTV·IoT 센서·통신 데이터를 실시간 Streaming으로 통합하여 승강장·열차·환승 구간의 미래 혼잡도를 예측하고,<br>
+     배차 최적화·안전 대응·모바일 안내를 자동화하는 AI 기반 혼잡 관리 유즈케이스</p>
+  <div class="badge-row">
+    <span class="badge">Time-Series Forecasting</span>
+    <span class="badge">Anomaly Detection</span>
+    <span class="badge">Computer Vision</span>
+    <span class="badge">Streaming ML</span>
+    <span class="badge">도시철도 · AFC · 역사 운영</span>
+    <span class="badge">MaaS</span>
+  </div>
+</div>
+
+<!-- S1 개요 -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>유즈케이스 개요</h2>
+  </div>
+  <table>
+    <tr><th style="width:200px">항목</th><th>내용</th></tr>
+    <tr><td><strong>유즈케이스명</strong></td><td>실시간 혼잡도 예측</td></tr>
+    <tr><td><strong>영문명</strong></td><td>Real-time Crowding Prediction &amp; Congestion Management</td></tr>
+    <tr><td><strong>AI 유형</strong></td><td>Time-Series Forecasting, Anomaly Detection, Computer Vision, Streaming ML</td></tr>
+    <tr><td><strong>적용 도메인</strong></td><td>도시철도, AFC, 역사 운영, 안전 관제, MaaS</td></tr>
+    <tr><td><strong>주요 목적</strong></td><td>승강장·열차·환승 구간 혼잡도 사전 예측, 안전사고 예방, 배차 최적화, 승객 분산 안내</td></tr>
+    <tr><td><strong>주요 데이터</strong></td><td>AFC 승하차 태그, CCTV 영상, IoT 센서, 열차 위치·운행 정보, 통신 유동인구, 이벤트 캘린더</td></tr>
+    <tr><td><strong>주요 결과</strong></td><td>5~30분 선행 혼잡 예측, 이상 혼잡 자동 탐지, 열차칸별 혼잡 안내, 운영 대응 자동화</td></tr>
+  </table>
+</div>
+
+<!-- S2 벤치마크 -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>벤치마크 사례</h2>
+  </div>
+  <table class="tbl-blue">
+    <tr><th>기관/시스템</th><th>사례 성격</th><th>주요 데이터</th><th>AFC 적용 시사점</th></tr>
+    <tr>
+      <td><strong>Tokyo Metro</strong></td>
+      <td>초고밀도 도시철도 환경에서 정시성·승강장 안전 중심 혼잡 분석 운영</td>
+      <td>IC카드 OD, 게이트 통과량, 승강장 센서, CCTV, 열차 위치, 이벤트</td>
+      <td>역 단위 Heatmap, 시간대별 혼잡률 예측, 열차별 탑승률 분석 가능</td>
+    </tr>
+    <tr>
+      <td><strong>Seoul Metro</strong></td>
+      <td>교통카드·통신사 유동인구·CCTV 통합으로 실시간 혼잡 예측 및 안전 대응</td>
+      <td>교통카드, LTE/5G 유동인구, 역사 CCTV, PSD 센서, 열차 혼잡도, 버스 환승</td>
+      <td>실시간 위험 혼잡 탐지, 배차 최적화, 모바일 혼잡 안내 가능</td>
+    </tr>
+  </table>
+
+  <div class="bench-grid">
+    <div class="bench-card">
+      <div class="bench-label">Tokyo Metro</div>
+      <h4>IC카드 OD + 이벤트 기반 혼잡 분석</h4>
+      <ul>
+        <li>IC 카드 기반 OD 데이터 활용</li>
+        <li>역 단위 혼잡 Heatmap 제공</li>
+        <li>시간대별 혼잡률 예측</li>
+        <li>이벤트 기반 수요 예측 (경기·공연·행사)</li>
+        <li>열차별 탑승률 분석</li>
+        <li>모바일 앱 실시간 혼잡 안내</li>
+      </ul>
+    </div>
+    <div class="bench-card intl">
+      <div class="bench-label">Seoul Metro</div>
+      <h4>통신 유동인구 + PSD 센서 통합 분석</h4>
+      <ul>
+        <li>통신사 LTE/5G 유동인구 연계</li>
+        <li>지하철과 버스 통합 분석</li>
+        <li>실시간 앱 혼잡도 제공</li>
+        <li>AI 기반 위험도 분석</li>
+        <li>PSD 센서 기반 승강장 밀집도 측정</li>
+        <li>출퇴근 혼잡 예측 및 배차 최적화</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- S3 업무문제 & 목표 -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>업무 문제 및 AI 적용 목표</h2>
+  </div>
+  <div class="subsection">
+    <h3>3.1 업무 문제</h3>
+    <table class="tbl-red">
+      <tr><th style="width:220px">문제</th><th>설명</th></tr>
+      <tr><td><strong>혼잡 사후 대응 한계</strong></td><td>혼잡이 발생한 후 조치하는 방식으로 사전 예방이 어려움</td></tr>
+      <tr><td><strong>승강장 안전사고 위험</strong></td><td>특정 시간대·이벤트 직후 혼잡 급증으로 압사·추락 위험 발생</td></tr>
+      <tr><td><strong>배차 최적화 부족</strong></td><td>열차 수요 변동에 실시간으로 대응하는 배차 체계가 없음</td></tr>
+      <tr><td><strong>열차칸별 혼잡 정보 부재</strong></td><td>승객이 혼잡도를 사전에 알 수 없어 특정 칸에 집중</td></tr>
+      <tr><td><strong>환승 동선 제어 어려움</strong></td><td>환승역에서 인파 흐름을 실시간으로 제어하기 어려움</td></tr>
+      <tr><td><strong>이벤트·특수일 대응 미흡</strong></td><td>공연·스포츠·축제 등 이벤트 전후 급증 수요 예측 부족</td></tr>
+      <tr><td><strong>운영 자동화 미비</strong></td><td>혼잡 임계치 초과 시 수동 대응에 의존하여 대응이 지연됨</td></tr>
+    </table>
+  </div>
+  <div class="subsection">
+    <h3>3.2 AI 적용 목표</h3>
+    <table class="tbl-green">
+      <tr><th style="width:220px">목표</th><th>설명</th></tr>
+      <tr><td><strong>선행 혼잡 예측</strong></td><td>5~30분 후 승강장·열차·환승 구간 혼잡도 사전 예측</td></tr>
+      <tr><td><strong>이상 혼잡 자동 탐지</strong></td><td>비정상적 혼잡 급증을 자동으로 탐지하고 경보 발송</td></tr>
+      <tr><td><strong>열차칸별 혼잡 안내</strong></td><td>모바일 앱으로 열차칸별 혼잡도 실시간 제공</td></tr>
+      <tr><td><strong>배차 최적화 지원</strong></td><td>수요 예측 기반 임시 열차 투입 및 배차간격 조정 추천</td></tr>
+      <tr><td><strong>환승 동선 제어</strong></td><td>환승 집중 구간 사전 감지 및 분산 유도</td></tr>
+      <tr><td><strong>이벤트 수요 예측</strong></td><td>이벤트 캘린더 연계로 특수일 혼잡 패턴 사전 예측</td></tr>
+      <tr><td><strong>운영 자동화</strong></td><td>혼잡 임계치 초과 시 방송·게이트·에스컬레이터 자동 제어</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- S4 데이터 -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <h2>데이터 구성</h2>
+  </div>
+  <div class="subsection">
+    <h3>4.1 Tokyo Metro 데이터 소스</h3>
+    <table class="tbl-blue">
+      <tr><th>데이터</th><th>설명</th><th>활용</th></tr>
+      <tr><td><strong>AFC/IC 카드</strong></td><td>승하차 태그 데이터</td><td>Origin-Destination 분석</td></tr>
+      <tr><td><strong>게이트 통과량</strong></td><td>실시간 유입 인원</td><td>입장 혼잡도 실시간 추정</td></tr>
+      <tr><td><strong>승강장 센서</strong></td><td>체류 인원</td><td>승강장 밀집도 측정</td></tr>
+      <tr><td><strong>CCTV 영상</strong></td><td>객체 탐지 기반 밀집도</td><td>영상 기반 혼잡도 산출</td></tr>
+      <tr><td><strong>열차 위치</strong></td><td>지연 및 운행 상태</td><td>도착 예측 및 배차 연계</td></tr>
+      <tr><td><strong>이벤트 데이터</strong></td><td>공연, 행사, 스포츠 경기</td><td>특수 수요 패턴 예측</td></tr>
+      <tr><td><strong>날씨</strong></td><td>우천, 폭염 등 외부 영향</td><td>날씨 기반 수요 보정</td></tr>
+      <tr><td><strong>환승 데이터</strong></td><td>환승 집중도 분석</td><td>환승 병목 예측</td></tr>
+    </table>
+  </div>
+  <div class="subsection">
+    <h3>4.2 Seoul Metro 데이터 소스</h3>
+    <table class="tbl-teal">
+      <tr><th>데이터</th><th>설명</th><th>활용</th></tr>
+      <tr><td><strong>교통카드</strong></td><td>AFC 이용 데이터</td><td>승하차량 기반 OD 분석</td></tr>
+      <tr><td><strong>LTE/5G 유동인구</strong></td><td>통신사 기반 유동인구 데이터</td><td>역 주변 실시간 유동인구 추정</td></tr>
+      <tr><td><strong>역사 CCTV</strong></td><td>객체 기반 혼잡 분석</td><td>실시간 밀집도 측정</td></tr>
+      <tr><td><strong>PSD 센서</strong></td><td>승강장 밀집도</td><td>안전 임계치 모니터링</td></tr>
+      <tr><td><strong>열차 혼잡도</strong></td><td>차량 센서 기반 혼잡 추정</td><td>열차칸별 혼잡 안내</td></tr>
+      <tr><td><strong>버스 환승</strong></td><td>통합 환승 흐름</td><td>대중교통 연계 수요 분석</td></tr>
+      <tr><td><strong>SNS/Event</strong></td><td>이벤트 급증 탐지</td><td>비정형 이벤트 대응</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- S5 모델링 -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <h2>분석·모델링 방식</h2>
+  </div>
+
+  <div class="subsection">
+    <h3>5.1 공통 AI Architecture</h3>
+    <div class="flow">
+      <div class="flow-step data" style="position:relative">
+        <div class="num-circle">1</div>
+        <div class="flow-title">실시간 데이터 수집</div>
+        <div class="chips">
+          <span class="chip">AFC/IC카드</span>
+          <span class="chip">CCTV 영상</span>
+          <span class="chip">IoT 센서</span>
+          <span class="chip">열차 위치</span>
+          <span class="chip">통신 유동인구</span>
+        </div>
+      </div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step process" style="position:relative">
+        <div class="num-circle">2</div>
+        <div class="flow-title">Kafka Streaming</div>
+        <div class="flow-sub">실시간 이벤트 수집 및 분산 처리</div>
+      </div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step process" style="position:relative">
+        <div class="num-circle">3</div>
+        <div class="flow-title">Real-time Feature Store</div>
+        <div class="chips">
+          <span class="chip">게이트 유입량</span>
+          <span class="chip">체류 인원</span>
+          <span class="chip">Lag Feature</span>
+          <span class="chip">이벤트 거리</span>
+        </div>
+      </div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step model" style="position:relative">
+        <div class="num-circle">4</div>
+        <div class="flow-title">ML Prediction Engine</div>
+        <div class="chips">
+          <span class="chip">LSTM / Transformer</span>
+          <span class="chip">YOLOv8</span>
+          <span class="chip">Isolation Forest</span>
+          <span class="chip">GNN</span>
+        </div>
+      </div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step output" style="position:relative">
+        <div class="num-circle">5</div>
+        <div class="flow-title">Prediction API</div>
+        <div class="flow-sub">혼잡도 예측 결과 · 이상 경보 · 배차 추천</div>
+      </div>
+      <div class="flow-arrow"></div>
+      <div class="flow-step action" style="position:relative">
+        <div class="num-circle">6</div>
+        <div class="flow-title">운영센터 / 모바일앱 / BI Dashboard</div>
+        <div class="chips">
+          <span class="chip">관제 경보</span>
+          <span class="chip">앱 혼잡 안내</span>
+          <span class="chip">배차 자동화</span>
+        </div>
+      </div>
+      <div class="flow-legend">
+        <div class="legend-item"><div class="legend-dot" style="border-color:var(--teal)"></div>데이터</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:var(--blue)"></div>처리</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:var(--purple)"></div>예측/탐지</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:var(--accent)"></div>결과</div>
+        <div class="legend-item"><div class="legend-dot" style="border-color:var(--green)"></div>활용</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3>5.2 AI/ML 기술 적용</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-header">Tokyo Metro 적용 AI 기술</div>
+        <table style="margin-top:0">
+          <tr><th style="background:var(--blue)">영역</th><th style="background:var(--blue)">기술</th></tr>
+          <tr><td>수요 예측</td><td>LSTM</td></tr>
+          <tr><td>시계열 예측</td><td>Transformer</td></tr>
+          <tr><td>이상 탐지</td><td>Isolation Forest</td></tr>
+          <tr><td>군집 분석</td><td>K-Means</td></tr>
+          <tr><td>영상 혼잡 분석</td><td>YOLO/CNN</td></tr>
+          <tr><td>이벤트 영향 분석</td><td>XGBoost</td></tr>
+          <tr><td>단기 혼잡 예측</td><td>Temporal Fusion Transformer</td></tr>
+        </table>
+      </div>
+      <div class="card" style="border-top-color:var(--teal)">
+        <div class="card-header" style="background:var(--teal)">Seoul Metro 적용 AI 기술</div>
+        <table style="margin-top:0">
+          <tr><th style="background:var(--teal)">영역</th><th style="background:var(--teal)">기술</th></tr>
+          <tr><td>혼잡 예측</td><td>LSTM / GRU</td></tr>
+          <tr><td>승객 흐름 분석</td><td>GNN (Graph Neural Network)</td></tr>
+          <tr><td>이상 탐지</td><td>AutoEncoder</td></tr>
+          <tr><td>영상 분석</td><td>YOLOv8</td></tr>
+          <tr><td>군중 밀집 분석</td><td>Density Estimation</td></tr>
+          <tr><td>실시간 스트리밍</td><td>Kafka + Spark Streaming</td></tr>
+        </table>
+      </div>
+      <div class="card" style="border-top-color:var(--purple)">
+        <div class="card-header" style="background:var(--purple)">공통 핵심 기술</div>
+        <table style="margin-top:0">
+          <tr><th style="background:var(--purple)">구분</th><th style="background:var(--purple)">내용</th></tr>
+          <tr><td>실시간 처리</td><td>Kafka + Flink Streaming</td></tr>
+          <tr><td>영상 AI</td><td>YOLOv8 (객체 탐지)</td></tr>
+          <tr><td>시계열 예측</td><td>LSTM / Transformer</td></tr>
+          <tr><td>이상 탐지</td><td>Isolation Forest / AutoEncoder</td></tr>
+          <tr><td>Feature Engineering</td><td>Lag, Rolling, Event Distance</td></tr>
+          <tr><td>모델 서빙</td><td>FastAPI / KServe</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S6 핵심 Feature -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <h2>핵심 Feature</h2>
+  </div>
+  <table class="tbl-teal">
+    <tr><th>Feature</th><th>설명</th><th>유형</th></tr>
+    <tr><td><strong>최근 5분 유입량</strong></td><td>Gate In Count</td><td>실시간</td></tr>
+    <tr><td><strong>역사 체류시간</strong></td><td>Dwell Time</td><td>실시간</td></tr>
+    <tr><td><strong>환승 집중률</strong></td><td>Transfer Density</td><td>실시간</td></tr>
+    <tr><td><strong>열차 도착 간격</strong></td><td>Headway</td><td>운행</td></tr>
+    <tr><td><strong>이전 혼잡도</strong></td><td>Lag Feature (t-1, t-5, t-15분)</td><td>시계열</td></tr>
+    <tr><td><strong>이벤트 거리</strong></td><td>Stadium/Event Distance &amp; 종료 예정 시각</td><td>외부</td></tr>
+    <tr><td><strong>날씨</strong></td><td>Rain / Temperature / 강수 확률</td><td>외부</td></tr>
+    <tr><td><strong>지연 정보</strong></td><td>Delay Minutes</td><td>운행</td></tr>
+    <tr><td><strong>시간대·요일</strong></td><td>Time &amp; Day Feature (출퇴근, 심야 구분)</td><td>컨텍스트</td></tr>
+    <tr><td><strong>공휴일 여부</strong></td><td>Holiday Flag</td><td>컨텍스트</td></tr>
+  </table>
+</div>
+
+<!-- S7 예측 수준 -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <h2>예측 수준</h2>
+  </div>
+  <div class="level-grid">
+    <div class="level-card">
+      <span class="level-badge lv1">Level 1</span>
+      <div class="level-title">현재 혼잡도 시각화</div>
+      <div class="level-desc">실시간 Heatmap, 역사 혼잡 대시보드 제공</div>
+    </div>
+    <div class="level-card">
+      <span class="level-badge lv2">Level 2</span>
+      <div class="level-title">5~15분 미래 예측</div>
+      <div class="level-desc">단기 혼잡 예측으로 모바일 사전 안내</div>
+    </div>
+    <div class="level-card">
+      <span class="level-badge lv3">Level 3</span>
+      <div class="level-title">열차칸별 예측</div>
+      <div class="level-desc">칸별 혼잡도 안내로 승객 분산 유도</div>
+    </div>
+    <div class="level-card">
+      <span class="level-badge lv4">Level 4</span>
+      <div class="level-title">이상혼잡 자동탐지</div>
+      <div class="level-desc">위험 상황 경보 발송, 관제 자동 알림</div>
+    </div>
+    <div class="level-card">
+      <span class="level-badge lv5">Level 5</span>
+      <div class="level-title">운영 자동제어</div>
+      <div class="level-desc">배차 추천, 게이트·방송·에스컬레이터 연계</div>
+    </div>
+  </div>
+  <table class="tbl-blue" style="margin-top:18px">
+    <tr><th>수준</th><th>설명</th><th>주요 기능</th></tr>
+    <tr><td><strong>Level 1</strong></td><td>현재 혼잡도 시각화</td><td>실시간 Heatmap, 역사 혼잡 대시보드</td></tr>
+    <tr><td><strong>Level 2</strong></td><td>5~15분 미래 예측</td><td>단기 혼잡 예측, 모바일 안내</td></tr>
+    <tr><td><strong>Level 3</strong></td><td>열차칸별 예측</td><td>칸별 혼잡도 안내, 승객 분산 유도</td></tr>
+    <tr><td><strong>Level 4</strong></td><td>이상혼잡 자동탐지</td><td>위험 상황 경보, 관제 자동 알림</td></tr>
+    <tr><td><strong>Level 5</strong></td><td>운영 자동제어</td><td>배차 추천, 게이트·방송·에스컬레이터 연계</td></tr>
+  </table>
+</div>
+
+<!-- S8 UseCase 설계 -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <h2>AFC 적용 Use Case 설계</h2>
+  </div>
+  <div class="subsection">
+    <h3>8.1 주요 유스케이스</h3>
+    <div class="usecase-grid">
+      <div class="usecase-card ops">
+        <span class="uc-tag ops">선행 예측</span>
+        <h5>15~30분 선행 혼잡 예측</h5>
+        <p>게이트 유입 급증·환승역 체류량 증가를 조기 예측. 예: 시부야역 행사 종료 후 20분 뒤 플랫폼 혼잡 급증 예측</p>
+      </div>
+      <div class="usecase-card mobile">
+        <span class="uc-tag mobile">모바일 안내</span>
+        <h5>열차칸별 혼잡도 안내</h5>
+        <p>모바일 앱에서 "앞칸 여유", "중간칸 혼잡", "후방칸 보통"과 같은 칸별 혼잡 정보 실시간 제공</p>
+      </div>
+      <div class="usecase-card auto">
+        <span class="uc-tag auto">운영 자동화</span>
+        <h5>운영 자동화 연계</h5>
+        <p>혼잡 임계치 초과 시 추가 배차 추천, 환승 유도 방송, 에스컬레이터 방향 변경, 출입 게이트 제어 연계</p>
+      </div>
+      <div class="usecase-card safety">
+        <span class="uc-tag safety">안전 대응</span>
+        <h5>실시간 위험 혼잡 탐지</h5>
+        <p>플랫폼 Density Score 증가 시 자동 경고를 발생시켜 관제센터 대응을 지원. 압사·추락 위험 사전 감지</p>
+      </div>
+      <div class="usecase-card ops">
+        <span class="uc-tag ops">배차 최적화</span>
+        <h5>출퇴근 예측 기반 배차</h5>
+        <p>5~60분 후 혼잡도, 환승 집중 구간, 역사별 대기열 예측으로 임시열차 투입 및 승객 분산 안내</p>
+      </div>
+      <div class="usecase-card mobile">
+        <span class="uc-tag mobile">모바일 안내</span>
+        <h5>통합 모바일 혼잡 안내</h5>
+        <p>열차칸 혼잡도, 역사 혼잡도, 대체 경로 추천, 환승 혼잡 경고를 앱에서 통합 제공</p>
+      </div>
+    </div>
+  </div>
+  <div class="subsection">
+    <h3>8.2 AFC 사업 관점 적용 영역</h3>
+    <table class="tbl-teal">
+      <tr><th>AFC 영역</th><th>적용 효과</th></tr>
+      <tr><td><strong>ABT</strong></td><td>실시간 승객 추적 및 혼잡 기반 요금 연계</td></tr>
+      <tr><td><strong>Clearing</strong></td><td>수요 기반 정산 및 혼잡 패턴 분석</td></tr>
+      <tr><td><strong>Fare Policy</strong></td><td>혼잡 기반 탄력요금 (Dynamic Pricing)</td></tr>
+      <tr><td><strong>MaaS</strong></td><td>대체경로 추천 및 혼잡 회피 경로 제공</td></tr>
+      <tr><td><strong>BI Dashboard</strong></td><td>운영 의사결정 지원 및 KPI 모니터링</td></tr>
+      <tr><td><strong>Predictive Ops</strong></td><td>운영 사전 대응 자동화</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- S9 KPI -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <h2>KPI 및 평가 기준</h2>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-cat cat-acc">예측 정확도</span>
+      <div class="kpi-name">MAPE</div>
+      <div class="kpi-desc">시간대별 혼잡도 예측 평균 절대 백분율 오차</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-acc">예측 정확도</span>
+      <div class="kpi-name">RMSE</div>
+      <div class="kpi-desc">혼잡도 예측 오차 편차 (큰 오차에 민감)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-det">이상 탐지</span>
+      <div class="kpi-name">Detection Precision</div>
+      <div class="kpi-desc">위험 혼잡 경보 중 실제 위험 상황 비율</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-det">이상 탐지</span>
+      <div class="kpi-name">Detection Recall</div>
+      <div class="kpi-desc">실제 위험 혼잡 상황 중 탐지된 비율</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-ops">운영 성과</span>
+      <div class="kpi-name">배차 개선율</div>
+      <div class="kpi-desc">AI 기반 배차 조정으로 인한 공급 효율화 비율</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-ops">운영 성과</span>
+      <div class="kpi-name">민원 감소율</div>
+      <div class="kpi-desc">혼잡 관련 민원 전년 대비 감소율</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-safe">안전</span>
+      <div class="kpi-name">안전사고 감소율</div>
+      <div class="kpi-desc">혼잡 관련 안전사고 발생 건수 감소율</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-sys">시스템</span>
+      <div class="kpi-name">예측 지연 시간</div>
+      <div class="kpi-desc">입력 데이터 수신 후 예측 결과 반환 시간(ms)</div>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-cat cat-data">데이터</span>
+      <div class="kpi-name">실시간 처리 완료율</div>
+      <div class="kpi-desc">Streaming 파이프라인 누락 없이 처리된 이벤트 비율</div>
+    </div>
+  </div>
+</div>
+
+<!-- S10 추진방안 -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <h2>추진 방안</h2>
+  </div>
+  <div class="subsection">
+    <h3>10.1 추진 단계 및 기간</h3>
+    <div class="stage-grid">
+      <div class="stage-card">
+        <div class="stage-num">1</div>
+        <span class="stage-tag">2~4개월 · 난이도 중</span>
+        <div class="stage-title">AFC 기반 혼잡 예측</div>
+        <div class="stage-desc">AFC 데이터 기반 역별 혼잡 예측 모델 구축 및 검증. 과거 패턴·이벤트 캘린더 통합</div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-num">2</div>
+        <span class="stage-tag">6개월 · 난이도 중상</span>
+        <div class="stage-title">Pilot: 실시간 통합</div>
+        <div class="stage-desc">CCTV·IoT 센서 통합, 실시간 Streaming 파이프라인 연계, 운영 대시보드 구축</div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-num">3</div>
+        <span class="stage-tag">12~24개월 · 난이도 상</span>
+        <div class="stage-title">전 노선 확대·자동화</div>
+        <div class="stage-desc">전 노선 확대, 배차 자동화, 모바일 앱 혼잡 안내 서비스 출시, 탄력요금 연계</div>
+      </div>
+    </div>
+  </div>
+  <div class="subsection">
+    <h3>10.2 성공 기준</h3>
+    <table class="tbl-green">
+      <tr><th style="width:160px">구분</th><th>성공 기준</th></tr>
+      <tr><td><strong>데이터 검증</strong></td><td>AFC 기반 역별 혼잡 예측 모델 생성 가능</td></tr>
+      <tr><td><strong>예측 검증</strong></td><td>5분/15분 선행 혼잡도 MAPE 10% 이내 달성</td></tr>
+      <tr><td><strong>탐지 검증</strong></td><td>이상 혼잡 탐지 Recall 90% 이상</td></tr>
+      <tr><td><strong>운영 검증</strong></td><td>배차 조정 추천 기능 현업 활용 가능</td></tr>
+      <tr><td><strong>안전 검증</strong></td><td>위험 혼잡 경보 발송 후 관제 대응 시간 단축</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- S11 리스크 -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <h2>리스크 및 대응방안</h2>
+  </div>
+  <table class="tbl-red">
+    <tr><th>리스크</th><th style="width:80px">영향</th><th>대응방안</th></tr>
+    <tr><td><strong>센서 데이터 품질 저하</strong></td><td>예측 오류 및 경보 오발</td><td>다중 소스 데이터 보완, 결측 대체 로직</td></tr>
+    <tr><td><strong>실시간 처리 지연</strong></td><td>Streaming 병목으로 예측 지연</td><td>Kafka/Flink 스케일아웃, 캐싱 전략</td></tr>
+    <tr><td><strong>이벤트 급증 예측 오류</strong></td><td>모델이 예상 외 이벤트에 미적응</td><td>이벤트 캘린더 연계, 온라인 학습</td></tr>
+    <tr><td><strong>모델 드리프트</strong></td><td>노선 변경·행사 패턴 변화로 성능 저하</td><td>주기적 재학습, 드리프트 모니터링</td></tr>
+    <tr><td><strong>개인정보 리스크</strong></td><td>CCTV·통신 데이터 수집 시 개인정보 문제</td><td>비식별화, 집계 단위 처리</td></tr>
+    <tr><td><strong>연계 시스템 복잡성</strong></td><td>AFC·열차제어·방송·게이트 다중 연계</td><td>API 표준화, 단계적 연계</td></tr>
+    <tr><td><strong>오경보(False Alarm) 과다</strong></td><td>운영자 신뢰 저하</td><td>임계치 조정, Human-in-the-loop 설계</td></tr>
+    <tr><td><strong>현업 활용 저조</strong></td><td>예측 결과가 실제 운영에 미반영</td><td>운영 대시보드 연계, 현업 교육</td></tr>
+  </table>
+</div>
+
+<!-- S12 기술 스택 & 운영 -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <h2>기술 스택 및 운영 방식</h2>
+  </div>
+  <div class="subsection">
+    <h3>12.1 추천 기술 스택</h3>
+    <table class="tbl-purple">
+      <tr><th style="width:160px">영역</th><th>추천 기술</th></tr>
+      <tr><td><strong>Streaming</strong></td><td>Apache Kafka</td></tr>
+      <tr><td><strong>Real-time ETL</strong></td><td>Apache Spark / Apache Flink</td></tr>
+      <tr><td><strong>Feature Store</strong></td><td>Feast</td></tr>
+      <tr><td><strong>ML Framework</strong></td><td>PyTorch / TensorFlow</td></tr>
+      <tr><td><strong>Model Serving</strong></td><td>FastAPI / KServe</td></tr>
+      <tr><td><strong>Dashboard</strong></td><td>Power BI / Grafana</td></tr>
+      <tr><td><strong>Video AI</strong></td><td>YOLOv8</td></tr>
+      <tr><td><strong>Lakehouse</strong></td><td>Apache Iceberg / Delta Lake</td></tr>
+    </table>
+  </div>
+  <div class="subsection">
+    <h3>12.2 고도화 방향</h3>
+    <div class="card-grid">
+      <div class="card" style="border-top-color:var(--accent)">
+        <div class="card-header" style="background:var(--accent)">Dynamic Fare Pricing</div>
+        <p>혼잡도 기반 탄력요금제 연계. 피크 시간대 요금 조정으로 수요 분산</p>
+      </div>
+      <div class="card" style="border-top-color:var(--teal)">
+        <div class="card-header" style="background:var(--teal)">Digital Twin Station</div>
+        <p>역사 디지털 트윈을 통한 혼잡 시뮬레이션 및 레이아웃 최적화</p>
+      </div>
+      <div class="card" style="border-top-color:var(--purple)">
+        <div class="card-header" style="background:var(--purple)">RL 기반 배차</div>
+        <p>Reinforcement Learning 기반 동적 배차 최적화 자동화</p>
+      </div>
+      <div class="card" style="border-top-color:var(--red)">
+        <div class="card-header" style="background:var(--red)">Autonomous Crowd Control</div>
+        <p>자율 혼잡 제어 시스템. 게이트·방송·에스컬레이터 AI 자율 제어</p>
+      </div>
+      <div class="card" style="border-top-color:var(--blue)">
+        <div class="card-header">MaaS 연계 혼잡 우회</div>
+        <p>MaaS 플랫폼과 대체경로를 실시간 연계하여 혼잡 분산 유도</p>
+      </div>
+      <div class="card" style="border-top-color:var(--green)">
+        <div class="card-header" style="background:var(--green)">Agentic AI 관제</div>
+        <p>AI 에이전트 기반 역사 운영 자동화 관제 시스템 구축</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S13 기대효과 -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <h2>기대효과</h2>
+  </div>
+  <table class="tbl-green">
+    <tr><th>효과 영역</th><th>기대효과</th></tr>
+    <tr><td><strong>안전성 향상</strong></td><td>압사·추락 위험 사전 감지 및 예방으로 승강장 안전사고 감소</td></tr>
+    <tr><td><strong>운영 효율</strong></td><td>AI 기반 배차 최적화로 공급 효율 향상 및 불필요한 열차 운행 비용 절감</td></tr>
+    <tr><td><strong>민원 감소</strong></td><td>혼잡 안내 개선으로 승객 체감 만족도 향상 및 민원 감소</td></tr>
+    <tr><td><strong>수익 증대</strong></td><td>혼잡 분산·탄력요금 연계로 수익 다각화 및 비피크 시간대 이용 촉진</td></tr>
+    <tr><td><strong>정시성 향상</strong></td><td>혼잡 대응 자동화로 승하차 지연 감소 및 정시 운행률 향상</td></tr>
+    <tr><td><strong>유지비 절감</strong></td><td>운영 자동화로 현장 인력 의존도 감소 및 운영 비용 절감</td></tr>
+  </table>
+</div>
+
+<!-- S14 요약 -->
+<div class="section" id="s14">
+  <div class="section-header">
+    <div class="section-num">14</div>
+    <h2>요약</h2>
+  </div>
+  <div class="oneliner">
+    <strong>실시간 혼잡도 예측</strong> 유즈케이스는 AFC·CCTV·IoT 센서·통신 유동인구 데이터를 <strong>실시간 Streaming 파이프라인</strong>으로 통합하고, LSTM·Transformer·YOLOv8 기반 AI 모델로 승강장·열차·환승 구간의 혼잡도를 <strong>5~30분 선행 예측</strong>하는 AI 기반 운영 체계이다.
+    <br><br>
+    <strong>Tokyo Metro</strong>의 IC카드 OD·이벤트 연계 혼잡 분석과 <strong>Seoul Metro</strong>의 통신 유동인구·PSD 센서 통합 모델은 AFC 데이터레이크와 결합하여 역사별 혼잡 Heatmap·열차칸별 안내·이상 혼잡 경보를 자동화할 수 있는 기반을 제공한다.
+    <br><br>
+    본 유즈케이스는 <strong>승강장 안전 확보, 배차 최적화, 모바일 혼잡 안내, 탄력요금 연계, Digital Twin 역사 운영</strong>의 핵심 데이터 기반이 된다.
+  </div>
+</div>
+
+<div style="text-align:center;padding:24px;color:var(--muted);font-size:.78rem">
+  AFC 데이터레이크 PM &nbsp;|&nbsp; v1.0 &nbsp;|&nbsp; 내부 기술 문서
+</div>
+
+<style>
+.close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>

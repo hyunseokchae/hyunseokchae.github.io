@@ -1,0 +1,1019 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부정승차·이상거래 탐지 Use Case</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── 히어로 ── */
+  .hero {
+    background: linear-gradient(135deg, #1a2e1a 0%, #1a375e 55%, #2e5090 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #aaccee; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+
+  /* ── 목차 ── */
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 13px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--accent); color: var(--white); }
+
+  /* ── 래퍼 ── */
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  /* ── 카드 ── */
+  .card { background: var(--white); border-radius: 12px; box-shadow: 0 2px 12px rgba(30,60,100,.08); margin-bottom: 28px; overflow: hidden; }
+  .card-header { display: flex; align-items: center; gap: 12px; padding: 16px 24px; background: var(--navy); color: var(--white); }
+  .card-header .num { background: var(--accent); color: var(--white); font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-body { padding: 20px 24px; }
+
+  /* ── 서브섹션 ── */
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title { font-size: 13px; font-weight: 700; color: var(--blue); border-left: 3px solid var(--blue); padding-left: 10px; margin-bottom: 10px; }
+
+  /* ── 테이블 ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); white-space: nowrap; }
+  .tbl-red    th { background: var(--red); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); }
+
+  /* ── 그리드 ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ── 탐지 유형 카드 ── */
+  .detect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 12px; }
+  .detect-card {
+    border-radius: 10px; padding: 14px 16px;
+    border: 2px solid; background: var(--white);
+    position: relative; overflow: hidden;
+  }
+  .detect-card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .detect-card.vision { border-color: #b8d8f0; }
+  .detect-card.vision::before { background: var(--blue); }
+  .detect-card.trx { border-color: #f5c6c6; }
+  .detect-card.trx::before { background: var(--red); }
+  .detect-card .d-type {
+    font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 10px;
+    display: inline-block; margin-bottom: 8px;
+  }
+  .detect-card.vision .d-type { background: var(--sky); color: var(--blue); }
+  .detect-card.trx .d-type { background: #fbebe9; color: var(--red); }
+  .detect-card .d-name { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+  .detect-card .d-desc { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+  .detect-card .d-how { font-size: 11px; color: var(--teal); font-weight: 600; }
+
+  /* ── 인포 박스 ── */
+  .info-box { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .info-box-header { padding: 10px 16px; font-size: 13px; font-weight: 700; color: var(--white); }
+  .info-box-body { padding: 14px 16px; }
+  .info-box-body p { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; line-height: 1.7; }
+
+  /* ── 모델 카드 ── */
+  .model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 12px; }
+  .model-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--gray); }
+  .model-card .name { font-size: 12px; font-weight: 700; color: var(--purple); margin-bottom: 4px; }
+  .model-card .desc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+  .model-card .tag { display: inline-block; background: var(--purple); color: var(--white); font-size: 10px; padding: 1px 8px; border-radius: 10px; margin-top: 6px; }
+  .model-card.recommended { border-color: var(--accent); background: #fff8ee; }
+  .model-card.recommended .name { color: var(--accent); }
+  .model-card.recommended .tag { background: var(--accent); }
+
+  /* ── KPI 뱃지 ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
+  .kpi-card { border-radius: 10px; padding: 14px 16px; border: 1px solid var(--border); }
+  .kpi-card .kpi-cat { font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 6px; }
+  .kpi-card .kpi-name { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .kpi-card .kpi-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .cat-model  { background:#e8f0fb; color:var(--navy); }
+  .cat-ops    { background:#eaf7f0; color:var(--green); }
+  .cat-biz    { background:#fff5e6; color:var(--accent); }
+  .cat-data   { background:#f5eafb; color:var(--purple); }
+  .cat-priv   { background:#e6f4f6; color:var(--teal); }
+
+  /* ── 단계별 운영 카드 ── */
+  .stage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 12px; }
+  .stage-card { border-radius: 10px; padding: 14px; border: 1px solid var(--border); background: var(--white); position: relative; overflow: hidden; }
+  .stage-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+  .stage-card .stage-num { font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: .08em; }
+  .stage-card .stage-name { font-size: 13px; font-weight: 700; color: var(--navy); margin: 3px 0 6px; }
+  .stage-card .stage-desc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+
+  /* ── 개인정보 원칙 카드 ── */
+  .privacy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 12px; }
+  .privacy-card {
+    border-radius: 10px; padding: 14px 16px;
+    border: 1px solid #99d0d8;
+    background: linear-gradient(135deg, #e6f4f6, #f0f8fa);
+  }
+  .privacy-card .p-ico { font-size: 22px; margin-bottom: 6px; }
+  .privacy-card .p-name { font-size: 12.5px; font-weight: 700; color: var(--teal); margin-bottom: 5px; }
+  .privacy-card .p-desc { font-size: 11.5px; color: var(--muted); line-height: 1.6; }
+
+  /* ── 카드형 플로우 ── */
+  .flow { display: flex; flex-direction: column; align-items: center; background: #f8fafd; border: 1px solid var(--border); border-radius: 12px; padding: 18px 14px; }
+  .flow-step { width: 100%; max-width: 400px; border-radius: 10px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 6px rgba(30,60,100,.06); border: 2px solid; background: var(--white); position: relative; }
+  .flow-step .num-circle { position: absolute; left: -10px; top: -10px; width: 22px; height: 22px; border-radius: 50%; color: var(--white); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,.15); }
+  .flow-step .step-title { font-size: 12.5px; font-weight: 700; color: var(--navy); line-height: 1.4; }
+  .flow-step .step-sub { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .flow-step .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 7px; }
+  .flow-step .chip { background: var(--gray); border: 1px solid var(--border); border-radius: 12px; padding: 2px 9px; font-size: 10.5px; color: var(--text); font-weight: 500; }
+  .flow-step .chip.star { background: var(--accent); border-color: var(--accent); color: var(--white); font-weight: 700; }
+  .flow-step.data    { border-color: var(--teal);   background:#e6f4f6; }
+  .flow-step.data    .num-circle { background: var(--teal); }
+  .flow-step.process { border-color: var(--blue);   background: var(--sky); }
+  .flow-step.process .num-circle { background: var(--blue); }
+  .flow-step.model   { border-color: var(--purple); background:#f5eafb; }
+  .flow-step.model   .num-circle { background: var(--purple); }
+  .flow-step.output  { border-color: var(--accent); background:#fff5e6; }
+  .flow-step.output  .num-circle { background: var(--accent); }
+  .flow-step.action  { border-color: var(--green);  background:#eaf7f0; }
+  .flow-step.action  .num-circle { background: var(--green); }
+  .flow-step.feedback{ border-color: var(--red);    background:#fbebe9; }
+  .flow-step.feedback .num-circle { background: var(--red); }
+  .flow-arrow { width: 2px; height: 18px; background: var(--accent); position: relative; margin: 2px 0; }
+  .flow-arrow::after { content: ""; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--accent); }
+  .flow-arrow.feedback { background: var(--red); }
+  .flow-arrow.feedback::after { border-top-color: var(--red); }
+  .flow-arrow.feedback::before { content: "피드백 루프"; position: absolute; left: 14px; top: 2px; font-size: 10px; color: var(--red); font-weight: 600; white-space: nowrap; }
+  .flow-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); width: 100%; }
+  .flow-legend .lg { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--muted); }
+  .flow-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* ── 요약 ── */
+  .oneliner { background: linear-gradient(135deg, var(--navy), #2e5090); color: var(--white); border-radius: 10px; padding: 18px 22px; font-size: 14px; font-weight: 500; line-height: 1.8; }
+  .oneliner strong { color: var(--accent); }
+
+  /* ── 푸터 ── */
+  .footer { text-align: center; padding: 20px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ══════ 히어로 ══════ -->
+<div class="hero">
+  <div class="hero-badge">🛡 Anomaly Detection AI Use Case</div>
+  <h1>부정승차·이상거래 탐지</h1>
+  <h2>Fare Evasion &amp; Abnormal Transaction Detection</h2>
+  <div class="hero-summary">
+    영상 AI와 AFC 거래 이상탐지를 결합해 <strong>수익 누수와 비정상 이용 패턴을 조기에 발견</strong>하고,
+    관제·단속·정산 업무의 효율성을 높이는 <strong>Revenue Protection</strong> 중심 AI 유즈케이스
+  </div>
+</div>
+
+<!-- ══════ 목차 ══════ -->
+<nav class="toc-bar">
+  <a href="#s1">1. 개요</a>
+  <a href="#s2">2. 벤치마크</a>
+  <a href="#s3">3. 업무 문제 &amp; 목표</a>
+  <a href="#s4">4. 탐지 유형</a>
+  <a href="#s5">5. 데이터</a>
+  <a href="#s6">6. 모델링</a>
+  <a href="#s7">7. 기관별 적용</a>
+  <a href="#s8">8. Use Case 설계</a>
+  <a href="#s9">9. KPI</a>
+  <a href="#s10">10. 추진 방안</a>
+  <a href="#s11">11. 리스크</a>
+  <a href="#s12">12. 운영</a>
+  <a href="#s13">13. 개인정보 &amp; 윤리</a>
+  <a href="#s14">14. 요약</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ══════ 1. 개요 ══════ -->
+<div class="card" id="s1">
+  <div class="card-header">
+    <span class="num">01</span>
+    <h3>유즈케이스 개요</h3>
+    <span class="en">Use Case Overview</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <colgroup><col style="width:160px"><col></colgroup>
+      <thead><tr><th>항목</th><th>내용</th></tr></thead>
+      <tbody>
+        <tr><td>유즈케이스명</td><td>부정승차·이상거래 탐지</td></tr>
+        <tr><td>영문명</td><td>Fare Evasion &amp; Abnormal Transaction Detection</td></tr>
+        <tr><td>AI 유형</td><td>Anomaly Detection &nbsp;|&nbsp; Computer Vision &nbsp;|&nbsp; Behavior Detection &nbsp;|&nbsp; Graph/Fraud Detection</td></tr>
+        <tr><td>적용 도메인</td><td>AFC &nbsp;|&nbsp; 도시철도 &nbsp;|&nbsp; 버스 &nbsp;|&nbsp; BRT &nbsp;|&nbsp; MaaS &nbsp;|&nbsp; 교통 정산</td></tr>
+        <tr><td>주요 목적</td><td>수익 누수 방지 &nbsp;|&nbsp; 부정승차 단속 효율화 &nbsp;|&nbsp; 이상거래 조기 탐지 &nbsp;|&nbsp; 정산 리스크 감소</td></tr>
+        <tr><td>주요 데이터</td><td>게이트 CCTV, AFC 태그 데이터, 카드/계정 거래로그, 환승이력, 환불이력, 블랙리스트, 게이트 이벤트 로그</td></tr>
+        <tr><td>주요 결과</td><td>의심 이벤트, 위험 점수, 이상거래 유형, 관제 알림, 단속 우선순위</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 2. 벤치마크 ══════ -->
+<div class="card" id="s2">
+  <div class="card-header">
+    <span class="num">02</span>
+    <h3>벤치마크 사례 요약</h3>
+    <span class="en">Benchmark Cases</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-teal">
+      <colgroup><col style="width:140px"><col style="width:190px"><col><col></colgroup>
+      <thead><tr><th>기관</th><th>사례 성격</th><th>적용 기술</th><th>AFC 적용 시사점</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>🇬🇧 TfL / London</td>
+          <td>Willesden Green 역 AI CCTV 기반 Smart Station PoC</td>
+          <td>CCTV 영상 분석, 행동 탐지, fare evasion alert</td>
+          <td>게이트 점프·밀기·tailgating 등 행동 기반 부정승차 탐지 가능</td>
+        </tr>
+        <tr>
+          <td>🇰🇷 서울교통공사</td>
+          <td>이상행동 탐지·추적 모델 기획 및 스마트스테이션 AI 관제 확대</td>
+          <td>생성형 AI, 이미지 캡셔닝, CCTV 행동 패턴 분석</td>
+          <td>부정승차·난동·침입·화재·이상행동까지 통합 관제 가능</td>
+        </tr>
+        <tr>
+          <td>🎯 AFC 전이 모델</td>
+          <td>거래로그 + 영상 + 게이트 이벤트 결합형 탐지</td>
+          <td>Anomaly Detection, Rule + ML Hybrid, Graph Fraud</td>
+          <td>단일 CCTV 탐지보다 거래·게이트·카드 패턴 결합이 효과적</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 3. 업무 문제 & 목표 ══════ -->
+<div class="card" id="s3">
+  <div class="card-header">
+    <span class="num">03</span>
+    <h3>업무 문제 &amp; AI 적용 목표</h3>
+    <span class="en">Pain Points &amp; AI Objectives</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title" style="color:var(--red);border-color:var(--red)">⚠ 업무 문제 (Pain Point)</div>
+        <table class="tbl-red">
+          <thead><tr><th>문제</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>수익 누수</td><td>무임·부정승차, 카드 미태그, 게이트 무단 통과로 운송수입 손실</td></tr>
+            <tr><td>단속 비효율</td><td>단속 인력이 모든 역·시간대·게이트를 감시하기 어려움</td></tr>
+            <tr><td>오탐·민원 리스크</td><td>잘못된 단속은 민원, 차별 논란, 운영 불신으로 이어질 수 있음</td></tr>
+            <tr><td>거래 이상 탐지 한계</td><td>반복 환불, 비정상 할인, 카드 공유, 이상 환승 패턴 탐지 어려움</td></tr>
+            <tr><td>관제 분산</td><td>CCTV·게이트 로그·AFC 거래·민원 데이터가 분리되어 종합 판단 어려움</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title" style="color:var(--green);border-color:var(--green)">🎯 AI 적용 목표</div>
+        <table class="tbl-green">
+          <thead><tr><th>목표</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>부정승차 의심행동 탐지</td><td>게이트 점프, tailgating, 역주행, 비정상 통과 탐지</td></tr>
+            <tr><td>이상거래 탐지</td><td>반복 환불, 비정상 할인, 비정상 환승, 다중 카드 패턴</td></tr>
+            <tr><td>단속 우선순위 제공</td><td>위험 점수 기반 단속 대상 역·시간대·게이트 추천</td></tr>
+            <tr><td>관제 알림 자동화</td><td>이상행동·이상거래를 실시간/준실시간으로 관제센터에 알림</td></tr>
+            <tr><td>수익보호 강화</td><td>누수 가능성 높은 패턴 조기 식별 → 정책 개선에 활용</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 4. 탐지 대상 유형 ══════ -->
+<div class="card" id="s4">
+  <div class="card-header">
+    <span class="num">04</span>
+    <h3>탐지 대상 유형</h3>
+    <span class="en">Detection Target Types</span>
+  </div>
+  <div class="card-body">
+
+    <div class="sub-section">
+      <div class="sub-title" style="color:var(--blue);border-color:var(--blue)">📷 영상 기반 부정승차 유형</div>
+      <div class="detect-grid">
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Gate Jumping</div>
+          <div class="d-desc">게이트 위를 뛰어넘음</div>
+          <div class="d-how">→ 객체검출 + 자세/행동 분석</div>
+        </div>
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Crawling Under Gate</div>
+          <div class="d-desc">게이트 아래로 기어감</div>
+          <div class="d-how">→ 자세추정 + 비정상 이동경로</div>
+        </div>
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Pushing Gate</div>
+          <div class="d-desc">게이트를 밀고 강제 통과</div>
+          <div class="d-how">→ 게이트 상태 로그 + 영상 행동</div>
+        </div>
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Tailgating</div>
+          <div class="d-desc">앞사람 뒤를 붙어 무임 통과</div>
+          <div class="d-how">→ 다중 인물 추적 + 단일 태그 비교</div>
+        </div>
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Reverse Passage</div>
+          <div class="d-desc">반대 방향 비정상 통과</div>
+          <div class="d-how">→ 이동 방향 추적 + 게이트 방향</div>
+        </div>
+        <div class="detect-card vision">
+          <span class="d-type">영상 탐지</span>
+          <div class="d-name">Open Gate Abuse</div>
+          <div class="d-desc">열린 게이트를 이용한 무단 통과</div>
+          <div class="d-how">→ 게이트 개방 상태 + 태그 부재</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section" style="margin-top:20px">
+      <div class="sub-title" style="color:var(--red);border-color:var(--red)">💳 AFC 거래 기반 이상거래 유형</div>
+      <div class="detect-grid">
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">비정상 환승</div>
+          <div class="d-desc">불가능한 시간·거리의 환승 패턴</div>
+          <div class="d-how">→ Rule + Anomaly Detection</div>
+        </div>
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">반복 환불</div>
+          <div class="d-desc">특정 카드·계정의 환불 반복</div>
+          <div class="d-how">→ 빈도 기반 이상탐지</div>
+        </div>
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">비정상 할인</div>
+          <div class="d-desc">할인 대상이 아닌 거래에 할인 적용</div>
+          <div class="d-how">→ 룰 검증 + 이상탐지</div>
+        </div>
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">카드 공유 의심</div>
+          <div class="d-desc">동일 카드가 물리적으로 불가능한 위치에서 반복 사용</div>
+          <div class="d-how">→ 시공간 이상탐지</div>
+        </div>
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">과도한 실패 태그</div>
+          <div class="d-desc">특정 카드·게이트에서 반복 실패</div>
+          <div class="d-how">→ 로그 이상탐지</div>
+        </div>
+        <div class="detect-card trx">
+          <span class="d-type">거래 탐지</span>
+          <div class="d-name">비정상 정산</div>
+          <div class="d-desc">특정 역·운영사·시간대 정산 금액 급변</div>
+          <div class="d-how">→ 통계적 이상탐지</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 5. 데이터 ══════ -->
+<div class="card" id="s5">
+  <div class="card-header">
+    <span class="num">05</span>
+    <h3>데이터 구성</h3>
+    <span class="en">Data Configuration</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">🗂 필요 데이터</div>
+      <table class="tbl-accent">
+        <colgroup><col style="width:150px"><col><col style="width:180px"></colgroup>
+        <thead><tr><th>데이터 영역</th><th>주요 항목</th><th>활용</th></tr></thead>
+        <tbody>
+          <tr><td>AFC 거래 데이터</td><td>카드 ID, 계정 ID, 태그 시각, 역, 게이트, 금액, 할인, 환승</td><td>이상거래 탐지</td></tr>
+          <tr><td>게이트 이벤트 로그</td><td>게이트 ID, 개폐 상태, 방향, 통과 이벤트, 오류코드</td><td>영상 이벤트와 매칭</td></tr>
+          <tr><td>CCTV 영상</td><td>게이트 주변 영상, 통과 장면, 사람 이동경로</td><td>부정승차 행동 탐지</td></tr>
+          <tr><td>카드/계정 마스터</td><td>카드 유형, 할인 유형, 등록 상태, 블랙리스트</td><td>위험 점수 산정</td></tr>
+          <tr><td>환불/민원 데이터</td><td>환불 신청, 취소, 분쟁, 민원 유형</td><td>반복 환불·오류 패턴 탐지</td></tr>
+          <tr><td>역/노선 마스터</td><td>역 ID, 게이트 위치, 환승역 여부, 혼잡도</td><td>공간적 위험도 반영</td></tr>
+          <tr><td>단속 결과</td><td>실제 단속 여부, 적발 여부, 오탐 여부</td><td>모델 검증·재학습</td></tr>
+          <tr><td>외부 이벤트</td><td>경기, 공연, 행사, 기상, 장애</td><td>특수 상황 오탐 방지</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section" style="margin-top:20px">
+      <div class="sub-title">📋 영상-거래 결합 데이터셋 예시</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>event_id</th><th>timestamp</th><th>station_id</th><th>gate_id</th>
+              <th>tag_count</th><th>person_count</th><th>gate_status</th><th>event_type</th><th>label</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>EVT001</td><td>2026-05-01 08:10:03</td><td>ST001</td><td>G05</td>
+              <td style="text-align:right">1</td><td style="text-align:right">2</td>
+              <td>closed/open</td><td>tailgating</td>
+              <td style="color:var(--accent);font-weight:700">suspicious</td>
+            </tr>
+            <tr>
+              <td>EVT002</td><td>2026-05-01 08:15:22</td><td>ST003</td><td>G02</td>
+              <td style="text-align:right">0</td><td style="text-align:right">1</td>
+              <td>forced_open</td><td>pushing_gate</td>
+              <td style="color:var(--red);font-weight:700">confirmed</td>
+            </tr>
+            <tr>
+              <td>EVT003</td><td>2026-05-01 09:01:10</td><td>ST010</td><td>G07</td>
+              <td style="text-align:right">1</td><td style="text-align:right">1</td>
+              <td>normal</td><td>normal_passage</td>
+              <td style="color:var(--green);font-weight:700">normal</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 6. 모델링 ══════ -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">06</span>
+    <h3>분석·모델링 방식</h3>
+    <span class="en">Modeling Approach</span>
+  </div>
+  <div class="card-body">
+
+    <!-- 6.1 전체 분석 구조 -->
+    <div class="sub-section">
+      <div class="sub-title">🔧 전체 분석 구조</div>
+      <div class="flow">
+        <div class="flow-step data">
+          <div class="num-circle">1</div>
+          <div class="step-title">CCTV 영상 수집</div>
+          <div class="step-sub">게이트 주변 실시간 영상 스트림</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step process">
+          <div class="num-circle">2</div>
+          <div class="step-title">사람 검출 / 추적</div>
+          <div class="chips">
+            <span class="chip">Object Detection</span>
+            <span class="chip">Multi-Object Tracking</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step model">
+          <div class="num-circle">3</div>
+          <div class="step-title">게이트 통과 행동 분석</div>
+          <div class="chips">
+            <span class="chip">Action Recognition</span>
+            <span class="chip">방향 분류</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step process">
+          <div class="num-circle">4</div>
+          <div class="step-title">AFC 태그 · 게이트 로그 매칭</div>
+          <div class="step-sub">통과 인원 수 vs 태그 건수 비교</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step model">
+          <div class="num-circle">5</div>
+          <div class="step-title">부정승차 후보 이벤트 생성 + 거래 이상탐지</div>
+          <div class="chips">
+            <span class="chip">Rule-based</span>
+            <span class="chip">Anomaly Detection</span>
+            <span class="chip">Graph Fraud</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step output">
+          <div class="num-circle">6</div>
+          <div class="step-title">위험 점수 산정</div>
+          <div class="step-sub">영상 점수 × 거래 점수 × 이력 점수 × 역/시간대 위험도</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step action">
+          <div class="num-circle">7</div>
+          <div class="step-title">관제 / 단속 대시보드 알림</div>
+          <div class="step-sub">이벤트 클립 제공 · 단속 우선순위 표출</div>
+        </div>
+        <div class="flow-arrow feedback"></div>
+        <div class="flow-step feedback">
+          <div class="num-circle">8</div>
+          <div class="step-title">현장 확인 &amp; 피드백</div>
+          <div class="step-sub">오탐/정탐 라벨 → 모델 재학습</div>
+        </div>
+        <div class="flow-legend">
+          <span class="lg"><span class="dot" style="background:var(--teal)"></span>데이터</span>
+          <span class="lg"><span class="dot" style="background:var(--blue)"></span>처리</span>
+          <span class="lg"><span class="dot" style="background:var(--purple)"></span>모델</span>
+          <span class="lg"><span class="dot" style="background:var(--accent)"></span>산출</span>
+          <span class="lg"><span class="dot" style="background:var(--green)"></span>현업 활용</span>
+          <span class="lg"><span class="dot" style="background:var(--red)"></span>피드백</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6.2 모델 접근 방식 -->
+    <div class="sub-section" style="margin-top:24px">
+      <div class="sub-title">🤖 모델 접근 방식</div>
+      <div class="model-grid">
+        <div class="model-card">
+          <div class="name">Object Detection</div>
+          <div class="desc">YOLO, RT-DETR — 사람·게이트 영역 검출</div>
+          <span class="tag">영상</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Multi-Object Tracking</div>
+          <div class="desc">DeepSORT, ByteTrack — 통과 인원·방향 추적</div>
+          <span class="tag">영상</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Action Recognition</div>
+          <div class="desc">점프·기어가기·밀기 등 영상 시계열 행동 분류</div>
+          <span class="tag">영상</span>
+        </div>
+        <div class="model-card recommended">
+          <div class="name">⭐ Rule-based Detection</div>
+          <div class="desc">"1태그 + 2인 통과" 등 명확한 룰 — 초기 권장</div>
+          <span class="tag">★ 권장</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Statistical Anomaly</div>
+          <div class="desc">환불·할인·환승 이상 — 평균·표준편차·시계열</div>
+          <span class="tag">통계</span>
+        </div>
+        <div class="model-card">
+          <div class="name">ML Anomaly Detection</div>
+          <div class="desc">Isolation Forest, Autoencoder, One-Class SVM</div>
+          <span class="tag">비지도</span>
+        </div>
+        <div class="model-card">
+          <div class="name">Graph Fraud Detection</div>
+          <div class="desc">카드·계정·기기·역 관계 — 조직적 부정사용 탐지</div>
+          <span class="tag">고도화</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6.3 추천 모델 구조 -->
+    <div class="sub-section" style="margin-top:24px">
+      <div class="sub-title">🔄 추천 모델 구조 (5단계) — Rule + Computer Vision + Anomaly Detection 하이브리드 권장</div>
+      <div class="flow">
+        <div class="flow-step process">
+          <div class="num-circle">1</div>
+          <div class="step-title">Rule 기반 탐지</div>
+          <div class="chips">
+            <span class="chip">태그 없음 + 통과 존재</span>
+            <span class="chip">1태그 + 2인 이상</span>
+            <span class="chip">게이트 강제 개방</span>
+            <span class="chip">비정상 방향</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step model">
+          <div class="num-circle">2</div>
+          <div class="step-title">영상 AI 탐지</div>
+          <div class="chips">
+            <span class="chip star">★ 사람 검출·추적</span>
+            <span class="chip">행동 분류</span>
+            <span class="chip">tailgating</span>
+            <span class="chip">jumping</span>
+            <span class="chip">crawling</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step model">
+          <div class="num-circle">3</div>
+          <div class="step-title">거래 이상탐지</div>
+          <div class="chips">
+            <span class="chip">반복 환불</span>
+            <span class="chip">비정상 할인</span>
+            <span class="chip">불가능 환승</span>
+            <span class="chip">카드 공유</span>
+          </div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step output">
+          <div class="num-circle">4</div>
+          <div class="step-title">위험 점수 산정</div>
+          <div class="chips">
+            <span class="chip">영상 점수</span>
+            <span class="chip">거래 점수</span>
+            <span class="chip">이력 점수</span>
+            <span class="chip">역/시간대 위험도</span>
+          </div>
+        </div>
+        <div class="flow-arrow feedback"></div>
+        <div class="flow-step feedback">
+          <div class="num-circle">5</div>
+          <div class="step-title">Human Review &amp; 피드백</div>
+          <div class="step-sub">관제요원 확인 → 단속 결과 → 오탐/정탐 라벨 재학습</div>
+        </div>
+        <div class="flow-legend">
+          <span class="lg"><span class="dot" style="background:var(--blue)"></span>Rule</span>
+          <span class="lg"><span class="dot" style="background:var(--purple)"></span>AI 모델</span>
+          <span class="lg"><span class="dot" style="background:var(--accent)"></span>의사결정</span>
+          <span class="lg"><span class="dot" style="background:var(--red)"></span>피드백</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════ 7. 기관별 적용 ══════ -->
+<div class="card" id="s7">
+  <div class="card-header">
+    <span class="num">07</span>
+    <h3>기관별 적용 포인트</h3>
+    <span class="en">Application by Reference Agency</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="info-box">
+        <div class="info-box-header" style="background:var(--navy)">🇬🇧 TfL형 적용 (Willesden Green Smart Station)</div>
+        <div class="info-box-body">
+          <p>기존 CCTV와 AI 알고리즘을 결합해 <strong>실시간 관제 알림</strong>을 생성한 사례 — 기존 인프라를 활용한 저비용 도입 가능</p>
+          <table>
+            <tbody>
+              <tr><td>탐지 대상</td><td>게이트 점프, 밀기, tailgating, 위험행동</td></tr>
+              <tr><td>데이터</td><td>기존 CCTV 영상, 행동 탐지 모델, 관제 피드백</td></tr>
+              <tr><td>운영 방식</td><td>AI 알림 → 직원 확인 → 대응</td></tr>
+              <tr><td>시사점</td><td>기존 CCTV 인프라 활용 저비용 도입 가능</td></tr>
+              <tr><td>주의점</td><td>오탐, 프라이버시, 직원 부담, 사회적 수용성 검토 필요</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-header" style="background:var(--teal)">🇰🇷 서울교통공사형 적용 (스마트스테이션 AI 관제)</div>
+        <div class="info-box-body">
+          <p>CCTV 영상의 장면·행동 패턴을 AI가 인식하고 관제 담당자에게 전달 — <strong>상황 설명+검색+추적</strong> 기능으로 확장 가능</p>
+          <table>
+            <tbody>
+              <tr><td>탐지 대상</td><td>난동, 위험행동, 침입, 이상행동, 부정승차 행동 패턴</td></tr>
+              <tr><td>데이터</td><td>CCTV 영상, 행동 패턴, 텍스트화된 장면 설명</td></tr>
+              <tr><td>운영 방식</td><td>AI 상황 인지 → 관제 담당자 전파 → 현장 알림</td></tr>
+              <tr><td>시사점</td><td>단순 객체탐지 → "상황 설명·검색·추적" 기능 확장</td></tr>
+              <tr><td>주의점</td><td>부정승차 단속과 안전 관제 목적을 명확히 분리해야 함</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 8. Use Case 설계 ══════ -->
+<div class="card" id="s8">
+  <div class="card-header">
+    <span class="num">08</span>
+    <h3>AFC 적용 Use Case 설계</h3>
+    <span class="en">Use Case Design</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">🔩 기능분해</div>
+        <table>
+          <colgroup><col style="width:90px"><col style="width:110px"><col></colgroup>
+          <thead><tr><th>Level 1</th><th>Level 2</th><th>Level 3</th></tr></thead>
+          <tbody>
+            <tr><td>데이터 수집</td><td>CCTV 수집</td><td>게이트 주변 영상, 통과 장면</td></tr>
+            <tr><td></td><td>AFC 거래 수집</td><td>태그, 요금, 할인, 환승, 환불</td></tr>
+            <tr><td></td><td>게이트 로그</td><td>개폐, 오류, 강제개방, 방향</td></tr>
+            <tr><td>영상 분석</td><td>사람 검출</td><td>게이트 주변 사람 수 검출</td></tr>
+            <tr><td></td><td>사람 추적</td><td>통과 인원, 이동 방향, 통과 순서</td></tr>
+            <tr><td></td><td>행동 분류</td><td>점프, 기어가기, 밀기, tailgating</td></tr>
+            <tr><td>거래 분석</td><td>이상거래 탐지</td><td>반복 환불, 비정상 할인, 불가능 환승</td></tr>
+            <tr><td></td><td>위험 점수</td><td>카드·계정·역·시간대별 위험도</td></tr>
+            <tr><td>융합 판단</td><td>영상-거래 매칭</td><td>통과 인원과 태그 건수 비교</td></tr>
+            <tr><td></td><td>이벤트 등급화</td><td>INFO / WARNING / HIGH / CRITICAL</td></tr>
+            <tr><td>운영 활용</td><td>관제 알림</td><td>의심 이벤트 실시간 표출</td></tr>
+            <tr><td></td><td>단속 지원</td><td>단속 우선순위 및 증거 클립 제공</td></tr>
+            <tr><td></td><td>모델 개선</td><td>오탐·정탐 피드백 재학습</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">📋 주요 기능 요구사항</div>
+        <table class="tbl-purple">
+          <colgroup><col style="width:88px"><col></colgroup>
+          <thead><tr><th>ID</th><th>요구사항</th></tr></thead>
+          <tbody>
+            <tr><td>FARE-001</td><td>게이트 주변 CCTV 영상에서 사람의 통과 여부와 이동 방향을 탐지한다.</td></tr>
+            <tr><td>FARE-002</td><td>게이트 점프, 게이트 아래 통과, 밀기, tailgating 등 부정승차 의심행동을 탐지한다.</td></tr>
+            <tr><td>FARE-003</td><td>AFC 태그 건수와 영상 기반 통과 인원 수를 비교한다.</td></tr>
+            <tr><td>FARE-004</td><td>태그 없이 통과한 것으로 의심되는 이벤트를 생성한다.</td></tr>
+            <tr><td>FARE-005</td><td>반복 환불, 비정상 할인, 비정상 환승 등 거래 이상 패턴을 탐지한다.</td></tr>
+            <tr><td>FARE-006</td><td>의심 이벤트별 위험 점수를 산정한다.</td></tr>
+            <tr><td>FARE-007</td><td>사고 전후 영상 클립을 관제요원·단속 담당자에게 제공한다.</td></tr>
+            <tr><td>FARE-008</td><td>오탐·정탐·미탐 피드백을 저장하여 모델 개선 데이터로 활용한다.</td></tr>
+            <tr><td>FARE-009</td><td>얼굴 인식 없이 행동과 거래 패턴 중심으로 탐지한다.</td></tr>
+            <tr><td>FARE-010</td><td>의심 이벤트를 단속 근거가 아닌 "검토 대상"으로 표시한다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 9. KPI ══════ -->
+<div class="card" id="s9">
+  <div class="card-header">
+    <span class="num">09</span>
+    <h3>KPI 및 평가 기준</h3>
+    <span class="en">KPIs &amp; Evaluation</span>
+  </div>
+  <div class="card-body">
+    <div class="kpi-grid">
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">Precision</div><div class="kpi-desc">의심 이벤트 중 실제 부정승차 비율</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">Recall</div><div class="kpi-desc">실제 부정승차 중 탐지된 비율</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-model">모델 성능</span><div class="kpi-name">F1-score</div><div class="kpi-desc">Precision과 Recall의 균형</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-ops">운영 성능</span><div class="kpi-name">False Positive Rate</div><div class="kpi-desc">정상 통과를 부정승차로 잘못 탐지한 비율</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-ops">운영 성능</span><div class="kpi-name">Alert Review Time</div><div class="kpi-desc">관제요원이 알림을 확인하는 평균 시간</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-biz">사업 효과</span><div class="kpi-name">Revenue Leakage ↓</div><div class="kpi-desc">수익 누수 감소 효과</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-biz">사업 효과</span><div class="kpi-name">Enforcement Hit Rate</div><div class="kpi-desc">단속 적중률</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-data">데이터 품질</span><div class="kpi-name">Video-Tx Match Rate</div><div class="kpi-desc">CCTV 이벤트와 AFC 거래 매칭 성공률</div></div>
+      <div class="kpi-card"><span class="kpi-cat cat-priv">개인정보</span><div class="kpi-name">Privacy Incident</div><div class="kpi-desc">영상 오남용 또는 개인정보 사고 건수</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 10. 추진 방안 ══════ -->
+<div class="card" id="s10">
+  <div class="card-header">
+    <span class="num">10</span>
+    <h3>추진 방안</h3>
+    <span class="en">Implementation Plan</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">🔬 범위</div>
+        <table>
+          <thead><tr><th>항목</th><th>권장 범위</th></tr></thead>
+          <tbody>
+            <tr><td>대상 역</td><td>부정승차 민원·적발이 많은 1~3개 역사</td></tr>
+            <tr><td>대상 위치</td><td>개찰구, 환승 게이트, 무인 게이트, 혼잡 게이트</td></tr>
+            <tr><td>기간</td><td>8~12주</td></tr>
+            <tr><td>데이터</td><td>CCTV 영상, AFC 태그, 게이트 로그, 단속 결과</td></tr>
+            <tr><td>탐지 대상</td><td>tailgating, gate jumping, gate pushing, 태그-통과 불일치</td></tr>
+            <tr><td>운영 방식</td><td>AI 탐지 → 관제 확인 → 단속 피드백</td></tr>
+            <tr><td>개인정보</td><td>얼굴인식 배제, 이벤트 클립 최소 저장, 접근로그 관리</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">✅ 성공 기준</div>
+        <table class="tbl-green">
+          <thead><tr><th>구분</th><th>성공 기준</th></tr></thead>
+          <tbody>
+            <tr><td>기술 검증</td><td>영상 기반 통과 인원 탐지와 AFC 태그 매칭 가능</td></tr>
+            <tr><td>모델 검증</td><td>주요 부정승차 유형별 Precision/Recall 기준 충족</td></tr>
+            <tr><td>운영 검증</td><td>관제요원이 알림을 업무에 활용 가능</td></tr>
+            <tr><td>사업 검증</td><td>단속 우선순위 제공으로 단속 적중률 개선</td></tr>
+            <tr><td>개인정보 검증</td><td>얼굴인식 없이 행동·거래 기반 탐지 가능</td></tr>
+            <tr><td>확산 판단</td><td>역사·게이트 유형별 확장 가능성 확인</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 11. 리스크 ══════ -->
+<div class="card" id="s11">
+  <div class="card-header">
+    <span class="num">11</span>
+    <h3>리스크 및 대응방안</h3>
+    <span class="en">Risks &amp; Mitigations</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-red">
+      <colgroup><col style="width:170px"><col style="width:180px"><col></colgroup>
+      <thead><tr><th>리스크</th><th>영향</th><th>대응방안</th></tr></thead>
+      <tbody>
+        <tr><td>오탐 증가</td><td>관제 피로, 민원 가능성</td><td>Human Review, 임계치 조정, Hard Negative 학습</td></tr>
+        <tr><td>미탐 발생</td><td>수익 누수 지속</td><td>Recall 중심 튜닝, 영상-거래 결합 강화</td></tr>
+        <tr><td>개인정보 논란</td><td>사회적 수용성 저하</td><td>얼굴인식 배제, 목적 제한, 안내 고지, 접근통제</td></tr>
+        <tr><td>직원 안전</td><td>현장 직접 대면 단속 시 위험</td><td>실시간 대면보다 사후 분석·단속 우선순위 활용</td></tr>
+        <tr><td>카메라 사각지대</td><td>탐지 누락</td><td>카메라 각도 조정, 게이트 로그 보완</td></tr>
+        <tr><td>데이터 매칭 오류</td><td>정상 승객을 의심 처리</td><td>시간 동기화, 게이트 ID 표준화, 매칭 윈도우 조정</td></tr>
+        <tr><td>차별·편향 논란</td><td>특정 집단 과탐지 우려</td><td>얼굴·성별·연령 기반 판단 금지, 성능 편향 점검</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 12. 운영 방식 ══════ -->
+<div class="card" id="s12">
+  <div class="card-header">
+    <span class="num">12</span>
+    <h3>권장 운영 방식 (단계별 로드맵)</h3>
+    <span class="en">Recommended Operational Roadmap</span>
+  </div>
+  <div class="card-body">
+    <div class="stage-grid">
+      <div class="stage-card" style="border-left-color:var(--teal)">
+        <div class="stage-num">STAGE 1 · PoC</div>
+        <div class="stage-name">검토 대상 알림</div>
+        <div class="stage-desc">AI 탐지 결과를 <strong>단속 근거가 아닌 검토 대상 알림</strong>으로만 사용</div>
+      </div>
+      <div class="stage-card" style="border-left-color:var(--blue)">
+        <div class="stage-num">STAGE 2 · Pilot</div>
+        <div class="stage-name">단속 우선순위 제공</div>
+        <div class="stage-desc">관제센터에서 이벤트 확인 후 <strong>단속 우선순위</strong> 제공</div>
+      </div>
+      <div class="stage-card" style="border-left-color:var(--purple)">
+        <div class="stage-num">STAGE 3 · 운영화</div>
+        <div class="stage-name">단속 계획 최적화</div>
+        <div class="stage-desc">반복 패턴·고위험 역·시간대 분석을 통한 <strong>단속 계획 최적화</strong></div>
+      </div>
+      <div class="stage-card" style="border-left-color:var(--accent)">
+        <div class="stage-num">STAGE 4 · 고도화</div>
+        <div class="stage-name">통합 Fraud Detection</div>
+        <div class="stage-desc">영상 + AFC + 게이트 + 환불/정산 <strong>통합 Fraud Detection 운영</strong></div>
+      </div>
+      <div class="stage-card" style="border-left-color:var(--green)">
+        <div class="stage-num">STAGE 5 · 확장</div>
+        <div class="stage-name">Graph 기반 확장</div>
+        <div class="stage-desc">Graph 기반 <strong>조직적 부정사용·카드 공유·환불 네트워크</strong> 탐지</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 13. 개인정보 & 윤리 ══════ -->
+<div class="card" id="s13">
+  <div class="card-header" style="background:var(--teal)">
+    <span class="num" style="background:rgba(255,255,255,.25)">13</span>
+    <h3>개인정보 및 윤리 고려사항</h3>
+    <span class="en">Privacy &amp; Ethics</span>
+  </div>
+  <div class="card-body">
+    <div class="privacy-grid">
+      <div class="privacy-card">
+        <div class="p-ico">🚫</div>
+        <div class="p-name">얼굴 인식 금지</div>
+        <div class="p-desc">원칙적으로 얼굴 인식을 사용하지 않음. 행동·거래 패턴 중심으로 탐지</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">🔒</div>
+        <div class="p-name">개인 식별 최소화</div>
+        <div class="p-desc">카드 ID, 계정 ID는 가명화 또는 해시 처리</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">🎞</div>
+        <div class="p-name">영상 최소 저장</div>
+        <div class="p-desc">의심 이벤트 클립 중심으로 최소 보관. 전체 영상 장기 보관 금지</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">🔑</div>
+        <div class="p-name">접근통제 분리</div>
+        <div class="p-desc">관제·단속·감사 담당자별 권한 분리 및 최소 권한 원칙</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">📋</div>
+        <div class="p-name">감사로그 관리</div>
+        <div class="p-desc">영상 조회·다운로드·삭제·판정 이력 감사로그 저장</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">📢</div>
+        <div class="p-name">고지 의무</div>
+        <div class="p-desc">CCTV AI 분석 목적, 보관기간, 담당부서를 승객에게 안내</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">👤</div>
+        <div class="p-name">자동 단속 제한</div>
+        <div class="p-desc">AI 결과만으로 제재하지 않음. Human Review를 반드시 거침</div>
+      </div>
+      <div class="privacy-card">
+        <div class="p-ico">⚖</div>
+        <div class="p-name">편향 점검</div>
+        <div class="p-desc">특정 시간대·역·집단에 대한 과탐지 여부 정기 점검</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 14. 요약 ══════ -->
+<div class="card" id="s14">
+  <div class="card-header">
+    <span class="num">14</span>
+    <h3>요약</h3>
+  </div>
+  <div class="card-body">
+    <div class="oneliner">
+      부정승차·이상거래 탐지는 CCTV 영상 기반 행동 탐지와 AFC 거래로그 기반 이상탐지를 결합하여,
+      게이트 무단 통과, tailgating, 반복 환불, 비정상 할인, 불가능 환승 등
+      <strong>수익 누수 가능성이 높은 이벤트를 조기에 식별</strong>하는 Anomaly Detection 유즈케이스이다.
+      TfL의 Willesden Green Smart Station은 기존 CCTV와 AI 알고리즘을 활용하여 fare evasion 알림을 생성한 사례이며,
+      서울교통공사의 생성형 AI 기반 이상행동 탐지·추적 모델은 CCTV 영상을 상황 설명과 행동 패턴으로 변환하여 관제 대응을 고도화하는 방향을 제시한다.
+      본 유즈케이스는 단속 자동화가 아니라 <strong>AI 기반 위험 이벤트 선별, Human Review, 단속 우선순위 제공, 수익보호 정책 개선</strong>을 목표로 추진하는 것이 적절하다.
+      영상 AI와 AFC 거래 이상탐지를 결합해 수익 누수와 비정상 이용 패턴을 조기에 발견하고,
+      관제·단속·정산 업무의 효율성을 높이는 <strong>Revenue Protection 중심 AI 유즈케이스</strong>이다.
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<div class="footer">
+  AFC 기반 AI Use Case &nbsp;|&nbsp; 부정승차·이상거래 탐지 &nbsp;|&nbsp; Fare Evasion &amp; Abnormal Transaction Detection
+</div>
+
+<style>
+.close-btn{position:fixed;top:14px;right:18px;z-index:9999;display:flex;align-items:center;gap:6px;background:rgba(20,40,70,.88);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:13px;font-weight:600;padding:7px 18px 7px 14px;border-radius:20px;cursor:pointer;backdrop-filter:blur(6px);transition:background .15s,transform .1s;font-family:'Noto Sans KR',sans-serif;letter-spacing:-.01em;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.close-btn:hover{background:rgba(192,57,43,.9);transform:scale(1.04);}
+</style>
+<button class="close-btn" onclick="window.close()">✕&nbsp;&nbsp;닫기</button>
+</body>
+</html>
