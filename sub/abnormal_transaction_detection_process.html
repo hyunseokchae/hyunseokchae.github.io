@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이상거래 탐지 AI/ML 적용 프로세스 — U05</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #1a0a10 0%, #1a375e 50%, #5c0f1a 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--red);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #f0b0b0; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+  .hero strong { color: #ffc84a; }
+
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 13px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--red); color: var(--white); }
+
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--red);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-body { padding: 20px 24px; }
+
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  .sub-title.red  { color: var(--red);   border-color: var(--red); }
+  .sub-title.green{ color: var(--green); border-color: var(--green); }
+  .sub-title.teal { color: var(--teal);  border-color: var(--teal); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); }
+
+  .tbl-red    th { background: var(--red); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); }
+  .tbl-blue   th { background: var(--blue); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .code-block {
+    background: #0d1b2a;
+    color: #a8d8ea;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin-top: 10px;
+  }
+  .code-block .kw  { color: #c792ea; font-weight: 600; }
+  .code-block .fn  { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .cmt { color: #546e7a; font-style: italic; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .arr { color: #ffc84a; font-weight: 700; }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(30,60,100,.06);
+    border: 2px solid;
+    background: var(--white);
+    position: relative;
+  }
+  .flow-step.data    { border-color: var(--blue);   }
+  .flow-step.process { border-color: var(--teal);   }
+  .flow-step.model   { border-color: var(--purple); }
+  .flow-step.output  { border-color: var(--green);  }
+  .flow-step.action  { border-color: var(--accent); }
+  .flow-step.danger  { border-color: var(--red);    }
+  .flow-step .num-circle {
+    position: absolute;
+    left: -10px; top: -10px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  }
+  .flow-step.data    .num-circle { background: var(--blue); }
+  .flow-step.process .num-circle { background: var(--teal); }
+  .flow-step.model   .num-circle { background: var(--purple); }
+  .flow-step.output  .num-circle { background: var(--green); }
+  .flow-step.action  .num-circle { background: var(--accent); }
+  .flow-step.danger  .num-circle { background: var(--red); }
+  .flow-step .step-title { font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.4; }
+  .flow-step .step-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .flow-arrow { font-size: 20px; color: var(--red); margin: 6px 0; font-weight: 700; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .kpi-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .kpi-grid, .kpi-grid-3 { grid-template-columns: 1fr 1fr; } }
+  .kpi-card {
+    background: linear-gradient(135deg, #f8fafd 0%, #eef2f7 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 14px;
+    text-align: center;
+  }
+  .kpi-card .kpi-icon { font-size: 24px; margin-bottom: 6px; }
+  .kpi-card .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--red); line-height: 1.2; }
+  .kpi-card .kpi-unit { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-card .kpi-label { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .kpi-card .kpi-desc { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+  .card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 12px; }
+  @media (max-width: 900px) { .card-grid, .card-grid-3 { grid-template-columns: 1fr; } }
+  .mini-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .mini-card-header {
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--white);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .mini-card-body { padding: 12px 14px; font-size: 12.5px; color: var(--muted); line-height: 1.75; }
+  .mini-card-body ul { list-style: none; }
+  .mini-card-body ul li::before { content: "· "; color: var(--blue); font-weight: 700; }
+
+  .sev { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .sev-crit   { background: rgba(192,57,43,.12);  color: var(--red);    border: 1px solid rgba(192,57,43,.3); }
+  .sev-high   { background: rgba(240,140,0,.12);  color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
+  .sev-med    { background: rgba(46,109,164,.12); color: var(--blue);   border: 1px solid rgba(46,109,164,.3); }
+  .sev-low    { background: rgba(23,123,78,.12);  color: var(--green);  border: 1px solid rgba(23,123,78,.3); }
+
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+  .badge-green  { background: rgba(23,123,78,.12);  color: var(--green);  border: 1px solid rgba(23,123,78,.3); }
+  .badge-red    { background: rgba(192,57,43,.12);  color: var(--red);    border: 1px solid rgba(192,57,43,.3); }
+  .badge-blue   { background: rgba(46,109,164,.12); color: var(--blue);   border: 1px solid rgba(46,109,164,.3); }
+  .badge-purple { background: rgba(106,13,145,.12); color: var(--purple); border: 1px solid rgba(106,13,145,.3); }
+  .badge-accent { background: rgba(240,140,0,.12);  color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
+  .badge-teal   { background: rgba(0,122,135,.12);  color: var(--teal);   border: 1px solid rgba(0,122,135,.3); }
+
+  .privacy-box {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff3e0 100%);
+    border: 1px solid rgba(240,140,0,.3);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-top: 16px;
+  }
+  .privacy-box .priv-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .privacy-box ul { list-style: none; font-size: 12.5px; color: #6b4f00; line-height: 1.8; }
+  .privacy-box ul li::before { content: "⚠️  "; }
+
+  .warn-box { background: rgba(192,57,43,.06); border: 1px solid rgba(192,57,43,.2); border-left: 4px solid var(--red); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
+  .em-box   { background: rgba(46,109,164,.06); border: 1px solid rgba(46,109,164,.2); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
+  .ok-box   { background: rgba(23,123,78,.06); border: 1px solid rgba(23,123,78,.2); border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
+
+  p { font-size: 13px; line-height: 1.8; color: var(--muted); margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--navy); }
+  .ul-disc { list-style: disc; padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  .ul-disc li { margin-bottom: 4px; }
+  .ul-disc li strong { color: var(--navy); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag { background: var(--gray); border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; font-size: 12px; color: var(--muted); }
+  .tag.hl { background: rgba(192,57,43,.08); border-color: rgba(192,57,43,.25); color: var(--red); font-weight: 600; }
+
+  .timeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
+  @media (max-width: 900px) { .timeline-grid { grid-template-columns: 1fr 1fr; } }
+  .tl-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .tl-header {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--white);
+    text-align: center;
+  }
+  .tl-body { padding: 10px 12px; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .tl-body ul { list-style: none; }
+  .tl-body ul li::before { content: "✓ "; color: var(--green); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">U05 · Anomaly Detection / AI/ML Process</div>
+  <h1>이상거래 탐지 AI/ML 적용 프로세스</h1>
+  <h2>Anomaly &amp; Fraud Transaction Detection — Step-by-Step ML Process</h2>
+  <div class="hero-summary">
+    AFC·결제·정산·ABT 환경에서 <strong>부정승차, 비정상 환불, 장비 오류, 정산 불일치</strong> 등 고위험 거래를
+    조기에 식별하는 AI/ML 적용 실무 절차서. 업무 문제 정의부터 데이터 목록화, EDA, 기술통계, 데이터 정제,
+    Target/Label 정의, Feature Engineering, Baseline 모델, ML 학습·평가, 운영 적용, 모니터링·재학습까지
+    <strong>11단계 전체 흐름</strong>을 단계별로 정리한다.
+  </div>
+</div>
+
+<nav class="toc-bar">
+  <a href="#s00">0. 목적</a>
+  <a href="#s01">1. 문제 정의</a>
+  <a href="#s02">2. 데이터 목록화</a>
+  <a href="#s03">3. EDA</a>
+  <a href="#s04">4. 기술통계</a>
+  <a href="#s05">5. 데이터 정제</a>
+  <a href="#s06">6. Target/Label</a>
+  <a href="#s07">7. Feature Engineering</a>
+  <a href="#s08">8. Baseline 모델</a>
+  <a href="#s09">9. ML 학습·평가</a>
+  <a href="#s10">10. 운영 적용</a>
+  <a href="#s11">11. 모니터링·재학습</a>
+  <a href="#s12">12. 전체 요약</a>
+  <a href="#s13">13. 추진 일정</a>
+  <a href="#s14">14. 결론</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ══ S00 문서 목적 ══ -->
+<div class="card" id="s00">
+  <div class="card-header">
+    <span class="num">00</span>
+    <h3>문서 목적</h3>
+    <span class="en">Document Purpose</span>
+  </div>
+  <div class="card-body">
+    <p>본 문서는 교통 AFC, 결제, 정산, 카드 이용, 계정 기반 티켓팅(ABT) 환경에서 <strong>이상거래 탐지(Anomaly/Fraud Transaction Detection)</strong> 모델을 적용하기 위한 실무 절차를 정리한 가이드입니다. 이상거래 탐지는 단순히 모델을 학습하는 작업이 아니라, 아래의 전체 흐름으로 추진되어야 합니다.</p>
+    <div class="flow" style="margin-top:16px;">
+      <div class="flow-step danger"><span class="num-circle">1</span><div class="step-title">업무 문제 정의</div><div class="step-sub">탐지 대상 유형 · KPI · 사용자 정의</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step data"><span class="num-circle">2</span><div class="step-title">데이터 목록화</div><div class="step-sub">소스 · 테이블 · 컬럼 인벤토리</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step data"><span class="num-circle">3</span><div class="step-title">EDA</div><div class="step-sub">구조 · 품질 · 패턴 탐색</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step data"><span class="num-circle">4</span><div class="step-title">기술통계 분석</div><div class="step-sub">분포 · 빈도 · 그룹별 패턴</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step process"><span class="num-circle">5</span><div class="step-title">데이터 정제</div><div class="step-sub">결측 · 중복 · 이상값 처리</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step process"><span class="num-circle">6</span><div class="step-title">Target / Label 판단</div><div class="step-sub">지도 / 비지도 / 하이브리드 결정</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step process"><span class="num-circle">7</span><div class="step-title">Feature Engineering</div><div class="step-sub">거래 · 카드 · 장비 · 시간 · 공간 Feature</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step model"><span class="num-circle">8</span><div class="step-title">Baseline 모델</div><div class="step-sub">룰 기반 · 통계 기반 탐지 기준선</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step model"><span class="num-circle">9</span><div class="step-title">ML 모델 학습 · 평가</div><div class="step-sub">비지도 / 지도 / 하이브리드 학습</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step output"><span class="num-circle">10</span><div class="step-title">검증 및 운영 적용</div><div class="step-sub">Batch · API · Dashboard · Alert</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step action"><span class="num-circle">11</span><div class="step-title">모니터링 · 재학습</div><div class="step-sub">드리프트 감지 · 피드백 · 버전 관리</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S01 업무 문제 정의 ══ -->
+<div class="card" id="s01">
+  <div class="card-header">
+    <span class="num">01</span>
+    <h3>업무 문제 정의</h3>
+    <span class="en">Problem Definition</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">1.1 목적</div>
+      <p>AFC 또는 결제 시스템에서 발생하는 거래 중 <strong>정상 패턴과 다른 거래</strong>, <strong>부정 사용 가능성이 높은 거래</strong>, <strong>시스템 오류 또는 정산 오류 가능성이 있는 거래</strong>를 조기에 식별한다.</p>
+      <div class="code-block"><span class="cmt">// 업무 문제 정의 예시</span><br>
+AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 탐지하여<br>
+부정승차, 카드 오남용, 장비 오류, 정산 오류, 비정상 환불·취소 거래를 조기에 식별한다.</div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">1.2 탐지 대상 유형</div>
+      <table class="tbl-red">
+        <thead><tr><th>구분</th><th>이상거래 유형</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>카드 사용 이상</td><td>동일 카드 반복 태그</td><td>짧은 시간 내 동일 카드가 비정상적으로 반복 사용</td></tr>
+          <tr><td>공간 이동 이상</td><td>불가능한 이동 패턴</td><td>물리적으로 불가능한 시간 내 먼 거리 이동</td></tr>
+          <tr><td>요금 이상</td><td>비정상 요금</td><td>무료/할인/고액/음수 요금 등 업무 규칙 위반 가능</td></tr>
+          <tr><td>장비 이상</td><td>특정 장비 오류 집중</td><td>특정 단말기 또는 게이트에서 이상 거래 급증</td></tr>
+          <tr><td>시간 이상</td><td>운영시간 외 거래</td><td>영업시간 외 또는 비정상 시간대 거래 발생</td></tr>
+          <tr><td>환불/취소 이상</td><td>반복 환불·취소</td><td>특정 카드/계정/채널에서 환불·취소 과다 발생</td></tr>
+          <tr><td>계정 이상</td><td>다중 기기 사용</td><td>하나의 계정이 여러 기기·지역에서 비정상 사용</td></tr>
+          <tr><td>정산 이상</td><td>집계 불일치</td><td>거래 금액과 정산 금액 간 차이 발생</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">1.3 업무 사용자 정의</div>
+      <div class="grid2">
+        <table class="tbl-blue">
+          <thead><tr><th>사용자</th><th>활용 목적</th></tr></thead>
+          <tbody>
+            <tr><td>운영센터</td><td>실시간 이상 징후 확인 및 현장 대응</td></tr>
+            <tr><td>정산 담당자</td><td>수익 누락, 정산 오류, 비정상 환불 확인</td></tr>
+            <tr><td>부정승차 단속팀</td><td>부정 사용 의심 대상 선별</td></tr>
+            <tr><td>장비 유지보수팀</td><td>장비 오류 기반 이상거래 확인</td></tr>
+            <tr><td>데이터 분석팀</td><td>이상 패턴 분석 및 모델 개선</td></tr>
+            <tr><td>고객센터</td><td>민원 발생 시 거래 이상 여부 확인</td></tr>
+          </tbody>
+        </table>
+        <table class="tbl-green">
+          <thead><tr><th>목표</th><th>예시 KPI</th></tr></thead>
+          <tbody>
+            <tr><td>부정거래 조기 탐지</td><td>의심거래 탐지율 80% 이상</td></tr>
+            <tr><td>오탐 최소화</td><td>False Positive Rate 10% 이하</td></tr>
+            <tr><td>운영 효율화</td><td>수작업 검토 대상 50% 절감</td></tr>
+            <tr><td>정산 안정성 향상</td><td>정산 오류 후보 자동 식별</td></tr>
+            <tr><td>장비 장애 조기 감지</td><td>장비 이상거래 급증 사전 탐지</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S02 데이터 목록화 ══ -->
+<div class="card" id="s02">
+  <div class="card-header">
+    <span class="num">02</span>
+    <h3>데이터 목록화</h3>
+    <span class="en">Data Inventory</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">2.1 데이터 인벤토리</div>
+      <table>
+        <thead><tr><th>데이터 영역</th><th>주요 데이터</th><th>활용 목적</th></tr></thead>
+        <tbody>
+          <tr><td>거래 데이터</td><td>태그인, 태그아웃, 결제, 환승, 취소, 환불</td><td>이상거래 탐지의 핵심 원천</td></tr>
+          <tr><td>카드/계정 데이터</td><td>카드번호, 카드유형, 계정ID, 상태, 발급정보</td><td>카드/계정별 이용 패턴 분석</td></tr>
+          <tr><td>장비 데이터</td><td>단말기ID, 게이트ID, 장비상태, 오류코드</td><td>장비 기반 이상거래 탐지</td></tr>
+          <tr><td>위치 데이터</td><td>역, 정류장, 노선, 구간, GPS</td><td>이동 패턴 및 불가능 이동 탐지</td></tr>
+          <tr><td>요금 정책 데이터</td><td>요금표, 할인정책, 환승규칙</td><td>요금 이상 및 정책 위반 탐지</td></tr>
+          <tr><td>블랙리스트 데이터</td><td>차단 카드, 분실 카드, 정지 계정</td><td>고위험 거래 판별</td></tr>
+          <tr><td>정산 데이터</td><td>일별/기관별/노선별 정산 금액</td><td>거래-정산 불일치 탐지</td></tr>
+          <tr><td>민원 데이터</td><td>민원 유형, 발생 일시, 카드/계정 정보</td><td>민원 연계 이상 패턴 분석</td></tr>
+          <tr><td>운영 캘린더</td><td>평일, 주말, 공휴일, 이벤트일</td><td>시간 패턴 보정</td></tr>
+          <tr><td>외부 데이터</td><td>날씨, 행사, 장애 정보</td><td>이상 패턴 해석 보조</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">2.2 필수 컬럼 예시</div>
+      <div class="grid2">
+        <table class="tbl-teal">
+          <thead><tr><th>컬럼</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>transaction_id</td><td>거래 고유 ID</td></tr>
+            <tr><td>card_id / account_id</td><td>카드/계정 식별자</td></tr>
+            <tr><td>transaction_datetime</td><td>거래 발생 일시</td></tr>
+            <tr><td>transaction_type</td><td>승차, 하차, 환승, 충전, 환불, 취소</td></tr>
+            <tr><td>station_id / stop_id</td><td>역 또는 정류장</td></tr>
+            <tr><td>route_id</td><td>노선</td></tr>
+            <tr><td>device_id</td><td>단말기 또는 게이트 ID</td></tr>
+          </tbody>
+        </table>
+        <table class="tbl-teal">
+          <thead><tr><th>컬럼</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>fare_amount</td><td>요금</td></tr>
+            <tr><td>discount_type</td><td>할인 유형</td></tr>
+            <tr><td>payment_method</td><td>결제 수단</td></tr>
+            <tr><td>result_code</td><td>거래 성공/실패 코드</td></tr>
+            <tr><td>error_code</td><td>오류 코드</td></tr>
+            <tr><td>blacklist_flag</td><td>블랙리스트 여부</td></tr>
+            <tr><td>refund_flag / cancel_flag</td><td>환불/취소 여부</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="privacy-box">
+      <div class="priv-title">📋 데이터 목록화 산출물</div>
+      <ul>
+        <li>데이터 소스 목록 · 테이블 목록 · 주요 컬럼 정의서</li>
+        <li>데이터 기간 및 보관 주기 · 데이터 적재 주기 · 데이터 소유 부서</li>
+        <li>개인정보/민감정보 포함 여부 · 분석 사용 가능 여부</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S03 EDA ══ -->
+<div class="card" id="s03">
+  <div class="card-header">
+    <span class="num">03</span>
+    <h3>EDA — 데이터 구조·품질 확인</h3>
+    <span class="en">Exploratory Data Analysis</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">3.1 데이터 구조 확인 태스크</div>
+      <table class="tbl-blue">
+        <thead><tr><th>태스크</th><th>확인 내용</th></tr></thead>
+        <tbody>
+          <tr><td>Row/Column 수 확인</td><td>데이터 규모 확인</td></tr>
+          <tr><td>컬럼 타입 확인</td><td>숫자, 문자, 날짜, 범주형 여부</td></tr>
+          <tr><td>Primary Key 확인</td><td>거래 고유성 확인</td></tr>
+          <tr><td>Join Key 확인</td><td>카드, 장비, 역, 정산 데이터 연결 가능성</td></tr>
+          <tr><td>Timestamp 확인</td><td>거래 시간 기준 사용 가능성</td></tr>
+          <tr><td>Target 후보 확인</td><td>이상거래 라벨 또는 대체 기준 존재 여부</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">3.2 데이터 품질 점검 항목</div>
+      <table>
+        <thead><tr><th>품질 항목</th><th>점검 내용</th></tr></thead>
+        <tbody>
+          <tr><td>완전성</td><td>필수 컬럼에 결측이 있는가</td></tr>
+          <tr><td>유일성</td><td>transaction_id가 중복되지 않는가</td></tr>
+          <tr><td>정확성</td><td>요금, 시간, 위치 값이 업무적으로 타당한가</td></tr>
+          <tr><td>일관성</td><td>코드값, 날짜 형식, 통화 단위가 일관적인가</td></tr>
+          <tr><td>정합성</td><td>거래 데이터와 마스터 데이터가 연결되는가</td></tr>
+          <tr><td>적시성</td><td>거래 데이터가 지연 없이 적재되는가</td></tr>
+          <tr><td>유효성</td><td>업무 룰에 맞는 값만 들어오는가</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">3.3 EDA 핵심 질문</div>
+      <div class="code-block">
+거래 ID는 유일한가?<br>
+동일 카드가 동일 시간에 여러 장소에서 사용되었는가?<br>
+요금이 0, 음수, 비정상 고액인 거래가 있는가?<br>
+특정 장비에서 오류 거래가 집중되는가?<br>
+블랙리스트 카드가 정상 승인된 사례가 있는가?<br>
+환불/취소 거래가 특정 카드나 계정에 집중되는가?<br>
+공휴일/이벤트일에 패턴이 급변하는가?</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S04 기술통계 ══ -->
+<div class="card" id="s04">
+  <div class="card-header">
+    <span class="num">04</span>
+    <h3>기술통계 분석 — 분포·패턴 파악</h3>
+    <span class="en">Descriptive Statistics</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">4.1 숫자형 변수 통계</div>
+      <div class="tag-list">
+        <span class="tag hl">fare_amount</span><span class="tag hl">daily_transaction_count</span>
+        <span class="tag hl">card_daily_usage_count</span><span class="tag hl">device_error_count</span>
+        <span class="tag hl">refund_amount</span><span class="tag hl">travel_time</span>
+        <span class="tag hl">distance_between_stations</span>
+      </div>
+      <table style="margin-top:12px;">
+        <thead><tr><th>지표</th><th>의미</th><th>지표</th><th>의미</th></tr></thead>
+        <tbody>
+          <tr><td>Count</td><td>데이터 건수</td><td>Std</td><td>표준편차</td></tr>
+          <tr><td>Mean</td><td>평균</td><td>Q1/Q3</td><td>분위수</td></tr>
+          <tr><td>Median</td><td>중앙값</td><td>IQR</td><td>이상값 판단 기준</td></tr>
+          <tr><td>Min/Max</td><td>최소/최대</td><td>Skewness</td><td>분포 비대칭성</td></tr>
+          <tr><td>CV</td><td>변동계수</td><td>Kurtosis</td><td>극단값 집중도</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">4.2 시간대별·그룹별 패턴 분석</div>
+      <div class="grid2">
+        <table class="tbl-teal">
+          <thead><tr><th>분석 단위</th><th>분석 내용</th></tr></thead>
+          <tbody>
+            <tr><td>시간대별</td><td>출근/퇴근 피크와 심야 이상 거래</td></tr>
+            <tr><td>요일별</td><td>평일/주말 패턴 차이</td></tr>
+            <tr><td>월별</td><td>계절성, 월말/월초 패턴</td></tr>
+            <tr><td>공휴일</td><td>공휴일 수요 및 이상거래 변화</td></tr>
+            <tr><td>이벤트일</td><td>행사, 파업, 장애와 이상거래 관계</td></tr>
+          </tbody>
+        </table>
+        <table class="tbl-teal">
+          <thead><tr><th>그룹 기준</th><th>분석 내용</th></tr></thead>
+          <tbody>
+            <tr><td>카드별</td><td>카드별 일평균 사용 횟수, 반복 사용</td></tr>
+            <tr><td>계정별</td><td>계정별 결제/환불/취소 패턴</td></tr>
+            <tr><td>장비별</td><td>장비별 오류율, 실패율</td></tr>
+            <tr><td>역별</td><td>역별 비정상 거래 발생률</td></tr>
+            <tr><td>요금유형별</td><td>할인/무료/환승 거래 이상 여부</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="em-box">
+      <strong>기술통계 해석 예시</strong><br>
+      특정 카드의 일평균 사용 횟수는 3회이나, 일부 카드는 하루 80회 이상 사용된다.<br>
+      전체 장비 오류율은 0.5%이나, D-102 단말기는 오류율이 12%이다.<br>
+      전체 환불 비율은 1% 미만이나, 특정 계정 그룹은 환불 비율이 30% 이상이다.
+    </div>
+  </div>
+</div>
+
+<!-- ══ S05 데이터 정제 ══ -->
+<div class="card" id="s05">
+  <div class="card-header">
+    <span class="num">05</span>
+    <h3>데이터 정제 — 결측·중복·이상값 처리</h3>
+    <span class="en">Data Cleaning</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">5.1 결측치 처리</div>
+      <table class="tbl-red">
+        <thead><tr><th>컬럼</th><th>결측 의미</th><th>처리</th></tr></thead>
+        <tbody>
+          <tr><td>station_id</td><td>위치 누락</td><td>거래 품질 오류로 분류</td></tr>
+          <tr><td>card_type</td><td>카드 유형 미수집</td><td>Unknown 범주 생성</td></tr>
+          <tr><td>exit_time</td><td>태그아웃 미존재</td><td>업무적으로 정상 가능, 별도 플래그</td></tr>
+          <tr><td>fare_amount</td><td>요금 누락</td><td>정산 영향 크므로 원인 분석 필요</td></tr>
+          <tr><td>device_id</td><td>장비 정보 누락</td><td>장비 기반 분석에서 제외 또는 보완</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">5.2 중복 데이터 처리</div>
+      <table>
+        <thead><tr><th>유형</th><th>설명</th><th>처리</th></tr></thead>
+        <tbody>
+          <tr><td>완전 중복</td><td>모든 컬럼 동일</td><td>1건만 유지</td></tr>
+          <tr><td>거래 ID 중복</td><td>transaction_id 동일</td><td>원천 시스템 기준 확인</td></tr>
+          <tr><td>재전송 중복</td><td>동일 거래가 여러 번 적재</td><td>최신 또는 최초 거래 유지</td></tr>
+          <tr><td>업무상 반복</td><td>동일 카드 반복 태그</td><td><span class="sev sev-crit">삭제 금지</span> — 이상 탐지 후보로 유지</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">5.3 이상값 정의</div>
+      <div class="warn-box">
+        <strong>주의:</strong> 이상값은 삭제 대상이 아니라, <strong>탐지 대상일 수 있음</strong>에 유의해야 합니다.
+      </div>
+      <table style="margin-top:12px;">
+        <thead><tr><th>항목</th><th>이상 기준 예</th></tr></thead>
+        <tbody>
+          <tr><td>요금</td><td>음수, 0원, 정책상 불가능한 금액</td></tr>
+          <tr><td>횟수</td><td>동일 카드 1시간 20회 이상</td></tr>
+          <tr><td>시간</td><td>영업시간 외 거래</td></tr>
+          <tr><td>위치</td><td>3분 내 물리적으로 불가능한 역 이동</td></tr>
+          <tr><td>장비</td><td>장비별 오류율이 평균의 10배</td></tr>
+          <tr><td>환불</td><td>특정 계정의 환불률이 비정상적으로 높음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S06 Target/Label ══ -->
+<div class="card" id="s06">
+  <div class="card-header">
+    <span class="num">06</span>
+    <h3>Target / Label 판단</h3>
+    <span class="en">Target Definition &amp; Label Strategy</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">6.1 Target 정의 예시</div>
+      <table>
+        <thead><tr><th>Use Case</th><th>Target 정의</th></tr></thead>
+        <tbody>
+          <tr><td>부정승차 탐지</td><td>해당 거래가 부정승차 의심 거래인지 여부</td></tr>
+          <tr><td>비정상 환불 탐지</td><td>해당 환불이 비정상 환불인지 여부</td></tr>
+          <tr><td>장비 오류 기반 이상거래</td><td>장비 오류로 인한 비정상 거래인지 여부</td></tr>
+          <tr><td>정산 오류 탐지</td><td>거래와 정산 간 불일치 발생 여부</td></tr>
+          <tr><td>블랙리스트 위반 탐지</td><td>차단 카드/계정의 승인 거래 여부</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">6.2 접근 방식 판단</div>
+      <table class="tbl-purple">
+        <thead><tr><th>Label 상황</th><th>추천 접근</th></tr></thead>
+        <tbody>
+          <tr><td>Label 충분</td><td><span class="badge badge-green">지도학습</span> XGBoost, LightGBM, Random Forest</td></tr>
+          <tr><td>Label 일부 존재</td><td><span class="badge badge-blue">반지도학습</span> 룰+ML 하이브리드</td></tr>
+          <tr><td>Label 없음</td><td><span class="badge badge-teal">비지도학습</span> Isolation Forest, Autoencoder</td></tr>
+          <tr><td>Label 품질 낮음</td><td><span class="badge badge-accent">룰 기반</span> 기준선 + 검토 워크플로우</td></tr>
+          <tr><td>이상거래 매우 희소</td><td><span class="badge badge-red">Anomaly Detection</span> Imbalanced Learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">6.3 Label 가능성 검토 질문</div>
+      <div class="code-block">
+실제 부정거래 적발 이력이 있는가?<br>
+오류 거래로 확정된 이력이 있는가?<br>
+정산 불일치 건을 거래 단위로 추적할 수 있는가?<br>
+민원 데이터와 거래 데이터를 연결할 수 있는가?<br>
+업무 전문가가 의심거래를 검토하여 라벨링할 수 있는가?<br>
+정상/이상 기준이 문서화되어 있는가?</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S07 Feature Engineering ══ -->
+<div class="card" id="s07">
+  <div class="card-header">
+    <span class="num">07</span>
+    <h3>Feature Engineering</h3>
+    <span class="en">Feature Engineering</span>
+  </div>
+  <div class="card-body">
+    <p>원천 데이터를 모델이 학습 가능한 변수로 변환한다. 개별 거래 자체보다 <strong>거래 전후 맥락, 카드/계정별 패턴, 장비별 패턴, 시간·공간 패턴</strong>이 탐지에 중요하다.</p>
+    <div class="grid2" style="margin-top:14px;">
+      <div>
+        <div class="sub-title" style="margin-bottom:8px;">카드/계정 단위 Feature</div>
+        <table class="tbl-blue">
+          <thead><tr><th>Feature</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>card_txn_count_1h</td><td>최근 1시간 거래 횟수</td></tr>
+            <tr><td>card_txn_count_24h</td><td>최근 24시간 거래 횟수</td></tr>
+            <tr><td>card_unique_station_24h</td><td>최근 24시간 이용 역 수</td></tr>
+            <tr><td>card_avg_fare_7d</td><td>최근 7일 평균 요금</td></tr>
+            <tr><td>card_refund_count_30d</td><td>최근 30일 환불 횟수</td></tr>
+            <tr><td>card_cancel_ratio_30d</td><td>최근 30일 취소 비율</td></tr>
+            <tr><td>card_night_usage_ratio</td><td>심야 이용 비율</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="sub-title" style="margin-bottom:8px;">공간/이동 Feature</div>
+        <table class="tbl-teal">
+          <thead><tr><th>Feature</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>previous_station_id</td><td>직전 이용 역</td></tr>
+            <tr><td>travel_time_from_prev</td><td>직전 거래와의 시간 차이</td></tr>
+            <tr><td>distance_from_prev</td><td>직전 거래 위치와의 거리</td></tr>
+            <tr><td>impossible_move_flag</td><td>불가능 이동 여부</td></tr>
+            <tr><td>transfer_count</td><td>환승 횟수</td></tr>
+            <tr><td>device_error_rate_1h</td><td>장비 오류율 (1시간)</td></tr>
+            <tr><td>device_abnormal_score</td><td>장비 이상 점수</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="sub-section" style="margin-top:16px;">
+      <div class="sub-title">집계·비율·변화량 Feature</div>
+      <div class="tag-list">
+        <span class="tag hl">amount_zscore_by_card</span>
+        <span class="tag hl">amount_zscore_by_station</span>
+        <span class="tag hl">txn_count_change_rate</span>
+        <span class="tag hl">error_rate_change</span>
+        <span class="tag hl">refund_ratio_change</span>
+        <span class="tag hl">rolling_avg_7d</span>
+        <span class="tag hl">rolling_std_7d</span>
+        <span class="tag">hour</span>
+        <span class="tag">is_weekend</span>
+        <span class="tag">is_holiday</span>
+        <span class="tag">is_peak_hour</span>
+        <span class="tag">is_late_night</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S08 Baseline ══ -->
+<div class="card" id="s08">
+  <div class="card-header">
+    <span class="num">08</span>
+    <h3>Baseline 모델</h3>
+    <span class="en">Baseline Model — Rule &amp; Statistics</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">8.1 룰 기반 탐지 규칙</div>
+      <table class="tbl-red">
+        <thead><tr><th>Rule ID</th><th>탐지 규칙</th></tr></thead>
+        <tbody>
+          <tr><td>R-001</td><td>동일 카드가 5분 내 5회 이상 사용</td></tr>
+          <tr><td>R-002</td><td>동일 카드가 10분 내 3개 이상 역에서 사용</td></tr>
+          <tr><td>R-003</td><td>요금이 음수 또는 정책상 불가능한 금액</td></tr>
+          <tr><td>R-004</td><td>블랙리스트 카드가 승인됨</td></tr>
+          <tr><td>R-005</td><td>특정 장비 오류율이 최근 평균 대비 5배 이상</td></tr>
+          <tr><td>R-006</td><td>환불/취소 비율이 카드 평균 대비 10배 이상</td></tr>
+          <tr><td>R-007</td><td>영업시간 외 승인 거래 발생</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">8.2 통계 기반 Baseline</div>
+      <table>
+        <thead><tr><th>방법</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>Z-score</td><td>평균 대비 표준편차 기준 이상값 탐지</td></tr>
+          <tr><td>IQR</td><td>Q1/Q3 기반 이상값 탐지</td></tr>
+          <tr><td>Moving Average</td><td>이동평균 대비 급증/급감 탐지</td></tr>
+          <tr><td>Percentile</td><td>상위 1% 또는 0.1% 이상값 탐지</td></tr>
+          <tr><td>Control Chart</td><td>관리한계선 기반 이상 탐지</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">8.3 Baseline 평가 기준</div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-icon">🎯</div><div class="kpi-label">탐지 건수</div><div class="kpi-desc">룰이 검출한 거래 수</div></div>
+        <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-label">업무 검토 결과</div><div class="kpi-desc">실제 이상 여부 확인</div></div>
+        <div class="kpi-card"><div class="kpi-icon">⚠️</div><div class="kpi-label">오탐률</div><div class="kpi-desc">정상인데 이상으로 탐지된 비율</div></div>
+        <div class="kpi-card"><div class="kpi-icon">🔍</div><div class="kpi-label">운영 가능성</div><div class="kpi-desc">담당자 검토 가능 수준</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S09 ML 학습·평가 ══ -->
+<div class="card" id="s09">
+  <div class="card-header">
+    <span class="num">09</span>
+    <h3>ML 모델 학습 · 평가</h3>
+    <span class="en">ML Model Training &amp; Evaluation</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">9.1 모델 접근 방식</div>
+      <table class="tbl-purple">
+        <thead><tr><th>접근 방식</th><th>적용 조건</th><th>예시 모델</th></tr></thead>
+        <tbody>
+          <tr><td>지도학습</td><td>Label이 충분할 때</td><td>XGBoost, LightGBM, Random Forest</td></tr>
+          <tr><td>비지도학습</td><td>Label이 없을 때</td><td>Isolation Forest, One-Class SVM, Autoencoder</td></tr>
+          <tr><td>반지도학습</td><td>일부 Label만 있을 때</td><td>Semi-supervised Learning</td></tr>
+          <tr><td>하이브리드</td><td>룰과 ML 결합</td><td>Rule Filter + ML Scoring</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">9.2 학습 데이터 분리 — 시계열 기준</div>
+      <div class="code-block">
+<span class="cmt">// 이상거래 탐지는 시간 순서를 반드시 고려해야 함</span><br>
+Train      : <span class="str">1월 ~ 9월</span><br>
+Validation : <span class="str">10월</span><br>
+Test       : <span class="str">11월 ~ 12월</span><br><br>
+<span class="cmt">// 무작위 분할 시 미래 데이터가 과거 학습에 섞이는 데이터 누수 발생</span></div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">9.3 평가 지표</div>
+      <div class="grid2">
+        <table class="tbl-green">
+          <thead><tr><th>지표</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>Precision</td><td>탐지한 건 중 실제 이상 비율</td></tr>
+            <tr><td>Recall</td><td>실제 이상 중 탐지한 비율</td></tr>
+            <tr><td>F1-score</td><td>Precision과 Recall의 균형</td></tr>
+            <tr><td>ROC-AUC</td><td>분류 성능 전반</td></tr>
+            <tr><td>PR-AUC</td><td>이상거래가 희소할 때 유용</td></tr>
+            <tr><td>Top-N Hit Rate</td><td>상위 위험 점수 N건 중 실제 이상 비율</td></tr>
+          </tbody>
+        </table>
+        <div>
+          <div class="warn-box" style="margin-top:0;">
+            <strong>Accuracy 함정 주의</strong><br>
+            정상 99.9% / 이상 0.1% 환경에서 모든 거래를 정상으로 예측해도 Accuracy = 99.9%.<br>
+            <strong>Precision, Recall, F1, PR-AUC, Top-N Hit Rate</strong>를 중점 관리해야 한다.
+          </div>
+          <div style="margin-top:12px;">
+            <div class="sub-title" style="margin-bottom:8px;">위험 점수 결과 예시</div>
+            <table class="tbl-red">
+              <thead><tr><th>거래 ID</th><th style="text-align:right;">위험 점수</th><th>주요 사유</th></tr></thead>
+              <tbody>
+                <tr><td>T-001</td><td style="text-align:right;">0.98</td><td>동일 카드 반복 사용, 불가능 이동</td></tr>
+                <tr><td>T-002</td><td style="text-align:right;">0.87</td><td>환불 비율 급증</td></tr>
+                <tr><td>T-003</td><td style="text-align:right;">0.81</td><td>장비 오류율 급증</td></tr>
+                <tr><td>T-004</td><td style="text-align:right;">0.75</td><td>심야 시간대 비정상 요금</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S10 운영 적용 ══ -->
+<div class="card" id="s10">
+  <div class="card-header">
+    <span class="num">10</span>
+    <h3>검증 및 운영 적용</h3>
+    <span class="en">Validation &amp; Production Deployment</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">10.1 검증 범위</div>
+      <table>
+        <thead><tr><th>항목</th><th>범위</th></tr></thead>
+        <tbody>
+          <tr><td>기간</td><td>최근 3~6개월 거래 데이터</td></tr>
+          <tr><td>대상</td><td>특정 노선/역/장비/카드 유형</td></tr>
+          <tr><td>방식</td><td>Batch 탐지</td></tr>
+          <tr><td>결과</td><td>일별 이상거래 후보 리스트</td></tr>
+          <tr><td>검토</td><td>업무 담당자 수동 검토</td></tr>
+          <tr><td>KPI</td><td>탐지 정확도, 오탐률, 검토 효율</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">10.2 운영 적용 방식</div>
+      <div class="card-grid">
+        <div class="mini-card">
+          <div class="mini-card-header" style="background: var(--blue);">📦 Batch Scoring</div>
+          <div class="mini-card-body">일/시간 단위로 이상거래 점수 산출. 대용량 거래 처리에 적합.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header" style="background: var(--teal);">⚡ Near Real-time</div>
+          <div class="mini-card-body">수분 단위로 거래 점수 산출. 준실시간 탐지 필요 시 활용.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header" style="background: var(--red);">🔴 Real-time API</div>
+          <div class="mini-card-body">거래 발생 시 즉시 위험 점수 반환. 최고 수준 대응 필요 시.</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-header" style="background: var(--purple);">📊 Dashboard + Alert</div>
+          <div class="mini-card-body">위험 거래·장비·카드·역 현황 시각화 및 Critical 알림 발송.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">10.3 운영 프로세스 흐름</div>
+      <div class="code-block">
+거래 데이터 수집<br>
+<span class="arr">→</span> Feature 생성<br>
+<span class="arr">→</span> 모델 점수 산출<br>
+<span class="arr">→</span> 위험도 등급 부여<br>
+<span class="arr">→</span> Dashboard 표시<br>
+<span class="arr">→</span> 담당자 검토<br>
+<span class="arr">→</span> 정상/이상 판정<br>
+<span class="arr">→</span> 판정 결과 재학습 데이터로 저장</div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">10.4 위험도 등급 기준</div>
+      <table>
+        <thead><tr><th>등급</th><th>기준</th><th>조치</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sev sev-crit">Critical</span></td><td>위험 점수 0.9 이상</td><td>즉시 검토 및 알림</td></tr>
+          <tr><td><span class="sev sev-high">High</span></td><td>0.75 ~ 0.9</td><td>우선 검토</td></tr>
+          <tr><td><span class="sev sev-med">Medium</span></td><td>0.5 ~ 0.75</td><td>샘플링 검토</td></tr>
+          <tr><td><span class="sev sev-low">Low</span></td><td>0.5 미만</td><td>모니터링</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S11 모니터링·재학습 ══ -->
+<div class="card" id="s11">
+  <div class="card-header">
+    <span class="num">11</span>
+    <h3>모니터링 · 재학습</h3>
+    <span class="en">Monitoring &amp; Retraining</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title">11.1 모니터링 항목</div>
+      <div class="grid2">
+        <table class="tbl-blue">
+          <thead><tr><th>항목</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>입력 데이터 건수</td><td>일/시간별 거래 건수 변화</td></tr>
+            <tr><td>Feature 분포</td><td>학습 시점과 운영 시점 분포 차이</td></tr>
+            <tr><td>이상탐지 건수</td><td>일별 이상거래 후보 수</td></tr>
+            <tr><td>오탐률</td><td>업무 검토 결과 정상 판정 비율</td></tr>
+            <tr><td>미탐률</td><td>사후 발견된 이상 중 미탐 비율</td></tr>
+          </tbody>
+        </table>
+        <table class="tbl-blue">
+          <thead><tr><th>항목</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>모델 점수 분포</td><td>위험 점수 평균/상위 분위 변화</td></tr>
+            <tr><td>데이터 지연</td><td>데이터 적재 지연 여부</td></tr>
+            <tr><td>Feature 누락</td><td>주요 Feature 생성 실패 여부</td></tr>
+            <tr><td>업무 피드백</td><td>담당자 판정 결과 반영</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">11.2 데이터 드리프트 예시</div>
+      <div class="code-block">
+신규 요금제 도입 후 <span class="kw">fare_amount</span> 분포 변화<br>
+신규 노선 개통 후 <span class="kw">station_id</span> 분포 변화<br>
+장비 교체 후 <span class="kw">error_code</span> 분포 변화<br>
+프로모션 기간 중 환불/취소 패턴 변화</div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">11.3 재학습 기준</div>
+      <table class="tbl-accent">
+        <thead><tr><th>조건</th><th>재학습 필요성</th></tr></thead>
+        <tbody>
+          <tr><td>Precision이 기준 이하로 하락</td><td><span class="sev sev-crit">즉시 필요</span></td></tr>
+          <tr><td>오탐률이 급증</td><td><span class="sev sev-crit">즉시 필요</span></td></tr>
+          <tr><td>신규 이상 패턴 등장</td><td><span class="sev sev-high">필요</span></td></tr>
+          <tr><td>요금 정책 변경</td><td><span class="sev sev-high">필요</span></td></tr>
+          <tr><td>장비/노선 체계 변경</td><td><span class="sev sev-high">필요</span></td></tr>
+          <tr><td>신규 데이터 3~6개월 축적</td><td><span class="sev sev-med">정기 재학습</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S12 전체 태스크 요약 ══ -->
+<div class="card" id="s12">
+  <div class="card-header">
+    <span class="num">12</span>
+    <h3>전체 프로세스 요약</h3>
+    <span class="en">Full Process Summary</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead><tr><th>단계</th><th>핵심 태스크</th><th>주요 산출물</th></tr></thead>
+      <tbody>
+        <tr><td>1. 업무 문제 정의</td><td>탐지 대상, 사용자, KPI 정의</td><td>Use Case 정의서</td></tr>
+        <tr><td>2. 데이터 목록화</td><td>데이터 소스, 테이블, 컬럼 식별</td><td>데이터 인벤토리</td></tr>
+        <tr><td>3. EDA</td><td>구조, 품질, 패턴 탐색</td><td>EDA 리포트</td></tr>
+        <tr><td>4. 기술통계</td><td>분포, 빈도, 그룹별 통계 분석</td><td>기술통계 보고서</td></tr>
+        <tr><td>5. 데이터 정제</td><td>결측, 중복, 이상값 처리</td><td>데이터 정제 기준서</td></tr>
+        <tr><td>6. Target/Label 판단</td><td>Label 존재 여부, 접근 방식 결정</td><td>Target/Label 정의서</td></tr>
+        <tr><td>7. Feature Engineering</td><td>거래/카드/장비/시간/공간 Feature 생성</td><td>Feature 정의서</td></tr>
+        <tr><td>8. Baseline 모델</td><td>룰 기반/통계 기반 탐지</td><td>Baseline 결과</td></tr>
+        <tr><td>9. ML 학습·평가</td><td>모델 학습, 성능 평가, 오류 분석</td><td>모델 평가서</td></tr>
+        <tr><td>10. 검증 및 운영 적용</td><td>Batch/API/Dashboard 적용</td><td>검증 결과서, 운영 설계서</td></tr>
+        <tr><td>11. 모니터링·재학습</td><td>성능, 드리프트, 피드백 관리</td><td>운영 리포트, 재학습 이력</td></tr>
+      </tbody>
+    </table>
+
+    <div class="ok-box" style="margin-top:16px;">
+      <strong>종합 요약</strong><br>
+      이상거래 탐지 AI/ML 모델은 AFC 거래, 카드/계정, 장비, 위치, 요금정책, 정산 데이터를 통합 분석하여 정상 거래 패턴과 다른 거래를 자동으로 식별한다. 업무 문제 정의, 데이터 인벤토리 구성, EDA 및 기술통계 분석, 결측·중복·이상값 정리, Target 및 Label 정의, Feature Engineering, Baseline 모델, ML 모델 학습·평가, 운영 적용, 모니터링 및 재학습의 단계적 절차를 적용하여 <strong>부정승차, 비정상 환불, 장비 오류, 정산 불일치</strong> 등 고위험 거래를 조기에 탐지하고, 데이터 기반 위험관리 체계를 구축한다.
+    </div>
+  </div>
+</div>
+
+<!-- ══ S13 추진 일정 ══ -->
+<div class="card" id="s13">
+  <div class="card-header">
+    <span class="num">13</span>
+    <h3>추진 일정</h3>
+    <span class="en">Implementation Timeline (12 Weeks)</span>
+  </div>
+  <div class="card-body">
+    <div class="timeline-grid">
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--red);">1~2주차</div>
+        <div class="tl-body"><ul><li>업무 문제 정의</li><li>데이터 소스 확인</li><li>스테이크홀더 인터뷰</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: #b03060;">3~4주차</div>
+        <div class="tl-body"><ul><li>데이터 추출</li><li>EDA 수행</li><li>기술통계 분석</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--navy);">5~6주차</div>
+        <div class="tl-body"><ul><li>데이터 정제</li><li>Target/Label 검토</li><li>Label 기준서 작성</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--blue);">7~8주차</div>
+        <div class="tl-body"><ul><li>Feature Engineering</li><li>Baseline 모델 구축</li><li>룰 기반 탐지 검증</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--purple);">9~10주차</div>
+        <div class="tl-body"><ul><li>ML 모델 학습</li><li>성능 평가</li><li>오류 분석</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--teal);">11주차</div>
+        <div class="tl-body"><ul><li>업무 담당자 검토</li><li>오탐/미탐 분석</li><li>모델 개선</li></ul></div>
+      </div>
+      <div class="tl-card">
+        <div class="tl-header" style="background: var(--green);">12주차</div>
+        <div class="tl-body"><ul><li>검증 결과 정리</li><li>운영 적용 방안 수립</li><li>최종 보고</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S14 결론 ══ -->
+<div class="card" id="s14">
+  <div class="card-header">
+    <span class="num">14</span>
+    <h3>결론 및 추진 원칙</h3>
+    <span class="en">Conclusion &amp; Key Principles</span>
+  </div>
+  <div class="card-body">
+    <p>이상거래 탐지 AI/ML 적용은 모델 개발보다 <strong>정확한 업무 문제 정의와 데이터 품질 분석</strong>이 우선이다. 특히 AFC/결제 환경에서는 이상거래의 정답 라벨이 부족하거나 희소한 경우가 많기 때문에, 초기에는 아래의 단계적 접근이 현실적이다.</p>
+    <div class="flow" style="margin-top:16px; padding: 16px;">
+      <div class="flow-step danger" style="max-width:560px;"><span class="num-circle">1</span><div class="step-title">룰 기반 Baseline</div><div class="step-sub">R-001~R-007 룰로 즉시 탐지 시작</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step data" style="max-width:560px;"><span class="num-circle">2</span><div class="step-title">기술통계 기반 이상값 탐지</div><div class="step-sub">Z-score, IQR, 이동평균 기준 이상 식별</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step model" style="max-width:560px;"><span class="num-circle">3</span><div class="step-title">비지도 이상탐지 모델</div><div class="step-sub">Isolation Forest, Autoencoder로 패턴 학습</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step process" style="max-width:560px;"><span class="num-circle">4</span><div class="step-title">업무 담당자 피드백 기반 Label 축적</div><div class="step-sub">판정 결과를 재학습 데이터로 지속 축적</div></div>
+      <div class="flow-arrow">↓</div>
+      <div class="flow-step output" style="max-width:560px;"><span class="num-circle">5</span><div class="step-title">단계적 지도학습 고도화</div><div class="step-sub">Label 축적 후 XGBoost/LightGBM 적용</div></div>
+    </div>
+    <div class="ok-box">
+      이 접근 방식은 <strong>초기 검증 성공 가능성을 높이고</strong>, 운영 현장의 검토 부담을 줄이며, 장기적으로 재학습 가능한 이상거래 탐지 체계를 구축하는 데 적합하다.
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
