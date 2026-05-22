@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보고타 LLM 민원 챗봇 PoC 계획서 — U11 3개월</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0a1520 0%, #1a375e 55%, #0a3d4a 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #80ccdd; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+  .hero strong { color: #ffc84a; }
+  .close-btn {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.35);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s;
+    letter-spacing: .02em;
+  }
+  .close-btn:hover { background: rgba(255,255,255,.28); }
+
+  /* ── TOC ── */
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 13px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--teal); color: var(--white); }
+
+  /* ── Layout ── */
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-body { padding: 20px 24px; }
+
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  .sub-title.teal   { color: var(--teal);   border-color: var(--teal); }
+  .sub-title.green  { color: var(--green);  border-color: var(--green); }
+  .sub-title.purple { color: var(--purple); border-color: var(--purple); }
+  .sub-title.red    { color: var(--red);    border-color: var(--red); }
+  .sub-title.accent { color: var(--accent); border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); }
+
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-blue   th { background: var(--blue); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); color: #fff; }
+  .tbl-red    th { background: var(--red); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .flow-step.data    { background: #e8f4fb; border: 1.5px solid #2e6da4; color: #1a375e; }
+  .flow-step.process { background: #e8f8f4; border: 1.5px solid #177b4e; color: #0d4a2a; }
+  .flow-step.model   { background: #f0eaf8; border: 1.5px solid #6a0d91; color: #4a0060; }
+  .flow-step.output  { background: #fff8e8; border: 1.5px solid #f08c00; color: #7a4500; }
+  .flow-step.action  { background: #e6f4f5; border: 1.5px solid #007a87; color: #004a54; }
+  .flow-step.danger  { background: #fdecea; border: 1.5px solid #c0392b; color: #7a1a10; }
+  .flow-arrow { color: #aab8cc; font-size: 18px; margin: 3px 0; line-height: 1; }
+
+  .hflow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .hstep {
+    background: #e6f4f5;
+    border: 1.5px solid var(--teal);
+    color: #004a54;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .harrow { color: #aab8cc; font-size: 16px; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .kpi-card {
+    background: var(--sky);
+    border: 1px solid #c0d8ee;
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .kpi-card .kpi-val {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1.2;
+  }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  .privacy-box {
+    background: linear-gradient(135deg, #e6f4f5, #d0ecf0);
+    border: 1px solid #9dd0d8;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #004a54;
+  }
+  .privacy-box strong { color: var(--teal); }
+
+  ul.bullet { padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  ul.bullet li { margin-bottom: 2px; }
+  ul.bullet li strong { color: var(--text); }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 4px;
+    margin: 2px;
+  }
+  .tag-teal   { background: #e0f4f6; color: var(--teal); border: 1px solid #9dd0d8; }
+  .tag-purple { background: #f0eaf8; color: var(--purple); border: 1px solid #c4a0e0; }
+  .tag-green  { background: #e8f4ee; color: var(--green); border: 1px solid #9dd8b8; }
+  .tag-accent { background: #fff0d0; color: #a06000; border: 1px solid #f0c060; }
+  .tag-red    { background: #fdecea; color: var(--red); border: 1px solid #e8a0a0; }
+  .tag-blue   { background: #e8f2fb; color: var(--blue); border: 1px solid #a0c4e8; }
+  .tag-gray   { background: #f0f2f5; color: var(--muted); border: 1px solid #ccd0d8; }
+
+  /* ── Gantt 스타일 ── */
+  .gantt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .gantt-table th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .gantt-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .gantt-table tr:nth-child(even) td { background: #f8fafd; }
+  .gantt-table td:first-child { font-weight: 600; color: var(--navy); white-space: nowrap; width: 200px; }
+  .gantt-table td:nth-child(2) { color: var(--muted); font-size: 11.5px; width: 100px; }
+  .bar {
+    height: 16px;
+    border-radius: 4px;
+    display: block;
+  }
+  .bar-m1  { background: linear-gradient(90deg, #2e6da4, #4a9fd4); }
+  .bar-m2  { background: linear-gradient(90deg, #177b4e, #28a86e); }
+  .bar-m3  { background: linear-gradient(90deg, #007a87, #00a0b0); }
+  .bar-all { background: linear-gradient(90deg, #6a0d91, #9040c0); }
+  .week-header { background: #2c4a70 !important; }
+  .month-header { background: #1a375e !important; font-size: 12px !important; text-align: center; }
+
+  /* ── 아키텍처 박스 ── */
+  .arch-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .arch-box {
+    flex: 1;
+    min-width: 140px;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    border: 1.5px solid;
+  }
+  .arch-box.fe   { background: #e8f2fb; border-color: #2e6da4; color: #1a375e; }
+  .arch-box.api  { background: #e6f4f5; border-color: #007a87; color: #004a54; }
+  .arch-box.llm  { background: #f0eaf8; border-color: #6a0d91; color: #4a0060; }
+  .arch-box.db   { background: #e8f4ee; border-color: #177b4e; color: #0d4a2a; }
+  .arch-box.mon  { background: #fff8e8; border-color: #f08c00; color: #7a4500; }
+  .arch-arrow-v  { text-align: center; color: #aab8cc; font-size: 18px; margin: 2px 0; }
+
+  .scope-in  { background: #e8f4ee; border: 1.5px solid #177b4e; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .scope-out { background: #fdecea; border: 1.5px solid #c0392b; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .scope-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; margin-bottom: 6px; }
+  .scope-in .scope-label  { color: var(--green); }
+  .scope-out .scope-label { color: var(--red); }
+
+  /* ── 역할 카드 ── */
+  .role-card {
+    background: var(--sky);
+    border: 1px solid #c0d8ee;
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .role-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .role-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 3px; margin-bottom: 8px; }
+  .role-badge.pm   { background: #fff0d0; color: #a06000; }
+  .role-badge.be   { background: #e0f4f6; color: var(--teal); }
+  .role-badge.fe   { background: #e8f2fb; color: var(--blue); }
+  .role-badge.ai   { background: #f0eaf8; color: var(--purple); }
+  .role-badge.qa   { background: #e8f4ee; color: var(--green); }
+
+  .milestone {
+    background: linear-gradient(135deg, #0d3a5a, #007a87);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .milestone .ms-date { font-size: 11.5px; color: #80ccdd; font-weight: 400; }
+
+  .info-box {
+    background: #f0f8ff;
+    border: 1px solid #c0d8ee;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #1a375e;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--teal); }
+
+  .risk-level {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 3px;
+  }
+  .risk-h { background: #fdecea; color: var(--red); }
+  .risk-m { background: #fff0d0; color: #a06000; }
+  .risk-l { background: #e8f4ee; color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <button class="close-btn" onclick="window.close()">✕ 닫기</button>
+  <div class="hero-badge">U11 · BOGOTÁ, COLOMBIA · PoC 3개월</div>
+  <h1>보고타 LLM 민원 챗봇 PoC 추진 계획서</h1>
+  <h2>Bogotá Web Chatbot PoC — TransMilenio·SITP 민원 자동응답 (스페인어) · TuLlave 카드</h2>
+  <div class="hero-summary">
+    본 계획서는 <strong>보고타 대중교통(TransMilenio·SITP, 운영 Recaudo Bogotá)</strong>의 고객 민원 챗봇 핵심 기능을 검증하기 위한
+    <strong>3개월 웹 기반 스페인어 PoC</strong> 추진 계획을 담는다.
+    전체 기능 중 <strong>구현 복잡도가 낮고 효과가 높은 기능</strong>(FAQ 자동응답, Intent 분류, RAG 정책 안내, 기본 상담원(agente) 이관)을 1차 범위로 하여,
+    <strong>충전(recarga)·잔액(saldo)·카드 분실(tarjeta perdida)·노선(rutas)·요금(tarifa)</strong> 등 상위 5개 민원을 대상으로 단기 검증한다.
+    예상 자동응답률 <strong>50~65%</strong> 달성, 상담원 이관 정확도 <strong>85%+</strong>를 PoC 성공 기준으로 설정한다.
+  </div>
+</div>
+
+<!-- ── TOC ── -->
+<nav class="toc-bar">
+  <a href="#s0">0. 개요</a>
+  <a href="#s1">1. PoC 범위</a>
+  <a href="#s2">2. 3개월 일정</a>
+  <a href="#s3">3. 기능 명세</a>
+  <a href="#s4">4. 기술 스택</a>
+  <a href="#s5">5. 시스템 구조</a>
+  <a href="#s6">6. 인력 구성</a>
+  <a href="#s7">7. 리스크</a>
+  <a href="#s8">8. KPI</a>
+  <a href="#s9">9. 산출물</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ── 0. 개요 ── -->
+<div class="card" id="s0">
+  <div class="card-header">
+    <span class="num">0</span>
+    <h3>PoC 개요</h3>
+    <span class="en">Overview</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title teal">추진 배경 및 목적</div>
+        <table class="tbl-teal">
+          <thead><tr><th style="width:96px; white-space:nowrap;">항목</th><th>내용</th></tr></thead>
+          <tbody>
+            <tr><td>추진 배경</td><td>충전·잔액·카드 관련 반복 민원이 TransMilenio·SITP 상담 채널에 집중, 스페인어 응대 품질 편차 발생</td></tr>
+            <tr><td>PoC 목적</td><td>스페인어 LLM/RAG 기반 자동응답 실현 가능성 검증 및 성과 수치화</td></tr>
+            <tr><td>기대 효과</td><td>자동응답률 50~65%, 상담원(agente) 단순 문의 처리 시간 50% 감소</td></tr>
+            <tr><td>PoC 형태</td><td>웹 챗봇 UI(ES) + 백엔드 API + RAG 파이프라인 (독립 환경)</td></tr>
+            <tr><td>검증 대상</td><td>TransMilenio 내부 직원 + 선정된 소수 파일럿 사용자 (약 10명 내외)</td></tr>
+            <tr><td>완료 기준</td><td>KPI 달성 여부 보고서 작성 및 경영진 데모 발표</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title">PoC → 본사업 전환 경로</div>
+        <div class="flow" style="gap:4px;">
+          <div class="flow-step action">PoC 착수 (M1 Week 1)<br><small style="font-weight:400;">킥오프 · 환경구축 · 범위 확정</small></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step data">기반 구축 (M1)<br><small style="font-weight:400;">지식베이스 · RAG 기초 · 데이터 정제</small></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step process">핵심 기능 개발 (M2)<br><small style="font-weight:400;">Intent 분류 · 챗봇 UI · 이관 판단</small></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step model">검증 · 파일럿 (M3)<br><small style="font-weight:400;">내부 테스트 → 파일럿 → 결과 분석</small></div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-step output">PoC 완료 보고<br><small style="font-weight:400;">KPI 달성 확인 · 본사업 계획 수립</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">3개월 핵심 마일스톤</div>
+      <div class="milestone"><span>M1 완료 — 스페인어 지식베이스 구축 및 기본 RAG 동작 확인</span><span class="ms-date">1개월 차 말</span></div>
+      <div class="milestone"><span>M2 완료 — 웹 챗봇 통합 내부 데모 (TransMilenio 직원 대상)</span><span class="ms-date">2개월 차 말</span></div>
+      <div class="milestone"><span>M3 완료 — 파일럿(10명 내외) 종료 · KPI 보고서 · 경영진 발표</span><span class="ms-date">3개월 차 말</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 1. PoC 범위 ── -->
+<div class="card" id="s1">
+  <div class="card-header">
+    <span class="num">1</span>
+    <h3>PoC 범위 정의</h3>
+    <span class="en">Scope Definition — In / Out</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title green">IN-SCOPE — PoC 대상 기능</div>
+        <div class="scope-in">
+          <div class="scope-label">✔ 웹 채팅 UI (스페인어)</div>
+          <ul class="bullet">
+            <li>PC/모바일 웹 브라우저 기반 스페인어 챗봇 인터페이스</li>
+            <li>비회원 접속 가능 (별도 로그인 불필요)</li>
+            <li>텍스트 입력 및 답변 표시, agente 이관 버튼</li>
+          </ul>
+        </div>
+        <div class="scope-in">
+          <div class="scope-label">✔ FAQ 자동응답 (RAG 기반 · ES)</div>
+          <ul class="bullet">
+            <li>충전(recarga)·요금(tarifa)·잔액(saldo)·분실(tarjeta perdida)·노선(rutas) 상위 5개 유형</li>
+            <li>TransMilenio FAQ + 약관/정책 문서 기반 벡터 검색 답변</li>
+            <li>신뢰도 낮은 답변 시 "확인 필요(verificar)" 처리</li>
+          </ul>
+        </div>
+        <div class="scope-in">
+          <div class="scope-label">✔ Intent 분류 (스페인어)</div>
+          <ul class="bullet">
+            <li>스페인어 민원 카테고리 자동 분류 (6~8개 클래스)</li>
+            <li>분류 결과 기반 응답 경로 분기</li>
+            <li>LLM 프롬프트 기반 또는 경량 분류 모델</li>
+          </ul>
+        </div>
+        <div class="scope-in">
+          <div class="scope-label">✔ 상담원(agente) 이관 판단 (기본)</div>
+          <ul class="bullet">
+            <li>민감 키워드 감지 시 이관 안내 (룰 기반)</li>
+            <li>Intent 신뢰도 임계값 미달 시 이관</li>
+            <li>이관 요청 수동 버튼 제공</li>
+          </ul>
+        </div>
+        <div class="scope-in">
+          <div class="scope-label">✔ 기본 모니터링 대시보드</div>
+          <ul class="bullet">
+            <li>자동응답률, 이관율, 카테고리별 문의 건수</li>
+            <li>답변 피드백 (좋아요/싫어요) 집계</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title red">OUT-OF-SCOPE — PoC 제외 항목</div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 음성봇 (STT/TTS)</div>
+          <ul class="bullet"><li>콜센터 음성 연동 — 구현 복잡도 및 인프라 비용 높음</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 개인화 (TuLlave 잔액·거래 API 연동)</div>
+          <ul class="bullet"><li>Recaudo Bogotá 결제/카드 시스템 API 연동 — 보안 검토 기간 필요</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 본인인증 연동 (cédula)</div>
+          <ul class="bullet"><li>금전 환불·개인 계정 조회 — 별도 인증 시스템 연동 필요</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 멀티채널 (WhatsApp, 앱, 이메일)</div>
+          <ul class="bullet"><li>WhatsApp·앱 SDK·이메일 연동 — 채널별 별도 개발 필요</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 다국어 확장 (영어 등)</div>
+          <ul class="bullet"><li>PoC는 스페인어 단일 언어 — 다국어는 본사업에서 검토</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 자동 재학습 파이프라인</div>
+          <ul class="bullet"><li>MLOps 인프라 — PoC 후 본사업에서 구축</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 실시간 운행 정보 연동 (llegadas)</div>
+          <ul class="bullet"><li>버스 도착·운행 API 실시간 연동 — PoC 범위 초과</li></ul>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">PoC 대상 민원 유형 (상위 5개 우선 적용)</div>
+      <table class="tbl-blue">
+        <thead><tr><th>순위</th><th>민원 유형 (ES)</th><th>선정 이유</th><th>자동화 난이도</th><th>예상 커버율</th></tr></thead>
+        <tbody>
+          <tr><td>1순위</td><td>충전 문의 (Recarga)</td><td>충전소·앱·온라인 충전 절차 FAQ 완비, 정형 답변 가능</td><td><span class="tag tag-green">낮음</span></td><td>~95%</td></tr>
+          <tr><td>2순위</td><td>요금·정산 문의 (Tarifa)</td><td>TransMilenio·SITP 요금/환승 정책 문서 기반 RAG 적합</td><td><span class="tag tag-green">낮음</span></td><td>~85%</td></tr>
+          <tr><td>3순위</td><td>잔액 조회·오류 (Saldo)</td><td>유형화된 잔액 미반영 패턴 존재 (개인 잔액 조회는 제외)</td><td><span class="tag tag-teal">중</span></td><td>~70%</td></tr>
+          <tr><td>4순위</td><td>카드 분실·재발급 (Tarjeta perdida)</td><td>분실·잠금·재발급 절차 안내 중심, 단순 프로세스</td><td><span class="tag tag-teal">중</span></td><td>~80%</td></tr>
+          <tr><td>5순위</td><td>노선·정류장 안내 (Rutas)</td><td>정적 노선·역 정보 중심, FAQ로 처리 가능</td><td><span class="tag tag-green">낮음</span></td><td>~90%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. 3개월 일정 ── -->
+<div class="card" id="s2">
+  <div class="card-header">
+    <span class="num">2</span>
+    <h3>3개월 추진 일정</h3>
+    <span class="en">3-Month Project Schedule</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title teal">월별 추진 목표</div>
+      <div class="grid3">
+        <div class="role-card">
+          <div class="role-title" style="color:var(--blue);">Month 1 — 기반 구축</div>
+          <ul class="bullet">
+            <li>프로젝트 킥오프 · 환경 구축</li>
+            <li>스페인어 데이터 수집 및 정제</li>
+            <li>지식베이스 구축 (TransMilenio FAQ·tarifa 벡터화)</li>
+            <li>기본 RAG 파이프라인 프로토타입 (ES)</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-title" style="color:var(--green);">Month 2 — 핵심 기능 개발</div>
+          <ul class="bullet">
+            <li>스페인어 Intent 분류 모델 개발·평가</li>
+            <li>웹 챗봇 UI(ES) · API 서버 개발</li>
+            <li>Guardrail · agente 이관 판단 로직</li>
+            <li>TransMilenio 내부 직원 데모 및 피드백</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-title" style="color:var(--teal);">Month 3 — 검증 및 완료</div>
+          <ul class="bullet">
+            <li>시스템 통합 테스트</li>
+            <li>파일럿 사용자 테스트 (10명 내외)</li>
+            <li>결과 분석 · 튜닝</li>
+            <li>KPI 보고서 · 경영진 발표</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">주차별 상세 일정</div>
+      <table class="gantt-table">
+        <thead>
+          <tr>
+            <th style="width:200px;">작업 항목</th>
+            <th style="width:80px;">담당</th>
+            <th class="month-header" colspan="4">Month 1 — 기반 구축</th>
+            <th class="month-header" colspan="4">Month 2 — 핵심 개발</th>
+            <th class="month-header" colspan="4">Month 3 — 검증·완료</th>
+          </tr>
+          <tr>
+            <th></th><th></th>
+            <th class="week-header">W1</th><th class="week-header">W2</th><th class="week-header">W3</th><th class="week-header">W4</th>
+            <th class="week-header">W5</th><th class="week-header">W6</th><th class="week-header">W7</th><th class="week-header">W8</th>
+            <th class="week-header">W9</th><th class="week-header">W10</th><th class="week-header">W11</th><th class="week-header">W12</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>킥오프 · 환경 구축</td><td><span class="tag tag-blue">PM/BE</span></td>
+            <td colspan="2"><span class="bar bar-m1" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>스페인어 데이터 수집·정제</td><td><span class="tag tag-teal">AI</span></td>
+            <td></td>
+            <td colspan="2"><span class="bar bar-m1" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>지식베이스 구축 · ES 임베딩</td><td><span class="tag tag-teal">AI/BE</span></td>
+            <td></td><td></td>
+            <td colspan="2"><span class="bar bar-m1" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>기본 RAG 파이프라인 프로토타입</td><td><span class="tag tag-teal">AI/BE</span></td>
+            <td></td><td></td><td></td>
+            <td><span class="bar bar-m1" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>스페인어 Intent 분류 개발·평가</td><td><span class="tag tag-teal">AI</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td colspan="2"><span class="bar bar-m2" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>웹 챗봇 UI(ES) 개발</td><td><span class="tag tag-blue">FE</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td>
+            <td colspan="2"><span class="bar bar-m2" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>API 서버 개발 (챗봇 백엔드)</td><td><span class="tag tag-teal">BE</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td>
+            <td colspan="2"><span class="bar bar-m2" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>Guardrail · 이관 판단 로직</td><td><span class="tag tag-teal">AI/BE</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td>
+            <td colspan="2"><span class="bar bar-m2" style="width:100%;"></span></td>
+            <td></td><td></td><td></td><td></td>
+          </tr>
+          <tr>
+            <td>내부 통합 테스트</td><td><span class="tag tag-green">QA/전체</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td colspan="2"><span class="bar bar-m3" style="width:100%;"></span></td>
+            <td></td><td></td>
+          </tr>
+          <tr>
+            <td>파일럿 사용자 테스트</td><td><span class="tag tag-teal">PM/QA</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td>
+            <td colspan="2"><span class="bar bar-m3" style="width:100%;"></span></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>결과 분석 · 튜닝</td><td><span class="tag tag-teal">AI/PM</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td>
+            <td><span class="bar bar-m3" style="width:100%;"></span></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>KPI 보고서 · 경영진 발표</td><td><span class="tag tag-blue">PM</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td>
+            <td><span class="bar bar-m3" style="width:100%;"></span></td>
+          </tr>
+          <tr>
+            <td>모니터링 대시보드</td><td><span class="tag tag-blue">FE/BE</span></td>
+            <td></td><td></td><td></td><td></td>
+            <td></td><td></td><td></td><td></td>
+            <td colspan="4"><span class="bar bar-all" style="width:100%;"></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">주요 의사결정 포인트</div>
+      <table class="tbl-accent">
+        <thead><tr><th>시점</th><th>의사결정 항목</th><th>기준</th></tr></thead>
+        <tbody>
+          <tr><td>W2 말</td><td>LLM API 공급사 최종 선정 (스페인어 성능 우선)</td><td>스페인어 답변 품질·비용·보안 요건 충족 여부</td></tr>
+          <tr><td>W4 말</td><td>RAG 프로토타입 계속 / 방향 전환</td><td>스페인어 답변 품질 기본 임계 달성 여부</td></tr>
+          <tr><td>W8 말</td><td>파일럿(10명 내외) 진행 여부 결정</td><td>내부 테스트 통과 기준 충족 여부</td></tr>
+          <tr><td>W12 말</td><td>본사업 전환 여부 결정</td><td>KPI 목표 달성 및 사업성 검토</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. 기능 명세 ── -->
+<div class="card" id="s3">
+  <div class="card-header">
+    <span class="num">3</span>
+    <h3>기능 상세 명세</h3>
+    <span class="en">Functional Specification</span>
+  </div>
+  <div class="card-body">
+
+    <div class="sub-section">
+      <div class="sub-title teal">기능 1 — FAQ 자동응답 (RAG 기반)</div>
+      <table class="tbl-teal">
+        <thead><tr><th>항목</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>설명</td><td>고객 질문을 벡터 검색으로 유사 문서를 찾아 LLM이 자연어로 응답 생성</td></tr>
+          <tr><td>입력</td><td>고객 텍스트 입력 (최대 500자)</td></tr>
+          <tr><td>처리</td><td>Query 임베딩 → 벡터 DB 검색 → 상위 3개 문서 추출 → LLM 프롬프트 조합 → 답변 생성</td></tr>
+          <tr><td>출력</td><td>자연어 답변 + 출처 문서 표시 (FAQ 항목명 또는 약관 조항)</td></tr>
+          <tr><td>예외</td><td>유사도 점수 0.6 미만 → "담당자 연결" 안내로 자동 전환</td></tr>
+          <tr><td>성능 목표</td><td>응답시간 5초 이내, 답변 정확도 80%+</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">기능 2 — Intent 분류</div>
+      <table class="tbl-blue">
+        <thead><tr><th>항목</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>설명</td><td>스페인어 고객 발화를 미리 정의된 민원 카테고리로 자동 분류</td></tr>
+          <tr><td>분류 클래스</td><td>충전(Recarga) / 요금·정산(Tarifa) / 잔액(Saldo) / 카드 분실(Tarjeta) / 노선 안내(Rutas) / 불편 신고(PQR) / 기타(이관)</td></tr>
+          <tr><td>구현 방식</td><td>LLM Few-shot 프롬프트 분류 (PoC) → 향후 스페인어 BERT(BETO) 파인튜닝 검토</td></tr>
+          <tr><td>출력</td><td>카테고리 레이블 + 신뢰도 점수 (0.0~1.0)</td></tr>
+          <tr><td>예외</td><td>신뢰도 0.7 미만 → "기타" 처리 후 이관 판단 로직으로 전달</td></tr>
+          <tr><td>성능 목표</td><td>분류 정확도 85%+</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title green">기능 3 — 상담원 이관 판단 (룰 기반)</div>
+      <table class="tbl-green">
+        <thead><tr><th>이관 조건</th><th>설명</th><th>처리</th></tr></thead>
+        <tbody>
+          <tr><td>민감 키워드 감지</td><td>환불(reembolso)·보상·소송(demanda)·위협 관련 키워드 포함</td><td>즉시 이관 안내 + agente 알림</td></tr>
+          <tr><td>Intent 신뢰도 낮음</td><td>분류 신뢰도 0.7 미만</td><td>이관 안내 메시지 표시</td></tr>
+          <tr><td>개인정보 요구 감지</td><td>cédula·카드번호·계좌번호 입력 시도</td><td>입력 차단 + 이관 안내</td></tr>
+          <tr><td>반복 문의</td><td>동일 세션 내 3회 이상 유사 질문</td><td>이관 권유 메시지</td></tr>
+          <tr><td>고객 수동 요청</td><td>"agente 연결(hablar con un agente)" 버튼 클릭</td><td>즉시 이관 처리</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title purple">기능 4 — Guardrail (안전장치)</div>
+      <table class="tbl-purple">
+        <thead><tr><th>유형</th><th>내용</th><th>처리</th></tr></thead>
+        <tbody>
+          <tr><td>입력 필터</td><td>욕설·스팸·비정상 입력 감지</td><td>응답 거부 + 안내 메시지</td></tr>
+          <tr><td>출력 필터</td><td>LLM 생성 답변 내 개인정보·부적절 내용</td><td>마스킹 또는 응답 차단</td></tr>
+          <tr><td>정책 외 안내 방지</td><td>RAG 출처 외 정보로 답변 생성 시</td><td>출처 기반 답변만 허용 (Source Grounding)</td></tr>
+          <tr><td>허위 안내 방지</td><td>Hallucination 의심 답변</td><td>신뢰도 낮으면 "확인 필요" 처리</td></tr>
+          <tr><td>범위 외 질문</td><td>업무 외 주제 (정치·종교 등)</td><td>응답 거부 메시지 반환</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">기능 5 — 웹 챗봇 UI 요구사항</div>
+      <table class="tbl-accent">
+        <thead><tr><th>기능</th><th>상세</th><th>우선순위</th></tr></thead>
+        <tbody>
+          <tr><td>채팅 인터페이스</td><td>말풍선 형태 대화 UI, 타이핑 중 로딩 표시</td><td><span class="tag tag-red">필수</span></td></tr>
+          <tr><td>빠른 선택 버튼</td><td>자주 묻는 유형 버튼 (Recarga·Tarifa·Saldo·Tarjeta·Rutas)</td><td><span class="tag tag-red">필수</span></td></tr>
+          <tr><td>상담원 연결 버튼</td><td>언제든 클릭 시 이관 처리</td><td><span class="tag tag-red">필수</span></td></tr>
+          <tr><td>답변 피드백</td><td>👍 / 👎 버튼으로 답변 품질 수집</td><td><span class="tag tag-red">필수</span></td></tr>
+          <tr><td>출처 표시</td><td>답변 근거 문서 표시 (FAQ 항목, 약관 조항)</td><td><span class="tag tag-teal">권장</span></td></tr>
+          <tr><td>대화 초기화</td><td>새 대화 시작 버튼</td><td><span class="tag tag-teal">권장</span></td></tr>
+          <tr><td>반응형 디자인</td><td>PC·모바일 웹 대응</td><td><span class="tag tag-teal">권장</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">처리 흐름 — 고객 메시지 수신부터 응답까지</div>
+      <div class="flow" style="gap:5px;">
+        <div class="flow-step data">고객 메시지 입력 (웹 UI)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step process">입력 Guardrail 검사 (욕설·스팸·개인정보 패턴)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step model">Intent 분류 (카테고리 + 신뢰도 점수)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step action">이관 조건 판단 (민감 키워드 · 신뢰도 · 반복 여부)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step data">RAG 검색 (쿼리 임베딩 → 벡터 DB → 상위 3개 문서)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step model">LLM 답변 생성 (RAG 문서 + 프롬프트 조합)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step process">출력 Guardrail 검사 (개인정보·부적절 내용·Hallucination)</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step output">웹 UI 답변 표시 (출처 문서 포함) + 피드백 버튼</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. 기술 스택 ── -->
+<div class="card" id="s4">
+  <div class="card-header">
+    <span class="num">4</span>
+    <h3>기술 스택</h3>
+    <span class="en">Technology Stack</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">프론트엔드 (웹 UI)</div>
+        <table>
+          <thead><tr><th>영역</th><th>기술</th><th>선정 이유</th></tr></thead>
+          <tbody>
+            <tr><td>UI 프레임워크</td><td>React 18 + TypeScript</td><td>컴포넌트 재사용, 상태관리 용이</td></tr>
+            <tr><td>스타일링</td><td>Tailwind CSS</td><td>빠른 UI 개발, 반응형 지원</td></tr>
+            <tr><td>실시간 통신</td><td>WebSocket (Socket.io)</td><td>스트리밍 응답 표시</td></tr>
+            <tr><td>상태관리</td><td>Zustand</td><td>경량, 단순한 대화 상태 관리</td></tr>
+            <tr><td>배포</td><td>Nginx + Docker</td><td>환경 통일, 간편 배포</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title teal">백엔드 API 서버</div>
+        <table class="tbl-teal">
+          <thead><tr><th>영역</th><th>기술</th><th>선정 이유</th></tr></thead>
+          <tbody>
+            <tr><td>API 프레임워크</td><td>FastAPI (Python)</td><td>LLM/AI 라이브러리 생태계 최적</td></tr>
+            <tr><td>비동기 처리</td><td>asyncio + uvicorn</td><td>스트리밍 응답 처리</td></tr>
+            <tr><td>인증</td><td>API Key 기반 (내부)</td><td>PoC 단순 인증 (운영 시 OAuth 전환)</td></tr>
+            <tr><td>로깅</td><td>structlog + ElasticSearch</td><td>대화 이력 수집 및 분석</td></tr>
+            <tr><td>배포</td><td>Docker + Kubernetes</td><td>확장성 확보</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title purple">AI/ML 컴포넌트</div>
+        <table class="tbl-purple">
+          <thead><tr><th>영역</th><th>기술 (1순위 / 대안)</th></tr></thead>
+          <tbody>
+            <tr><td>LLM API</td><td>GPT-4o mini / Claude Haiku (스페인어 성능·비용 효율)</td></tr>
+            <tr><td>임베딩 모델</td><td>text-embedding-3-small (다국어) / multilingual-e5</td></tr>
+            <tr><td>벡터 DB</td><td>Chroma (로컬 PoC) / Pinecone (클라우드)</td></tr>
+            <tr><td>RAG 프레임워크</td><td>LangChain / LlamaIndex</td></tr>
+            <tr><td>Intent 분류</td><td>LLM Few-shot → 향후 BETO(스페인어 BERT) 파인튜닝</td></tr>
+            <tr><td>문서 로더</td><td>LangChain PDF/DOCX Loader</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title green">인프라 및 모니터링</div>
+        <table class="tbl-green">
+          <thead><tr><th>영역</th><th>기술</th></tr></thead>
+          <tbody>
+            <tr><td>클라우드</td><td>AWS(상파울루 리전) / Azure 또는 온프레미스 (Recaudo Bogotá 보안 정책에 따라)</td></tr>
+            <tr><td>컨테이너</td><td>Docker Compose (PoC) → K8s (본사업)</td></tr>
+            <tr><td>모니터링</td><td>Grafana + Prometheus (응답시간·오류율)</td></tr>
+            <tr><td>대화 분석</td><td>Kibana 대시보드 (Elastic 기반)</td></tr>
+            <tr><td>CI/CD</td><td>GitHub Actions (PoC 단순 배포)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">LLM API 비용 추정 (PoC 기준)</div>
+      <table class="tbl-accent">
+        <thead><tr><th>항목</th><th>모델</th><th>단가</th><th>월 예상 사용량</th><th>월 비용 추정</th></tr></thead>
+        <tbody>
+          <tr><td>답변 생성</td><td>GPT-4o mini</td><td>$0.15/1M tokens (입력)</td><td>~500K tokens</td><td>~$15</td></tr>
+          <tr><td>임베딩</td><td>text-embedding-3-small</td><td>$0.02/1M tokens</td><td>~2M tokens</td><td>~$4</td></tr>
+          <tr><td>Intent 분류</td><td>GPT-4o mini</td><td>$0.15/1M tokens</td><td>~200K tokens</td><td>~$6</td></tr>
+          <tr><td colspan="4" style="text-align:right; font-weight:700; color:var(--teal);">월 총 비용 추정 (PoC 규모)</td><td style="font-weight:700;">~$25~50/월</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 5. 시스템 구조 ── -->
+<div class="card" id="s5">
+  <div class="card-header">
+    <span class="num">5</span>
+    <h3>PoC 시스템 아키텍처</h3>
+    <span class="en">System Architecture</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title teal">전체 구성도</div>
+      <div style="background:#f8fafd; border:1px solid var(--border); border-radius:12px; padding:24px;">
+        <div class="arch-row">
+          <div class="arch-box fe">🖥️ 웹 챗봇 UI<br><small style="font-weight:400;">React + WebSocket</small></div>
+        </div>
+        <div class="arch-arrow-v">↕ HTTPS / WebSocket</div>
+        <div class="arch-row">
+          <div class="arch-box api" style="flex:2;">⚙️ FastAPI 백엔드<br><small style="font-weight:400;">Intent 분류 · Guardrail · RAG 조합 · 이관 판단</small></div>
+          <div class="arch-box mon">📊 모니터링<br><small style="font-weight:400;">Grafana / Kibana</small></div>
+        </div>
+        <div class="arch-arrow-v">↕ API 호출</div>
+        <div class="arch-row">
+          <div class="arch-box llm">🤖 LLM API<br><small style="font-weight:400;">GPT-4o mini</small></div>
+          <div class="arch-box db">🔍 벡터 DB<br><small style="font-weight:400;">Chroma / Pinecone</small></div>
+          <div class="arch-box db" style="background:#fff8e8; border-color:#f08c00; color:#7a4500;">📂 지식베이스 (ES)<br><small style="font-weight:400;">FAQ · tarifa · rutas</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">지식베이스 구성 계획</div>
+      <table class="tbl-blue">
+        <thead><tr><th>문서 유형</th><th>예상 문서 수</th><th>청크 방식</th><th>업데이트 주기</th></tr></thead>
+        <tbody>
+          <tr><td>FAQ (스페인어 Q&A)</td><td>200~500개</td><td>Q&A 단위 (1 chunk/항목)</td><td>월 1회 수동 갱신</td></tr>
+          <tr><td>요금·환승 정책 (Tarifa)</td><td>10~20개 PDF</td><td>문단 단위 (500자 청크)</td><td>정책 변경 시</td></tr>
+          <tr><td>이용약관·카드 규정 (TuLlave)</td><td>5~10개</td><td>조항 단위</td><td>개정 시</td></tr>
+          <tr><td>공지사항·노선 안내 (Rutas)</td><td>최근 6개월분</td><td>공지 단위</td><td>주 1회 자동 수집</td></tr>
+          <tr><td>상담원 응대 매뉴얼 (ES)</td><td>5~10개</td><td>절 단위 (300자 청크)</td><td>분기 1회</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title green">데이터 흐름 — 지식베이스 구축</div>
+      <div class="hflow">
+        <span class="hstep">문서 수집<br><small>(FAQ·tarifa·rutas)</small></span><span class="harrow">→</span>
+        <span class="hstep">개인정보 마스킹</span><span class="harrow">→</span>
+        <span class="hstep">텍스트 추출<br><small>(PDF·DOCX → 텍스트)</small></span><span class="harrow">→</span>
+        <span class="hstep">청크 분할<br><small>(문단·조항 단위)</small></span><span class="harrow">→</span>
+        <span class="hstep">임베딩 생성<br><small>(Embedding API)</small></span><span class="harrow">→</span>
+        <span class="hstep">벡터 DB 저장<br><small>(메타데이터 포함)</small></span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">PoC 환경 구성</div>
+      <table>
+        <thead><tr><th>구분</th><th>스펙 / 구성</th></tr></thead>
+        <tbody>
+          <tr><td>개발 서버</td><td>CPU 8코어 / RAM 32GB / SSD 500GB (온프레미스 또는 클라우드 VM)</td></tr>
+          <tr><td>벡터 DB</td><td>Chroma (로컬) — 문서 10만 청크 이하 충분</td></tr>
+          <tr><td>LLM API</td><td>OpenAI API 또는 Azure OpenAI (기관 보안 정책 선택)</td></tr>
+          <tr><td>네트워크</td><td>내부망 (인트라넷) 접속 — PoC 기간 접근 제한</td></tr>
+          <tr><td>보안</td><td>HTTPS, API Key 인증, 접속 IP 화이트리스트</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 6. 인력 구성 ── -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">6</span>
+    <h3>인력 구성 및 역할</h3>
+    <span class="en">Team & Roles</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="grid3">
+        <div class="role-card">
+          <div class="role-badge pm">PM</div>
+          <div class="role-title">프로젝트 매니저 (1명)</div>
+          <ul class="bullet">
+            <li>일정 및 리스크 관리</li>
+            <li>이해관계자 커뮤니케이션</li>
+            <li>주간 진행 보고</li>
+            <li>KPI 정의 및 측정</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-badge ai">AI 엔지니어</div>
+          <div class="role-title">AI/ML 엔지니어 (2명)</div>
+          <ul class="bullet">
+            <li>RAG 파이프라인 설계·구현</li>
+            <li>Intent 분류 모델 개발</li>
+            <li>LLM 프롬프트 엔지니어링</li>
+            <li>Guardrail·품질 평가</li>
+            <li>지식베이스 구축 및 관리</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-badge be">백엔드</div>
+          <div class="role-title">백엔드 개발자 (1명)</div>
+          <ul class="bullet">
+            <li>FastAPI 서버 구현</li>
+            <li>LLM·벡터 DB API 연동</li>
+            <li>이관 판단 로직 구현</li>
+            <li>로깅·모니터링 연동</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-badge fe">프론트엔드</div>
+          <div class="role-title">프론트엔드 개발자 (1명)</div>
+          <ul class="bullet">
+            <li>웹 챗봇 UI 개발</li>
+            <li>반응형 레이아웃</li>
+            <li>WebSocket 실시간 통신</li>
+            <li>모니터링 대시보드 UI</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-badge qa">QA</div>
+          <div class="role-title">QA / 스페인어 도메인 전문가 (1명)</div>
+          <ul class="bullet">
+            <li>테스트 케이스 작성·실행</li>
+            <li>스페인어 답변 품질 평가 (수동 검수)</li>
+            <li>민원 도메인 검수 (현지어)</li>
+            <li>파일럿 사용자 코디네이션</li>
+          </ul>
+        </div>
+        <div class="role-card">
+          <div class="role-badge" style="background:#f0eaf8; color:var(--purple);">업무 담당자</div>
+          <div class="role-title">TransMilenio 고객센터 담당자 (파트타임)</div>
+          <ul class="bullet">
+            <li>스페인어 FAQ·tarifa·rutas 문서 제공</li>
+            <li>라벨링 검수 (민원 분류)</li>
+            <li>이관(agente) 판단 기준 협의</li>
+            <li>파일럿 결과 피드백</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">투입 공수 (3개월 합계)</div>
+      <table class="tbl-accent">
+        <thead><tr><th>역할</th><th>인원</th><th>M1</th><th>M2</th><th>M3</th><th>합계 (MM)</th></tr></thead>
+        <tbody>
+          <tr><td>PM</td><td>1명</td><td>0.6 MM</td><td>0.6 MM</td><td>0.6 MM</td><td>1.8 MM</td></tr>
+          <tr><td>AI 엔지니어</td><td>2명</td><td>2.5 MM</td><td>2.5 MM</td><td>2.0 MM</td><td>7.0 MM</td></tr>
+          <tr><td>백엔드 개발자</td><td>1명</td><td>0.6 MM</td><td>1.2 MM</td><td>0.7 MM</td><td>2.5 MM</td></tr>
+          <tr><td>프론트엔드 개발자</td><td>1명</td><td>0.4 MM</td><td>1.0 MM</td><td>0.6 MM</td><td>2.0 MM</td></tr>
+          <tr><td>QA / 도메인 전문가</td><td>1명</td><td>0.4 MM</td><td>0.6 MM</td><td>0.7 MM</td><td>1.7 MM</td></tr>
+          <tr><td colspan="5" style="text-align:right; font-weight:700;">총 투입 공수</td><td style="font-weight:700; color:var(--teal);">15.0 MM</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 7. 리스크 ── -->
+<div class="card" id="s7">
+  <div class="card-header">
+    <span class="num">7</span>
+    <h3>리스크 및 대응 방안</h3>
+    <span class="en">Risk Management</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-red">
+      <thead><tr><th>리스크</th><th>영향도</th><th>발생 가능성</th><th>대응 방안</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>LLM Hallucination — 잘못된 정책 안내</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>RAG 출처 제한(Source Grounding), 신뢰도 임계값 하에 "확인 필요" 처리, QA 수동 검수 병행</td>
+        </tr>
+        <tr>
+          <td>스페인어 답변 품질·자연스러움 부족 (현지 표현·구어체)</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>스페인어 강점 LLM 선정, 콜롬비아 현지 표현 프롬프트 가이드, 현지 스페인어 검수자 투입</td>
+        </tr>
+        <tr>
+          <td>지식베이스 문서 품질 불량 (최신성·상충)</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td>문서 수집 전 품질 점검 체크리스트 적용, 업무 담당자 검수 필수화, 문서 버전 관리</td>
+        </tr>
+        <tr>
+          <td>LLM API 응답 지연 (5초 초과)</td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>스트리밍 응답 적용, 경량 모델 대안 준비, 캐싱(자주 묻는 질문 사전 응답 저장)</td>
+        </tr>
+        <tr>
+          <td>Intent 분류 정확도 미달 (목표 85% 미충족)</td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>Few-shot 프롬프트 최적화, 라벨링 추가, 임계값 조정, 기타 분류 → 이관으로 안전하게 처리</td>
+        </tr>
+        <tr>
+          <td>개인정보 유출 위험 (상담 로그 학습 사용)</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td><span class="risk-level risk-l">낮음</span></td>
+          <td>학습·지식베이스 등록 전 cédula·카드번호 마스킹 필수, 개인정보 포함 실거래 데이터 PoC에서 제외</td>
+        </tr>
+        <tr>
+          <td>콜롬비아 개인정보보호법(Ley 1581) 준수 제약</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>데이터 처리 동의(habeas data) 확보, 데이터 리전·보관 정책 법무 검토 후 착수</td>
+        </tr>
+        <tr>
+          <td>파일럿 사용자(10명 내외) 모집 어려움</td>
+          <td><span class="risk-level risk-l">낮음</span></td>
+          <td><span class="risk-level risk-l">낮음</span></td>
+          <td>TransMilenio 내부 직원 우선 테스트로 KPI 수집, 외부 파일럿 지연 시 M3 내 내부 검증으로 대체</td>
+        </tr>
+        <tr>
+          <td>일정 지연 (지식베이스 구축 예상보다 길어짐)</td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>W4 말 RAG 프로토타입 Checkpoint 기준 일정 재검토, 범위 축소(민원 유형 3개로 한정) 검토</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 8. KPI ── -->
+<div class="card" id="s8">
+  <div class="card-header">
+    <span class="num">8</span>
+    <h3>KPI 및 성공 기준</h3>
+    <span class="en">KPI & Success Criteria</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title teal">PoC 성공 판단 KPI</div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val">50~65%</div>
+          <div class="kpi-label">자동응답률<br>(목표 60%)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">85%+</div>
+          <div class="kpi-label">Intent 분류 정확도</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">90%+</div>
+          <div class="kpi-label">이관 판단 정확도</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">5초 이내</div>
+          <div class="kpi-label">평균 응답시간</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">3% 이하</div>
+          <div class="kpi-label">Hallucination 발생률</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">70%+</div>
+          <div class="kpi-label">파일럿 사용자 만족도</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title">KPI 측정 방법</div>
+      <table class="tbl-blue">
+        <thead><tr><th>KPI</th><th>측정 방법</th><th>측정 시점</th></tr></thead>
+        <tbody>
+          <tr><td>자동응답률</td><td>전체 대화 중 이관 없이 완료된 비율 (로그 집계)</td><td>M3 파일럿 기간 2주</td></tr>
+          <tr><td>Intent 분류 정확도</td><td>테스트셋 200건 수동 라벨 vs 모델 예측 비교</td><td>M2 말 내부 평가</td></tr>
+          <tr><td>이관 판단 정확도</td><td>이관 여부 수동 판단 vs 시스템 판단 비교 (100건)</td><td>M2 말 내부 평가</td></tr>
+          <tr><td>평균 응답시간</td><td>API 응답시간 로그 P50/P95 측정</td><td>상시 모니터링</td></tr>
+          <tr><td>Hallucination 발생률</td><td>QA 수동 검수 (답변 50건) + 피드백 👎 비율</td><td>M3 파일럿 기간</td></tr>
+          <tr><td>사용자 만족도</td><td>대화 종료 후 설문 (5점 척도 → 4점+ 비율)</td><td>M3 파일럿 기간</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">PoC 성공/보완/중단 판단 기준</div>
+      <table class="tbl-accent">
+        <thead><tr><th>판정</th><th>조건</th><th>후속 조치</th></tr></thead>
+        <tbody>
+          <tr><td>성공 — 본사업 전환</td><td>자동응답률 50%+ AND Intent 정확도 80%+ AND 만족도 65%+</td><td>본사업 예산·범위 수립 착수</td></tr>
+          <tr><td>보완 — 조건부 전환</td><td>일부 KPI 미달, 특정 민원 유형에서만 성공</td><td>범위 재조정 후 2개월 추가 검증</td></tr>
+          <tr><td>중단 — 재검토</td><td>자동응답률 30% 미만 OR Hallucination 10%+ 초과</td><td>기술 스택 재검토 또는 사업 방향 전환</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 9. 산출물 ── -->
+<div class="card" id="s9">
+  <div class="card-header">
+    <span class="num">9</span>
+    <h3>산출물 목록</h3>
+    <span class="en">Deliverables</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title">Month 1 산출물</div>
+        <table>
+          <thead><tr><th>산출물</th><th>형태</th></tr></thead>
+          <tbody>
+            <tr><td>PoC 착수 보고서</td><td>문서 (PPT/PDF)</td></tr>
+            <tr><td>기술 스택 선정 결과</td><td>문서</td></tr>
+            <tr><td>데이터 수집·정제 결과</td><td>CSV / 문서</td></tr>
+            <tr><td>지식베이스 (벡터 DB)</td><td>Chroma DB 파일</td></tr>
+            <tr><td>RAG 파이프라인 프로토타입</td><td>소스코드 + Jupyter Notebook</td></tr>
+            <tr><td>기본 RAG 품질 테스트 결과</td><td>테스트 시트</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title teal">Month 2 산출물</div>
+        <table class="tbl-teal">
+          <thead><tr><th>산출물</th><th>형태</th></tr></thead>
+          <tbody>
+            <tr><td>Intent 분류 모델 / 프롬프트</td><td>소스코드 + 평가 결과</td></tr>
+            <tr><td>웹 챗봇 UI (내부 배포)</td><td>React 앱 + Docker 이미지</td></tr>
+            <tr><td>FastAPI 백엔드 서버</td><td>소스코드 + API 명세</td></tr>
+            <tr><td>Guardrail 로직</td><td>소스코드 + 테스트 결과</td></tr>
+            <tr><td>내부 데모 발표 자료</td><td>PPT</td></tr>
+            <tr><td>M2 중간 진행 보고서</td><td>문서</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title green">Month 3 산출물</div>
+        <table class="tbl-green">
+          <thead><tr><th>산출물</th><th>형태</th></tr></thead>
+          <tbody>
+            <tr><td>통합 테스트 결과 보고서</td><td>문서</td></tr>
+            <tr><td>파일럿 테스트 결과 분석</td><td>문서 + 데이터 시트</td></tr>
+            <tr><td>KPI 달성 현황 보고서</td><td>문서 (PPT/PDF)</td></tr>
+            <tr><td>경영진 최종 발표 자료</td><td>PPT (20~30슬라이드)</td></tr>
+            <tr><td>본사업 전환 제안서 (안)</td><td>문서</td></tr>
+            <tr><td>전체 소스코드 및 배포 패키지</td><td>Git Repository</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title purple">공통 산출물</div>
+        <table class="tbl-purple">
+          <thead><tr><th>산출물</th><th>시점</th></tr></thead>
+          <tbody>
+            <tr><td>주간 진행 보고서</td><td>매주 금요일</td></tr>
+            <tr><td>대화 품질 모니터링 대시보드</td><td>M2 말부터 운영</td></tr>
+            <tr><td>개인정보 처리 방침 (PoC용)</td><td>M1 완료 전</td></tr>
+            <tr><td>API 명세서 (Swagger)</td><td>M2 완료 시</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">PoC 완료 후 본사업 확장 계획 (참고)</div>
+      <table class="tbl-accent">
+        <thead><tr><th>항목</th><th>PoC (3개월)</th><th>본사업 Phase 1 (6개월)</th><th>본사업 Phase 2 (추가 6개월)</th></tr></thead>
+        <tbody>
+          <tr><td>채널</td><td>웹 챗봇 (ES)</td><td>웹 + 앱 챗봇</td><td>WhatsApp·콜센터 음성봇</td></tr>
+          <tr><td>언어</td><td>스페인어</td><td>스페인어 고도화</td><td>영어 등 다국어 확장</td></tr>
+          <tr><td>민원 유형</td><td>상위 5개</td><td>전체 민원 유형</td><td>개인화 (TuLlave 거래 연동)</td></tr>
+          <tr><td>인증</td><td>비회원 (익명)</td><td>로그인 사용자 지원</td><td>본인인증 (cédula) 연동</td></tr>
+          <tr><td>LLM</td><td>API 기반</td><td>API + 파인튜닝 검토</td><td>온프레미스 LLM 검토</td></tr>
+          <tr><td>자동응답률 목표</td><td>50~65%</td><td>70%+</td><td>80%+</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="privacy-box">
+        <strong>개인정보 보호 주의사항 (PoC 전 기간 적용)</strong><br>
+        PoC 기간 중 실제 고객 개인정보(이름, cédula, 카드번호, 전화번호, 거래내역)는 지식베이스 및 학습 데이터에 포함하지 않는다.
+        파일럿 참여자(10명 내외)의 대화 내용은 별도 동의(habeas data) 획득 후 수집하며, PoC 종료 후 30일 이내 파기한다.
+        콜롬비아 개인정보보호법(Ley 1581 de 2012) 준수 여부를 착수 전 법무 검토 후 확인한다.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('dragstart', e => e.preventDefault());
+</script>
+</body>
+</html>

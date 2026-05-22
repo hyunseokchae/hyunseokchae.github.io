@@ -767,6 +767,10 @@ html, body {
 .rec-top td:first-child { border-left: 3px solid var(--accent); }
 .rec-top .rec-uc { color: #ffc84a !important; }
 .rec-top::after { content: ''; }
+.rec-priority td { background: rgba(0,122,135,0.2) !important; }
+.rec-priority td:first-child { border-left: 4px solid #5dd3de; }
+.rec-priority .rec-uc { color: #5dd3de !important; font-weight: 800; font-size: 13.5px; }
+.priority-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; background:rgba(0,122,135,0.35); border:1px solid rgba(0,122,135,0.6); color:#5dd3de; white-space:nowrap; vertical-align:middle; margin-left:8px; }
 .phase-p1 { background: rgba(0,122,135,0.2); color: #5dd3de; border: 1px solid rgba(0,122,135,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
 .phase-p12 { background: rgba(46,109,164,0.2); color: #7ab8e8; border: 1px solid rgba(46,109,164,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
 .phase-p2 { background: rgba(106,13,145,0.2); color: #c490e4; border: 1px solid rgba(106,13,145,0.4); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
@@ -774,6 +778,109 @@ html, body {
 
 .period-val { font-size: 12px; color: rgba(255,255,255,0.55); }
 .ai-type { font-size: 11px; color: rgba(255,255,255,0.5); }
+
+/* ── PoC 계획서 (Slide 9) ── */
+.poc-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.poc-sum-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--teal);
+}
+.poc-sum-card:nth-child(2) { border-left-color: var(--blue); }
+.poc-sum-card:nth-child(3) { border-left-color: var(--purple); }
+.poc-sum-card:nth-child(4) { border-left-color: var(--accent); }
+.poc-sum-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 4px; }
+.poc-sum-val { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1.3; }
+.poc-sum-val small { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.55); }
+
+.poc-roadmap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.poc-month {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.poc-month-header {
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.poc-m-dot {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+  flex-shrink: 0;
+}
+.poc-m1 .poc-m-dot { background: rgba(46,109,164,0.3); color: #7ab8e8; border: 2px solid #2e6da4; }
+.poc-m2 .poc-m-dot { background: rgba(23,123,78,0.3); color: #5de8a0; border: 2px solid var(--green); }
+.poc-m3 .poc-m-dot { background: rgba(0,122,135,0.3); color: #5dd3de; border: 2px solid var(--teal); }
+.poc-m-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: rgba(255,255,255,0.45); }
+.poc-m-name { font-size: 13.5px; font-weight: 700; color: var(--white); }
+.poc-month-body { padding: 10px 14px; }
+.poc-task {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 0;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.8);
+  line-height: 1.45;
+}
+.poc-task::before { content: '▸'; color: var(--accent); font-size: 11px; margin-top: 1px; }
+.poc-month-ms {
+  margin: 4px 14px 12px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.6);
+}
+.poc-month-ms b { color: rgba(255,255,255,0.45); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
+
+.poc-bottom { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; width: 100%; }
+.poc-scope {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.poc-scope-title { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 8px; }
+.poc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.poc-tag {
+  font-size: 10.5px; font-weight: 600;
+  padding: 3px 9px; border-radius: 5px;
+  border: 1px solid;
+}
+.poc-tag.in  { background: rgba(23,123,78,0.18); color: #5de8a0; border-color: rgba(23,123,78,0.4); }
+.poc-tag.out { background: rgba(192,57,43,0.15); color: #f0a0a0; border-color: rgba(192,57,43,0.35); }
+.poc-scope-sub { font-size: 10px; color: rgba(255,255,255,0.4); margin: 8px 0 5px; }
+
+.poc-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.poc-kpi { text-align: center; }
+.poc-kpi-val { font-size: 19px; font-weight: 900; color: var(--accent); line-height: 1; }
+.poc-kpi-label { font-size: 9.5px; color: rgba(255,255,255,0.5); margin-top: 5px; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -859,10 +966,107 @@ html, body {
 </section>
 
 <!-- ══════════════════════════════════════════════
-     SLIDE 3 — 교통 분야 검증 유즈케이스 (T1~T7)
+     SLIDE 3 — 18개 유즈케이스 분류
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="slide-title">유즈케이스 분류</div>
+  <div class="slide-sub">데이터 준비도·구현 난이도 기반 단기·중기·장기 구분</div>
+  <div class="slide-content">
+    <div class="phase-grid">
+      <div class="phase-col">
+        <div class="phase-header ph-short">🟢 단기 Quick Wins &nbsp;<small style="font-weight:400;opacity:0.7;">9개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U01</span><div><div class="pi-name">수요 예측</div><div class="pi-data">거래 로그 + 캘린더</div></div></div>
+          <div class="phase-item"><span class="pi-code">U02</span><div><div class="pi-name">OD 분석</div><div class="pi-data">태그 IN/OUT + 환승</div></div></div>
+          <div class="phase-item"><span class="pi-code">U05</span><div><div class="pi-name">부정승차 탐지</div><div class="pi-data">거래 + 게이트 시퀀스</div></div></div>
+          <div class="phase-item"><span class="pi-code">U06</span><div><div class="pi-name">정산 오류 탐지</div><div class="pi-data">정산·클리어링 로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U07</span><div><div class="pi-name">정기권 이탈 예측</div><div class="pi-data">정기권 이력</div></div></div>
+          <div class="phase-item"><span class="pi-code">U08</span><div><div class="pi-name">승객 세그멘테이션</div><div class="pi-data">거래 + 회원 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U14</span><div><div class="pi-name">스케줄 최적화</div><div class="pi-data">다이어 + 인력 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U16</span><div><div class="pi-name">데이터 품질 관리</div><div class="pi-data">메타데이터·원천 로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U17</span><div><div class="pi-name">Gen AI 마케팅</div><div class="pi-data">캠페인 이력</div></div></div>
+        </div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-header ph-mid">🟡 중기 Strategic Bets &nbsp;<small style="font-weight:400;opacity:0.7;">8개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U03</span><div><div class="pi-name">혼잡도 예측</div><div class="pi-data">CCTV(선택) 보강</div></div></div>
+          <div class="phase-item"><span class="pi-code">U04</span><div><div class="pi-name">게이트 예지보전</div><div class="pi-data">IoT 로그 표준화</div></div></div>
+          <div class="phase-item"><span class="pi-code">U11</span><div><div class="pi-name">LLM 민원 챗봇</div><div class="pi-data">응대 매뉴얼 정리</div></div></div>
+          <div class="phase-item"><span class="pi-code">U12</span><div><div class="pi-name">분실물 매칭</div><div class="pi-data">사진·텍스트 DB</div></div></div>
+          <div class="phase-item"><span class="pi-code">U13</span><div><div class="pi-name">MaaS 개인화 추천</div><div class="pi-data">앱 로그·제휴 카탈로그</div></div></div>
+          <div class="phase-item"><span class="pi-code">U15</span><div><div class="pi-name">동적 요금 시뮬</div><div class="pi-data">가격탄력성·정책 데이터</div></div></div>
+          <div class="phase-item"><span class="pi-code">U18</span><div><div class="pi-name">LLM 운영 어시스턴트</div><div class="pi-data">운영 문서 정리</div></div></div>
+          <div class="phase-item"><span class="pi-code">U19</span><div><div class="pi-name">운전자 운행패턴 스코어링</div><div class="pi-data">운행 로그 + 사고·지연 이력</div></div></div>
+        </div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-header ph-long">🔴 장기 Long Bets &nbsp;<small style="font-weight:400;opacity:0.7;">2개 유즈케이스</small></div>
+        <div class="phase-items">
+          <div class="phase-item"><span class="pi-code">U09</span><div><div class="pi-name">CCTV 이상행동 탐지</div><div class="pi-data">대량 영상 수집·라벨링 필요</div></div></div>
+          <div class="phase-item"><span class="pi-code">U10</span><div><div class="pi-name">낙상·선로 침입 탐지</div><div class="pi-data">CCTV + 사고 라벨 DB</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="warn-box">⚠️ <strong>영상 데이터 거버넌스 신규 구축 필요</strong> — U09·U10은 Phase 2 이후 단계적 추진. 대량 영상 수집·라벨링 인프라 및 개인정보 거버넌스 선행 구축이 전제 조건입니다.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 4 — 18개 유즈케이스 정량 효과
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="slide-title">유즈케이스 기대 효과</div>
+  <div class="slide-sub">비즈니스 임팩트 카테고리별 1차 효과 추정</div>
+  <div class="slide-content">
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="impact-header ih-rev">🏆 수익 보호 &amp; 오류 제거</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U05 부정승차·이상거래 탐지</span><span class="ir-val">+0.3~1.0% 매출 회수</span></div>
+          <div class="impact-row"><span class="ir-uc">U06 정산 오류 자동 탐지</span><span class="ir-val">오정산 −50%+</span></div>
+          <div class="impact-row"><span class="ir-uc">U07 정기권 이탈 예측</span><span class="ir-val">이탈률 −10~20%</span></div>
+          <div class="impact-row"><span class="ir-uc">U13 MaaS 개인화 추천</span><span class="ir-val">제휴 수익 +10~20%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-ops">⚙️ 운영 효율 &amp; 비용 절감</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U01 시간대·역별 수요 예측</span><span class="ir-val">운영비 −3~7%</span></div>
+          <div class="impact-row"><span class="ir-uc">U02 OD 이동 패턴 분석</span><span class="ir-val">배차·요금 최적화 기반 확보</span></div>
+          <div class="impact-row"><span class="ir-uc">U04 게이트·단말기 예지보전</span><span class="ir-val">다운타임 −30~50%</span></div>
+          <div class="impact-row"><span class="ir-uc">U14 스케줄 최적화</span><span class="ir-val">인건비 −2~5%</span></div>
+          <div class="impact-row"><span class="ir-uc">U16 데이터 품질 거버넌스</span><span class="ir-val">오류 리포트 −60%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-cx">🤖 고객 경험 &amp; 안전</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U11 LLM 민원 챗봇</span><span class="ir-val">1차 응대 60%+ 자동화</span></div>
+          <div class="impact-row"><span class="ir-uc">U03 혼잡도 실시간 예측</span><span class="ir-val">혼잡 민원 −15~25%</span></div>
+          <div class="impact-row"><span class="ir-uc">U09/U10 CCTV 안전 탐지</span><span class="ir-val">사고 대응 시간 −40%</span></div>
+          <div class="impact-row"><span class="ir-uc">U19 운전자 운행패턴 스코어링</span><span class="ir-val">안전사고 리스크 −20~35%</span></div>
+          <div class="impact-row"><span class="ir-uc">U12 분실물 AI 매칭</span><span class="ir-val">처리 시간 −50%</span></div>
+        </div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-header ih-gen">🚀 Gen AI 생산성</div>
+        <div class="impact-items">
+          <div class="impact-row"><span class="ir-uc">U17 Gen AI 마케팅 콘텐츠</span><span class="ir-val">제작 시간 −70%</span></div>
+          <div class="impact-row"><span class="ir-uc">U18 LLM 운영 어시스턴트</span><span class="ir-val">운영 보고 −40%</span></div>
+          <div class="impact-row"><span class="ir-uc">U15 동적 요금 시뮬레이션</span><span class="ir-val">정책 분석 시간 −60%</span></div>
+          <div class="impact-row"><span class="ir-uc">U08 승객 세그멘테이션</span><span class="ir-val">캠페인 전환율 +15%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 5 — 교통 분야 검증 유즈케이스 (T1~T7)
 ═══════════════════════════════════════════════ -->
 <section class="slide" id="s3">
-  <div class="slide-title">교통 분야 검증 유즈케이스</div>
+  <div class="slide-title">국내외 유사사례</div>
   <div class="slide-sub">글로벌 선행 사례로 검증된 7개 핵심 유즈케이스 — T1~T6 상세 문서 연결</div>
   <div class="slide-content">
     <table class="uc-table">
@@ -941,104 +1145,92 @@ html, body {
 </section>
 
 <!-- ══════════════════════════════════════════════
-     SLIDE 4 — 18개 유즈케이스 분류
+     SLIDE 6 — 시스템 아키텍처
 ═══════════════════════════════════════════════ -->
-<section class="slide" id="s4">
-  <div class="slide-title">상세 유즈케이스 분류</div>
-  <div class="slide-sub">데이터 준비도·구현 난이도 기반 단기·중기·장기 구분</div>
+<section class="slide" id="s8">
+  <div class="slide-title">AI/ML 시스템 아키텍처</div>
+  <div class="slide-sub">Bronze → Silver → Gold 메달리온 아키텍처 + MLOps 7계층</div>
   <div class="slide-content">
-    <div class="phase-grid">
-      <div class="phase-col">
-        <div class="phase-header ph-short">🟢 단기 Quick Wins &nbsp;<small style="font-weight:400;opacity:0.7;">9개 유즈케이스</small></div>
-        <div class="phase-items">
-          <div class="phase-item"><span class="pi-code">U01</span><div><div class="pi-name">수요 예측</div><div class="pi-data">거래 로그 + 캘린더</div></div></div>
-          <div class="phase-item"><span class="pi-code">U02</span><div><div class="pi-name">OD 분석</div><div class="pi-data">태그 IN/OUT + 환승</div></div></div>
-          <div class="phase-item"><span class="pi-code">U05</span><div><div class="pi-name">부정승차 탐지</div><div class="pi-data">거래 + 게이트 시퀀스</div></div></div>
-          <div class="phase-item"><span class="pi-code">U06</span><div><div class="pi-name">정산 오류 탐지</div><div class="pi-data">정산·클리어링 로그</div></div></div>
-          <div class="phase-item"><span class="pi-code">U07</span><div><div class="pi-name">정기권 이탈 예측</div><div class="pi-data">정기권 이력</div></div></div>
-          <div class="phase-item"><span class="pi-code">U08</span><div><div class="pi-name">승객 세그멘테이션</div><div class="pi-data">거래 + 회원 데이터</div></div></div>
-          <div class="phase-item"><span class="pi-code">U14</span><div><div class="pi-name">스케줄 최적화</div><div class="pi-data">다이어 + 인력 데이터</div></div></div>
-          <div class="phase-item"><span class="pi-code">U16</span><div><div class="pi-name">데이터 품질 관리</div><div class="pi-data">메타데이터·원천 로그</div></div></div>
-          <div class="phase-item"><span class="pi-code">U17</span><div><div class="pi-name">Gen AI 마케팅</div><div class="pi-data">캠페인 이력</div></div></div>
-        </div>
+    <div class="arch-layers">
+      <div class="arch-layer la1">
+        <div class="al-num">1</div>
+        <div class="al-name">Data Ingestion</div>
+        <div class="al-detail">CDC · Batch · API · File Interface — 운영계 AFC → 분석계 안전 복제 <span class="al-tag medal-bronze">Bronze</span></div>
       </div>
-      <div class="phase-col">
-        <div class="phase-header ph-mid">🟡 중기 Strategic Bets &nbsp;<small style="font-weight:400;opacity:0.7;">8개 유즈케이스</small></div>
-        <div class="phase-items">
-          <div class="phase-item"><span class="pi-code">U03</span><div><div class="pi-name">혼잡도 예측</div><div class="pi-data">CCTV(선택) 보강</div></div></div>
-          <div class="phase-item"><span class="pi-code">U04</span><div><div class="pi-name">게이트 예지보전</div><div class="pi-data">IoT 로그 표준화</div></div></div>
-          <div class="phase-item"><span class="pi-code">U11</span><div><div class="pi-name">LLM 민원 챗봇</div><div class="pi-data">응대 매뉴얼 정리</div></div></div>
-          <div class="phase-item"><span class="pi-code">U12</span><div><div class="pi-name">분실물 매칭</div><div class="pi-data">사진·텍스트 DB</div></div></div>
-          <div class="phase-item"><span class="pi-code">U13</span><div><div class="pi-name">MaaS 개인화 추천</div><div class="pi-data">앱 로그·제휴 카탈로그</div></div></div>
-          <div class="phase-item"><span class="pi-code">U15</span><div><div class="pi-name">동적 요금 시뮬</div><div class="pi-data">가격탄력성·정책 데이터</div></div></div>
-          <div class="phase-item"><span class="pi-code">U18</span><div><div class="pi-name">LLM 운영 어시스턴트</div><div class="pi-data">운영 문서 정리</div></div></div>
-          <div class="phase-item"><span class="pi-code">U19</span><div><div class="pi-name">운전자 운행패턴 스코어링</div><div class="pi-data">운행 로그 + 사고·지연 이력</div></div></div>
-        </div>
+      <div class="arch-layer la2">
+        <div class="al-num">2</div>
+        <div class="al-name">Data Lake / Warehouse</div>
+        <div class="al-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
       </div>
-      <div class="phase-col">
-        <div class="phase-header ph-long">🔴 장기 Long Bets &nbsp;<small style="font-weight:400;opacity:0.7;">2개 유즈케이스</small></div>
-        <div class="phase-items">
-          <div class="phase-item"><span class="pi-code">U09</span><div><div class="pi-name">CCTV 이상행동 탐지</div><div class="pi-data">대량 영상 수집·라벨링 필요</div></div></div>
-          <div class="phase-item"><span class="pi-code">U10</span><div><div class="pi-name">낙상·선로 침입 탐지</div><div class="pi-data">CCTV + 사고 라벨 DB</div></div></div>
-        </div>
+      <div class="arch-layer la3">
+        <div class="al-num">3</div>
+        <div class="al-name">Feature Layer</div>
+        <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
+      </div>
+      <div class="arch-layer la4">
+        <div class="al-num">4</div>
+        <div class="al-name">ML Platform</div>
+        <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
+      </div>
+      <div class="arch-layer la5">
+        <div class="al-num">5</div>
+        <div class="al-name">Serving Layer</div>
+        <div class="al-detail">Batch Scoring · API Serving — Phase 1 배치 중심 → Phase 2 준실시간 확장</div>
+      </div>
+      <div class="arch-layer la6">
+        <div class="al-num">6</div>
+        <div class="al-name">Monitoring</div>
+        <div class="al-detail">Data Drift · Model Drift · KPI Monitoring — 데이터 변화 및 모델 성능 저하 자동 감시</div>
+      </div>
+      <div class="arch-layer la7">
+        <div class="al-num">7</div>
+        <div class="al-name">Business Application</div>
+        <div class="al-detail">Dashboard · Alert · Workflow — 단속·정비·CS·정산 업무 시스템 연결</div>
       </div>
     </div>
-    <div class="warn-box">⚠️ <strong>영상 데이터 거버넌스 신규 구축 필요</strong> — U09·U10은 Phase 2 이후 단계적 추진. 대량 영상 수집·라벨링 인프라 및 개인정보 거버넌스 선행 구축이 전제 조건입니다.</div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     SLIDE 5 — 18개 유즈케이스 정량 효과
-═══════════════════════════════════════════════ -->
-<section class="slide" id="s5">
-  <div class="slide-title">유즈케이스 기대 효과</div>
-  <div class="slide-sub">비즈니스 임팩트 카테고리별 1차 효과 추정</div>
-  <div class="slide-content">
-    <div class="impact-grid">
-      <div class="impact-card">
-        <div class="impact-header ih-rev">🏆 수익 보호 &amp; 오류 제거</div>
-        <div class="impact-items">
-          <div class="impact-row"><span class="ir-uc">U05 부정승차·이상거래 탐지</span><span class="ir-val">+0.3~1.0% 매출 회수</span></div>
-          <div class="impact-row"><span class="ir-uc">U06 정산 오류 자동 탐지</span><span class="ir-val">오정산 −50%+</span></div>
-          <div class="impact-row"><span class="ir-uc">U07 정기권 이탈 예측</span><span class="ir-val">이탈률 −10~20%</span></div>
-          <div class="impact-row"><span class="ir-uc">U13 MaaS 개인화 추천</span><span class="ir-val">제휴 수익 +10~20%</span></div>
-        </div>
-      </div>
-      <div class="impact-card">
-        <div class="impact-header ih-ops">⚙️ 운영 효율 &amp; 비용 절감</div>
-        <div class="impact-items">
-          <div class="impact-row"><span class="ir-uc">U01 시간대·역별 수요 예측</span><span class="ir-val">운영비 −3~7%</span></div>
-          <div class="impact-row"><span class="ir-uc">U02 OD 이동 패턴 분석</span><span class="ir-val">배차·요금 최적화 기반 확보</span></div>
-          <div class="impact-row"><span class="ir-uc">U04 게이트·단말기 예지보전</span><span class="ir-val">다운타임 −30~50%</span></div>
-          <div class="impact-row"><span class="ir-uc">U14 스케줄 최적화</span><span class="ir-val">인건비 −2~5%</span></div>
-          <div class="impact-row"><span class="ir-uc">U16 데이터 품질 거버넌스</span><span class="ir-val">오류 리포트 −60%</span></div>
-        </div>
-      </div>
-      <div class="impact-card">
-        <div class="impact-header ih-cx">🤖 고객 경험 &amp; 안전</div>
-        <div class="impact-items">
-          <div class="impact-row"><span class="ir-uc">U11 LLM 민원 챗봇</span><span class="ir-val">1차 응대 60%+ 자동화</span></div>
-          <div class="impact-row"><span class="ir-uc">U03 혼잡도 실시간 예측</span><span class="ir-val">혼잡 민원 −15~25%</span></div>
-          <div class="impact-row"><span class="ir-uc">U09/U10 CCTV 안전 탐지</span><span class="ir-val">사고 대응 시간 −40%</span></div>
-          <div class="impact-row"><span class="ir-uc">U19 운전자 운행패턴 스코어링</span><span class="ir-val">안전사고 리스크 −20~35%</span></div>
-          <div class="impact-row"><span class="ir-uc">U12 분실물 AI 매칭</span><span class="ir-val">처리 시간 −50%</span></div>
-        </div>
-      </div>
-      <div class="impact-card">
-        <div class="impact-header ih-gen">🚀 Gen AI 생산성</div>
-        <div class="impact-items">
-          <div class="impact-row"><span class="ir-uc">U17 Gen AI 마케팅 콘텐츠</span><span class="ir-val">제작 시간 −70%</span></div>
-          <div class="impact-row"><span class="ir-uc">U18 LLM 운영 어시스턴트</span><span class="ir-val">운영 보고 −40%</span></div>
-          <div class="impact-row"><span class="ir-uc">U15 동적 요금 시뮬레이션</span><span class="ir-val">정책 분석 시간 −60%</span></div>
-          <div class="impact-row"><span class="ir-uc">U08 승객 세그멘테이션</span><span class="ir-val">캠페인 전환율 +15%</span></div>
-        </div>
-      </div>
+    <div class="arch-note" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+      <span>전체 파이프라인에 MLOps 자동화 적용 · Champion-Challenger 모델 운영 · 자동 재학습 트리거</span>
+      <span style="display:inline-flex;gap:8px;flex-shrink:0;">
+        <a href="sub/AFC_AWS_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#FF9900,#e07000);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(255,180,0,0.4);
+                  box-shadow:0 2px 8px rgba(255,153,0,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          AWS 아키텍처 ↗
+        </a>
+        <a href="sub/AFC_Azure_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#0078D4,#005a9e);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(0,150,255,0.4);
+                  box-shadow:0 2px 8px rgba(0,120,212,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          Azure 아키텍처 ↗
+        </a>
+        <a href="sub/AFC_GCP_ML_Architecture.html" target="_blank"
+           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+                  background:linear-gradient(135deg,#4285F4,#1a73e8);
+                  color:#fff;font-size:12px;font-weight:700;
+                  padding:7px 16px;border-radius:8px;text-decoration:none;
+                  border:1px solid rgba(66,133,244,0.4);
+                  box-shadow:0 2px 8px rgba(66,133,244,0.3);
+                  transition:opacity .2s;"
+           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+          GCP 아키텍처 ↗
+        </a>
+      </span>
     </div>
   </div>
 </section>
 
 <!-- ══════════════════════════════════════════════
-     SLIDE 6 — 우선순위 매트릭스
+     SLIDE 7 — 우선순위 매트릭스
 ═══════════════════════════════════════════════ -->
 <section class="slide" id="s6">
   <div class="slide-title">우선순위 매트릭스</div>
@@ -1156,259 +1348,11 @@ html, body {
 </section>
 
 <!-- ══════════════════════════════════════════════
-     SLIDE 8 — 추천 AI 로드맵 (3Phase)
-═══════════════════════════════════════════════ -->
-<section class="slide" id="s7">
-  <div class="slide-title">AI 도입 로드맵</div>
-  <div class="slide-sub">3 Phase 단계적 추진 — PoC → Pilot → Production</div>
-  <div class="slide-content">
-    <div class="roadmap-grid">
-      <div class="phase-card ph-1">
-        <div class="phase-card-header">
-          <div class="ph-dot">1</div>
-          <div>
-            <div class="ph-label">PHASE 1 · 단기</div>
-            <div class="ph-name">PoC &amp; Quick Wins</div>
-          </div>
-        </div>
-        <div class="phase-body">
-          <div class="track track-a">
-            <div class="track-label">🅰 수익 보호</div>
-            <div class="track-items">U05 부정승차 · U06 정산 오류</div>
-          </div>
-          <div class="track track-b">
-            <div class="track-label">🅱 운영 효율</div>
-            <div class="track-items">U01 수요 예측 · U04 예지보전</div>
-          </div>
-          <div class="track track-c">
-            <div class="track-label">🅲 Gen AI</div>
-            <div class="track-items">U11 챗봇 · U17 마케팅</div>
-          </div>
-          <div class="track track-d">
-            <div class="track-label">🅳 공통 기반</div>
-            <div class="track-items">U16 데이터 품질 · U08 승객 세그멘테이션</div>
-          </div>
-        </div>
-        <div class="phase-kpi">
-          <div class="kpi-label">종료 KPI</div>
-          운영 모델 3개 · MLOps 파이프라인 1개
-        </div>
-      </div>
-      <div class="phase-card ph-2">
-        <div class="phase-card-header">
-          <div class="ph-dot">2</div>
-          <div>
-            <div class="ph-label">PHASE 2 · 중기</div>
-            <div class="ph-name">Pilot &amp; Scale</div>
-          </div>
-        </div>
-        <div class="phase-body">
-          <div class="track track-a">
-            <div class="track-label">🅰 운영화 확대</div>
-            <div class="track-items">U05/U06 전 노선 · U07 이탈 예측</div>
-          </div>
-          <div class="track track-b">
-            <div class="track-label">🅱 수요·안전</div>
-            <div class="track-items">U03 혼잡도 · U02 OD 분석</div>
-          </div>
-          <div class="track track-c">
-            <div class="track-label">🅲 AI 고도화</div>
-            <div class="track-items">U13 MaaS 추천 · U18 LLM 어시스턴트 · U12 분실물 · U19 운전자 스코어링</div>
-          </div>
-          <div class="track track-d">
-            <div class="track-label">🅳 영상 AI PoC</div>
-            <div class="track-items">U09 CCTV (선별 역사)</div>
-          </div>
-        </div>
-        <div class="phase-kpi">
-          <div class="kpi-label">종료 KPI</div>
-          운영 모델 7~9개 · A/B 테스트 체계 구축
-        </div>
-      </div>
-      <div class="phase-card ph-3">
-        <div class="phase-card-header">
-          <div class="ph-dot">3</div>
-          <div>
-            <div class="ph-label">PHASE 3 · 장기</div>
-            <div class="ph-name">Production &amp; Optimize</div>
-          </div>
-        </div>
-        <div class="phase-body">
-          <div class="track track-a">
-            <div class="track-label">🅰 전사 확대</div>
-            <div class="track-items">전 노선 Champion-Challenger 운영</div>
-          </div>
-          <div class="track track-b">
-            <div class="track-label">🅱 운영 최적화</div>
-            <div class="track-items">U14 스케줄 최적화 · U03 전 역사</div>
-          </div>
-          <div class="track track-c">
-            <div class="track-label">🅲 영상 AI 전사</div>
-            <div class="track-items">U09/U10 CCTV 전사 · U15 동적 요금</div>
-          </div>
-          <div class="track track-d">
-            <div class="track-label">🅳 거버넌스</div>
-            <div class="track-items">AI 거버넌스 위원회 · 윤리 가이드</div>
-          </div>
-        </div>
-        <div class="phase-kpi">
-          <div class="kpi-label">종료 KPI</div>
-          운영 유즈케이스 12개+ · MLOps Level 2
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     SLIDE 9 — 시스템 아키텍처
-═══════════════════════════════════════════════ -->
-<section class="slide" id="s8">
-  <div class="slide-title">AI/ML 시스템 아키텍처</div>
-  <div class="slide-sub">Bronze → Silver → Gold 메달리온 아키텍처 + MLOps 7계층</div>
-  <div class="slide-content">
-    <div class="arch-layers">
-      <div class="arch-layer la1">
-        <div class="al-num">1</div>
-        <div class="al-name">Data Ingestion</div>
-        <div class="al-detail">CDC · Batch · API · File Interface — 운영계 AFC → 분석계 안전 복제 <span class="al-tag medal-bronze">Bronze</span></div>
-      </div>
-      <div class="arch-layer la2">
-        <div class="al-num">2</div>
-        <div class="al-name">Data Lake / Warehouse</div>
-        <div class="al-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
-      </div>
-      <div class="arch-layer la3">
-        <div class="al-num">3</div>
-        <div class="al-name">Feature Layer</div>
-        <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
-      </div>
-      <div class="arch-layer la4">
-        <div class="al-num">4</div>
-        <div class="al-name">ML Platform</div>
-        <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
-      </div>
-      <div class="arch-layer la5">
-        <div class="al-num">5</div>
-        <div class="al-name">Serving Layer</div>
-        <div class="al-detail">Batch Scoring · API Serving — Phase 1 배치 중심 → Phase 2 준실시간 확장</div>
-      </div>
-      <div class="arch-layer la6">
-        <div class="al-num">6</div>
-        <div class="al-name">Monitoring</div>
-        <div class="al-detail">Data Drift · Model Drift · KPI Monitoring — 데이터 변화 및 모델 성능 저하 자동 감시</div>
-      </div>
-      <div class="arch-layer la7">
-        <div class="al-num">7</div>
-        <div class="al-name">Business Application</div>
-        <div class="al-detail">Dashboard · Alert · Workflow — 단속·정비·CS·정산 업무 시스템 연결</div>
-      </div>
-    </div>
-    <div class="arch-note" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-      <span>전체 파이프라인에 MLOps 자동화 적용 · Champion-Challenger 모델 운영 · 자동 재학습 트리거</span>
-      <span style="display:inline-flex;gap:8px;flex-shrink:0;">
-        <a href="sub/AFC_AWS_ML_Architecture.html" target="_blank"
-           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-                  background:linear-gradient(135deg,#FF9900,#e07000);
-                  color:#fff;font-size:12px;font-weight:700;
-                  padding:7px 16px;border-radius:8px;text-decoration:none;
-                  border:1px solid rgba(255,180,0,0.4);
-                  box-shadow:0 2px 8px rgba(255,153,0,0.3);
-                  transition:opacity .2s;"
-           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
-          AWS 아키텍처 ↗
-        </a>
-        <a href="sub/AFC_Azure_ML_Architecture.html" target="_blank"
-           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-                  background:linear-gradient(135deg,#0078D4,#005a9e);
-                  color:#fff;font-size:12px;font-weight:700;
-                  padding:7px 16px;border-radius:8px;text-decoration:none;
-                  border:1px solid rgba(0,150,255,0.4);
-                  box-shadow:0 2px 8px rgba(0,120,212,0.3);
-                  transition:opacity .2s;"
-           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
-          Azure 아키텍처 ↗
-        </a>
-        <a href="sub/AFC_GCP_ML_Architecture.html" target="_blank"
-           style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
-                  background:linear-gradient(135deg,#4285F4,#1a73e8);
-                  color:#fff;font-size:12px;font-weight:700;
-                  padding:7px 16px;border-radius:8px;text-decoration:none;
-                  border:1px solid rgba(66,133,244,0.4);
-                  box-shadow:0 2px 8px rgba(66,133,244,0.3);
-                  transition:opacity .2s;"
-           onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
-          GCP 아키텍처 ↗
-        </a>
-      </span>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     SLIDE 10 — 위험 요소 및 완화 전략
-═══════════════════════════════════════════════ -->
-<section class="slide" id="s9">
-  <div class="slide-title">AI/ML 고려사항</div>
-  <div class="slide-sub">영향도 × 발생 가능성 기반 주요 6대 위험 요소 관리</div>
-  <div class="slide-content">
-    <table class="risk-table">
-      <thead>
-        <tr>
-          <th>위험 등급</th>
-          <th>위험 요소</th>
-          <th>영향</th>
-          <th>완화 전략</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="risk-badge r-high">HIGH</span></td>
-          <td><span class="risk-factor">개인정보 (교통카드 ID) 유출</span></td>
-          <td>법적·평판 리스크 (대)</td>
-          <td class="risk-mitigation">Bronze 직후 가명화 · KMS 암호화 · Lake Formation FGAC 적용</td>
-        </tr>
-        <tr>
-          <td><span class="risk-badge r-high">HIGH</span></td>
-          <td><span class="risk-factor">Gen AI 환각·개인정보 유출</span></td>
-          <td>신뢰도 저하 (대)</td>
-          <td class="risk-mitigation">RAG + Guardrail + 응답 감사 로그 의무화</td>
-        </tr>
-        <tr>
-          <td><span class="risk-badge r-med">MED</span></td>
-          <td><span class="risk-factor">데이터 보강 지연</span></td>
-          <td>PoC 일정 지연</td>
-          <td class="risk-mitigation">외부 데이터(날씨·행사) 우선 계약 · IoT 센서 표준화 선행</td>
-        </tr>
-        <tr>
-          <td><span class="risk-badge r-med">MED</span></td>
-          <td><span class="risk-factor">모델 드리프트 (계절성·이벤트)</span></td>
-          <td>예측 정확도 하락</td>
-          <td class="risk-mitigation">Model Monitor + Champion/Challenger + 자동 재학습 파이프라인</td>
-        </tr>
-        <tr>
-          <td><span class="risk-badge r-med">MED</span></td>
-          <td><span class="risk-factor">노조·정책 협의 (요금·스케줄 AI)</span></td>
-          <td>운영화 지연</td>
-          <td class="risk-mitigation">Phase 3으로 후행 배치 · 시뮬레이션 전용 단계 우선 운영</td>
-        </tr>
-        <tr>
-          <td><span class="risk-badge r-low">LOW</span></td>
-          <td><span class="risk-factor">MLOps 내부 인력 부족</span></td>
-          <td>운영화 지연</td>
-          <td class="risk-mitigation">Phase 1 외부 파트너 활용 · Phase 2부터 내재화 로드맵 병행</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════════════
-     SLIDE 11 — 검토대상 유즈케이스
+     SLIDE 8 — 유즈케이스 검토결과
 ═══════════════════════════════════════════════ -->
 <section class="slide" id="s10">
-  <div class="slide-title">검토대상 유즈케이스</div>
-  <div class="slide-sub">우선순위 등급 · AI 유형 · 기간 · 기대 효과 · 추진 단계</div>
+  <div class="slide-title">유즈케이스 검토결과</div>
+  <div class="slide-sub">우선순위 등급 · AI 유형 · 기간 · 기대 효과</div>
   <div class="slide-content">
     <table class="rec-table">
       <thead>
@@ -1418,41 +1362,36 @@ html, body {
           <th>AI 유형</th>
           <th>기간</th>
           <th>1차 기대 효과</th>
-          <th>단계</th>
         </tr>
       </thead>
       <tbody>
         <tr class="rec-top">
           <td class="rec-stars">★★★</td>
+          <td class="rec-uc"><a href="sub/llm_chatbot_process.html" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.5);">U11 LLM 민원 챗봇</a></td>
+          <td class="ai-type">NLP/LLM</td>
+          <td class="period-val">2~3개월</td>
+          <td class="rec-effect">CS 자동화 60%+</td>
+        </tr>
+        <tr>
+          <td class="rec-stars">★★★</td>
           <td class="rec-uc"><a href="sub/abnormal_transaction_detection_process.html" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.5);">U05 부정승차·이상거래 탐지</a></td>
           <td class="ai-type">Anomaly Detection</td>
           <td class="period-val">4~6개월</td>
           <td class="rec-effect">매출 회수 +0.3~1.0%</td>
-          <td><span class="phase-p1">Phase 1</span></td>
         </tr>
-        <tr class="rec-top">
+        <tr>
           <td class="rec-stars">★★★</td>
           <td class="rec-uc">U01 시간대·역별 수요 예측</td>
           <td class="ai-type">Forecasting</td>
           <td class="period-val">4~6개월</td>
           <td class="rec-effect">운영비 −3~7%</td>
-          <td><span class="phase-p1">Phase 1</span></td>
         </tr>
-        <tr class="rec-top">
+        <tr>
           <td class="rec-stars">★★★</td>
           <td class="rec-uc">U04 게이트·단말기 예지보전</td>
           <td class="ai-type">Predictive AI</td>
           <td class="period-val">6~9개월</td>
           <td class="rec-effect">다운타임 −30~50%</td>
-          <td><span class="phase-p12">Phase 1~2</span></td>
-        </tr>
-        <tr>
-          <td class="rec-stars">★★★</td>
-          <td class="rec-uc">U11 LLM 민원 챗봇</td>
-          <td class="ai-type">NLP/LLM</td>
-          <td class="period-val">2~3개월</td>
-          <td class="rec-effect">CS 자동화 60%+</td>
-          <td><span class="phase-p1">Phase 1</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
@@ -1460,7 +1399,6 @@ html, body {
           <td class="ai-type">Forecasting + CCTV</td>
           <td class="period-val">5~7개월</td>
           <td class="rec-effect">혼잡 민원 −15~25%</td>
-          <td><span class="phase-p2">Phase 2</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
@@ -1468,7 +1406,6 @@ html, body {
           <td class="ai-type">Anomaly Detection</td>
           <td class="period-val">4~5개월</td>
           <td class="rec-effect">오정산 −50%+</td>
-          <td><span class="phase-p12">Phase 1~2</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
@@ -1476,7 +1413,6 @@ html, body {
           <td class="ai-type">Recommender</td>
           <td class="period-val">6~8개월</td>
           <td class="rec-effect">제휴 수익 +10~20%</td>
-          <td><span class="phase-p2">Phase 2</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
@@ -1484,7 +1420,6 @@ html, body {
           <td class="ai-type">Generative AI</td>
           <td class="period-val">2개월</td>
           <td class="rec-effect">제작 시간 −70%</td>
-          <td><span class="phase-p1">Phase 1</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.6);">★★</td>
@@ -1492,7 +1427,6 @@ html, body {
           <td class="ai-type">Clustering / Scoring</td>
           <td class="period-val">5~8개월</td>
           <td class="rec-effect">안전사고 리스크 −20~35% · 교육 효율↑</td>
-          <td><span class="phase-p12">Phase 2</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.35);">★</td>
@@ -1500,7 +1434,6 @@ html, body {
           <td class="ai-type">Computer Vision</td>
           <td class="period-val">9~12개월</td>
           <td class="rec-effect">사고 대응 시간 −40% (정성적)</td>
-          <td><span class="phase-p2">Phase 2~3</span></td>
         </tr>
         <tr>
           <td class="rec-stars" style="color:rgba(240,140,0,0.35);">★</td>
@@ -1508,10 +1441,133 @@ html, body {
           <td class="ai-type">Optimization</td>
           <td class="period-val">6~9개월</td>
           <td class="rec-effect">인건비 −2~5%</td>
-          <td><span class="phase-p3">Phase 3</span></td>
         </tr>
       </tbody>
     </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     SLIDE 9 — LLM Chatbot PoC 계획서
+═══════════════════════════════════════════════ -->
+<section class="slide" id="s11">
+  <div class="slide-badge">PROOF OF CONCEPT · BOGOTÁ, COLOMBIA</div>
+  <div class="slide-title">보고타 LLM Chatbot PoC 계획서</div>
+  <div class="slide-sub">웹 기반 3개월 PoC — TransMilenio·SITP 민원 자동응답 (스페인어) · TuLlave 카드</div>
+  <div class="slide-content">
+
+    <!-- 요약 바 -->
+    <div class="poc-summary">
+      <div class="poc-sum-card">
+        <div class="poc-sum-label">추진 기간</div>
+        <div class="poc-sum-val">3개월 <small>(12주)</small></div>
+      </div>
+      <div class="poc-sum-card">
+        <div class="poc-sum-label">적용 대상</div>
+        <div class="poc-sum-val">TransMilenio·SITP <small>· Recaudo Bogotá · TuLlave</small></div>
+      </div>
+      <div class="poc-sum-card">
+        <div class="poc-sum-label">대상 민원 (ES)</div>
+        <div class="poc-sum-val">상위 5개 <small>(충전·잔액·분실·노선·요금)</small></div>
+      </div>
+      <div class="poc-sum-card">
+        <div class="poc-sum-label">핵심 목표</div>
+        <div class="poc-sum-val">자동응답 60% <small>· 스페인어 챗봇</small></div>
+      </div>
+    </div>
+
+    <!-- 3개월 로드맵 -->
+    <div class="poc-roadmap">
+      <div class="poc-month poc-m1">
+        <div class="poc-month-header">
+          <div class="poc-m-dot">M1</div>
+          <div>
+            <div class="poc-m-label">MONTH 1 · 1~4주</div>
+            <div class="poc-m-name">기반 구축</div>
+          </div>
+        </div>
+        <div class="poc-month-body">
+          <div class="poc-task">킥오프 · 환경 구축 · LLM/임베딩 공급사 선정</div>
+          <div class="poc-task">스페인어 데이터 수집·정제 (TransMilenio FAQ·tarifa·rutas)</div>
+          <div class="poc-task">지식베이스 구축 · 스페인어 임베딩 · 벡터 DB</div>
+          <div class="poc-task">기본 RAG 파이프라인 프로토타입 (ES)</div>
+        </div>
+        <div class="poc-month-ms"><b>마일스톤</b>스페인어 지식베이스 구축 및 기본 RAG 동작 확인</div>
+      </div>
+
+      <div class="poc-month poc-m2">
+        <div class="poc-month-header">
+          <div class="poc-m-dot">M2</div>
+          <div>
+            <div class="poc-m-label">MONTH 2 · 5~8주</div>
+            <div class="poc-m-name">핵심 기능 개발</div>
+          </div>
+        </div>
+        <div class="poc-month-body">
+          <div class="poc-task">스페인어 Intent 분류 모델 개발 및 평가</div>
+          <div class="poc-task">웹 챗봇 UI (ES) · FastAPI 백엔드 개발</div>
+          <div class="poc-task">Guardrail · 상담원(agente) 이관 판단 로직</div>
+          <div class="poc-task">TransMilenio 내부 직원 데모 및 피드백</div>
+        </div>
+        <div class="poc-month-ms"><b>마일스톤</b>웹 챗봇 통합 내부 데모 (TransMilenio 직원 대상)</div>
+      </div>
+
+      <div class="poc-month poc-m3">
+        <div class="poc-month-header">
+          <div class="poc-m-dot">M3</div>
+          <div>
+            <div class="poc-m-label">MONTH 3 · 9~12주</div>
+            <div class="poc-m-name">검증 및 완료</div>
+          </div>
+        </div>
+        <div class="poc-month-body">
+          <div class="poc-task">시스템 통합 테스트</div>
+          <div class="poc-task">파일럿 사용자 테스트 (10명 내외)</div>
+          <div class="poc-task">결과 분석 · 모델 튜닝</div>
+          <div class="poc-task">KPI 보고서 · 경영진 발표</div>
+        </div>
+        <div class="poc-month-ms"><b>마일스톤</b>파일럿 종료 · KPI 보고 · 본사업 전환 판단</div>
+      </div>
+    </div>
+
+    <!-- 하단: 범위 + KPI -->
+    <div class="poc-bottom">
+      <div class="poc-scope">
+        <div class="poc-scope-title">PoC 범위 (구현 용이 기능 우선)</div>
+        <div class="poc-tags">
+          <span class="poc-tag in">✓ FAQ 자동응답 (RAG·ES)</span>
+          <span class="poc-tag in">✓ Intent 분류 (스페인어)</span>
+          <span class="poc-tag in">✓ 상담원(agente) 이관</span>
+          <span class="poc-tag in">✓ Guardrail</span>
+          <span class="poc-tag in">✓ 모니터링 대시보드</span>
+        </div>
+        <div class="poc-scope-sub">제외 (본사업 단계)</div>
+        <div class="poc-tags">
+          <span class="poc-tag out">✗ 음성봇 STT/TTS</span>
+          <span class="poc-tag out">✗ TuLlave 잔액·거래 연동</span>
+          <span class="poc-tag out">✗ 본인인증 (cédula)</span>
+          <span class="poc-tag out">✗ WhatsApp·앱 채널</span>
+          <span class="poc-tag out">✗ 영어·다국어 확장</span>
+        </div>
+      </div>
+
+      <div class="poc-scope" style="padding:10px 14px;">
+        <div class="poc-scope-title">성공 기준 KPI</div>
+        <div class="poc-kpi-strip" style="border:none; padding:6px 0 0; background:transparent;">
+          <div class="poc-kpi"><div class="poc-kpi-val">60%</div><div class="poc-kpi-label">자동응답률</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">85%</div><div class="poc-kpi-label">Intent 정확도</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">90%</div><div class="poc-kpi-label">이관 정확도</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">5초</div><div class="poc-kpi-label">평균 응답</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">3%</div><div class="poc-kpi-label">Hallu. 이하</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">70%</div><div class="poc-kpi-label">사용자 만족</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:10px;">
+      <a href="sub/llm_chatbot_poc_plan.html" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,122,135,0.25); border:1px solid rgba(0,122,135,0.5); color:#5dd3de; font-size:12.5px; font-weight:700; padding:8px 20px; border-radius:24px; text-decoration:none; letter-spacing:0.3px;">📄 상세 계획서 전문 보기 (범위·일정·기능·기술·인력·리스크·KPI·산출물)</a>
+    </div>
+
   </div>
 </section>
 
