@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이상거래 탐지 AI/ML 적용 프로세스 — U05</title>
+<title>이상거래 탐지 AI/ML 적용 예시 — U05</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -65,6 +65,21 @@
     max-width: 900px;
   }
   .hero strong { color: #ffc84a; }
+  .close-btn {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.35);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s;
+    letter-spacing: .02em;
+  }
+  .close-btn:hover { background: rgba(255,255,255,.28); }
 
   .toc-bar {
     background: var(--navy);
@@ -314,8 +329,9 @@
 <body>
 
 <div class="hero">
+  <button class="close-btn" onclick="window.close()">✕ 닫기</button>
   <div class="hero-badge">U05 · Anomaly Detection / AI/ML Process</div>
-  <h1>이상거래 탐지 AI/ML 적용 프로세스</h1>
+  <h1>이상거래 탐지 AI/ML 적용 예시</h1>
   <h2>Anomaly &amp; Fraud Transaction Detection — Step-by-Step ML Process</h2>
   <div class="hero-summary">
     AFC·결제·정산·ABT 환경에서 <strong>부정승차, 비정상 환불, 장비 오류, 정산 불일치</strong> 등 고위험 거래를
