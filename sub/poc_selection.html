@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3개월 PoC 과제 선택 비교 — LLM 민원 챗봇 vs 부정승차 탐지</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1a30 0%, #1a375e 55%, #2d0a5a 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--purple);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #c4a0e8; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+  .hero strong { color: #ffc84a; }
+  .close-btn {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.35);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s;
+    letter-spacing: .02em;
+  }
+  .close-btn:hover { background: rgba(255,255,255,.28); }
+
+  /* ── TOC ── */
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 13px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--purple); color: var(--white); }
+
+  /* ── Layout ── */
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--purple);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-header.teal-hd { background: linear-gradient(90deg, var(--navy), var(--teal)); }
+  .card-header.purple-hd { background: linear-gradient(90deg, var(--navy), var(--purple)); }
+  .card-body { padding: 20px 24px; }
+
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  .sub-title.teal   { color: var(--teal);   border-color: var(--teal); }
+  .sub-title.green  { color: var(--green);  border-color: var(--green); }
+  .sub-title.purple { color: var(--purple); border-color: var(--purple); }
+  .sub-title.red    { color: var(--red);    border-color: var(--red); }
+  .sub-title.accent { color: var(--accent); border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); }
+
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-blue   th { background: var(--blue); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); color: #fff; }
+  .tbl-red    th { background: var(--red); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ── 비교표 특수 셀 ── */
+  .cmp-high  { background: #e8f4ee !important; color: #177b4e; font-weight: 700; }
+  .cmp-mid   { background: #fff8e8 !important; color: #a06000; font-weight: 600; }
+  .cmp-low   { background: #f4f6f9 !important; color: var(--muted); }
+  .cmp-hd-llm  { background: #e8f2fb !important; color: var(--blue); font-weight: 700; text-align: center; }
+  .cmp-hd-fraud { background: #f0eaf8 !important; color: var(--purple); font-weight: 700; text-align: center; }
+  .cmp-row-label { background: var(--gray) !important; font-weight: 700; color: var(--navy); width: 200px; }
+
+  /* ── Flow ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .flow-step.data    { background: #e8f4fb; border: 1.5px solid #2e6da4; color: #1a375e; }
+  .flow-step.process { background: #e8f8f4; border: 1.5px solid #177b4e; color: #0d4a2a; }
+  .flow-step.model   { background: #f0eaf8; border: 1.5px solid #6a0d91; color: #4a0060; }
+  .flow-step.output  { background: #fff8e8; border: 1.5px solid #f08c00; color: #7a4500; }
+  .flow-step.action  { background: #e6f4f5; border: 1.5px solid #007a87; color: #004a54; }
+  .flow-step.danger  { background: #fdecea; border: 1.5px solid #c0392b; color: #7a1a10; }
+  .flow-arrow { color: #aab8cc; font-size: 18px; margin: 3px 0; line-height: 1; }
+
+  ul.bullet { padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  ul.bullet li { margin-bottom: 2px; }
+  ul.bullet li strong { color: var(--text); }
+
+  /* ── 선택 기준표 ── */
+  .crit-yes  { background: #e8f4ee !important; color: var(--green); font-weight: 600; }
+  .crit-no   { background: #f0eaf8 !important; color: var(--purple); font-weight: 600; }
+
+  /* ── 추천 결론 카드 ── */
+  .rank-card {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .rank-card.rank1 {
+    background: linear-gradient(135deg, #e8f4fb, #d8eef8);
+    border: 2px solid var(--teal);
+  }
+  .rank-card.rank2 {
+    background: var(--gray);
+    border: 1px solid var(--border);
+    opacity: .85;
+  }
+  .rank-num {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    min-width: 44px;
+    text-align: center;
+  }
+  .rank1 .rank-num { color: var(--teal); }
+  .rank2 .rank-num { color: var(--muted); }
+  .rank-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .rank-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .rank-badge {
+    display: inline-block;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 10px; border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .rank1 .rank-badge { background: var(--teal); color: #fff; }
+  .rank2 .rank-badge { background: #d0d8e4; color: var(--muted); }
+
+  /* ── 조건 코드블록 ── */
+  .condition-box {
+    background: #1a2a40;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #80ccee;
+    line-height: 2;
+    margin-bottom: 16px;
+  }
+  .condition-box .cb-comment { color: #5a8a6a; }
+
+  /* ── 제안 방향 카드 ── */
+  .option-card {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(30,60,100,.1);
+  }
+  .option-header {
+    padding: 14px 20px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .opt-a .option-header { background: linear-gradient(90deg, var(--teal), #009aaa); }
+  .opt-b .option-header { background: linear-gradient(90deg, #5a3a80, var(--purple)); }
+  .option-label {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 10px; border-radius: 20px;
+    background: rgba(255,255,255,.25);
+    letter-spacing: .05em;
+  }
+  .option-body {
+    background: var(--white);
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+  }
+  .option-code {
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: var(--navy);
+    line-height: 1.9;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  .prereq-label {
+    font-size: 12px; font-weight: 700;
+    color: var(--purple);
+    margin-bottom: 8px;
+  }
+
+  /* ── 한 줄 결론 ── */
+  .final-box {
+    background: linear-gradient(135deg, #0d1a30, #1a375e, #2d0a5a);
+    border-radius: 12px;
+    padding: 28px 32px;
+    text-align: center;
+    color: var(--white);
+  }
+  .final-box p {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.8;
+    margin-bottom: 10px;
+  }
+  .final-box p:last-child { margin-bottom: 0; }
+  .final-box strong { color: #ffc84a; }
+  .final-box .final-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,.65);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <button class="close-btn" onclick="window.close()">✕ 닫기</button>
+  <div class="hero-badge">PoC 과제 선택 비교 · LLM 민원 챗봇 vs 부정승차 탐지</div>
+  <h1>3개월 PoC 과제 선택 비교</h1>
+  <h2>LLM Chatbot PoC vs. Fare Evasion Detection PoC — Selection Analysis</h2>
+  <div class="hero-summary">
+    보고타 교통·AFC 영역에서 <strong>3개월 PoC</strong>를 추진할 경우, 후보 과제는 <strong>LLM 민원 챗봇</strong>과 <strong>부정승차 탐지</strong>로 구분된다.
+    두 과제 모두 AI/ML 적용 가치가 있으나, PoC 목적이 <strong>내부 테스트 중심인지</strong>, <strong>운영 데이터 확보가 가능한지</strong>,
+    <strong>단기간 내 시연 가능한 결과물이 필요한지</strong>에 따라 적합성이 달라진다.
+    본 문서는 두 과제를 7개 관점에서 비교하고 최적 선택을 안내한다.
+  </div>
+</div>
+
+<!-- ── TOC ── -->
+<nav class="toc-bar">
+  <a href="#s1">1. 비교 개요</a>
+  <a href="#s2">2. LLM 민원 챗봇</a>
+  <a href="#s3">3. 부정승차 탐지</a>
+  <a href="#s4">4. 선택 기준</a>
+  <a href="#s5">5. 추천 결론</a>
+  <a href="#s6">6. 제안 방향</a>
+  <a href="#s7">7. 한 줄 결론</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ── 1. 비교 개요 ── -->
+<div class="card" id="s1">
+  <div class="card-header">
+    <span class="num">1</span>
+    <h3>비교 개요</h3>
+    <span class="en">Comparison Overview</span>
+  </div>
+  <div class="card-body">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:200px;">구분</th>
+          <th class="cmp-hd-llm">LLM 민원 챗봇</th>
+          <th class="cmp-hd-fraud">부정승차 탐지</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="cmp-row-label">과제 유형</td>
+          <td>생성형 AI / RAG / 고객응대 자동화</td>
+          <td>예측·탐지형 ML / 이상탐지</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">주요 목적</td>
+          <td>민원 자동응답, 상담원 지원, FAQ 자동화</td>
+          <td>비정상 이용 패턴 및 부정승차 의심 거래 탐지</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">주요 데이터</td>
+          <td>FAQ, 정책문서, 상담로그, VOC</td>
+          <td>AFC 거래, 카드, 장비, 정류장, 단속 이력</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">주요 결과물</td>
+          <td>내부 챗봇 Prototype, RAG Pipeline, 답변 평가</td>
+          <td>이상거래 Score, 의심 패턴, 탐지 Rule/Model</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">3개월 PoC 적합성</td>
+          <td class="cmp-high">높음</td>
+          <td class="cmp-mid">중간</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">내부 테스트 적합성</td>
+          <td class="cmp-high">높음</td>
+          <td class="cmp-mid">중간</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">데이터 확보 난이도</td>
+          <td class="cmp-mid">중간</td>
+          <td class="cmp-high" style="background:#fdecea !important; color:var(--red); font-weight:700;">높음</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">라벨 필요성</td>
+          <td class="cmp-low">낮음~중간</td>
+          <td class="cmp-high" style="background:#fdecea !important; color:var(--red); font-weight:700;">높음</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">운영 리스크</td>
+          <td class="cmp-mid">중간</td>
+          <td class="cmp-high" style="background:#fdecea !important; color:var(--red); font-weight:700;">높음</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">시연 용이성</td>
+          <td class="cmp-high">높음</td>
+          <td class="cmp-mid">중간</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">업무 임팩트</td>
+          <td class="cmp-mid">중간</td>
+          <td class="cmp-high">높음</td>
+        </tr>
+        <tr>
+          <td class="cmp-row-label">정량 ROI 산정</td>
+          <td class="cmp-mid">중간</td>
+          <td class="cmp-high">높음</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 2. LLM 민원 챗봇 PoC ── -->
+<div class="card" id="s2">
+  <div class="card-header teal-hd">
+    <span class="num">2</span>
+    <h3>LLM 민원 챗봇 PoC</h3>
+    <span class="en">LLM Complaint Chatbot PoC</span>
+  </div>
+  <div class="card-body">
+    <p style="font-size:13.5px; color:var(--muted); margin-bottom:20px; line-height:1.75;">
+      보고타 교통 이용자의 문의를 이해하고, FAQ·정책문서·운영 매뉴얼·공지사항 등을 검색하여 답변하는 <strong style="color:var(--teal);">RAG 기반 고객응대 AI</strong>이다.
+    </p>
+
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title teal">처리 흐름</div>
+        <div class="flow">
+          <div class="flow-step data">사용자 질문 수신</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">Intent 분류</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step data">관련 문서 검색 (RAG)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step model">LLM 답변 생성</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step danger">Guardrail 검증</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step action">답변 제공 또는 상담원 이관</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title teal">대표 질의 예시</div>
+        <ul class="bullet">
+          <li>카드를 분실했을 때 어떻게 해야 하나요?</li>
+          <li>충전했는데 잔액이 반영되지 않았습니다.</li>
+          <li>환승 할인은 어떻게 적용되나요?</li>
+          <li>앱 로그인이 되지 않습니다.</li>
+          <li>분실물은 어디에 신고하나요?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-section" style="margin-top:20px;">
+      <div class="sub-title green">장점</div>
+      <table class="tbl-green">
+        <thead><tr><th style="width:220px;">장점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>내부 PoC에 적합</td><td>실제 고객에게 공개하지 않고도 내부 테스트 가능</td></tr>
+          <tr><td>데이터 준비 부담 낮음</td><td>FAQ, 정책문서, 샘플 민원만 있어도 시작 가능</td></tr>
+          <tr><td>빠른 Prototype 가능</td><td>3개월 내 Chat UI, RAG, 평가셋 구축 가능</td></tr>
+          <tr><td>시연 효과 높음</td><td>경영진·고객 대상 데모가 쉬움</td></tr>
+          <tr><td>성과 설명 용이</td><td>답변 정확도, 검색 성공률, 자동응답 가능률 등으로 평가 가능</td></tr>
+          <tr><td>확장성 높음</td><td>Web, App, WhatsApp, 콜센터, 상담원 보조로 확대 가능</td></tr>
+          <tr><td>산출물 재사용 가능</td><td>Intent Taxonomy, Golden Set, Prompt, 지식베이스 재사용 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title red">단점</div>
+      <table class="tbl-red">
+        <thead><tr><th style="width:220px;">단점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>답변 품질 관리 필요</td><td>LLM이 근거 없는 답변을 생성할 수 있음</td></tr>
+          <tr><td>문서 품질 의존</td><td>FAQ와 정책문서가 부정확하면 답변 품질 저하</td></tr>
+          <tr><td>개인정보 통제 필요</td><td>카드번호, 전화번호, 환불, 법적 민원 등 Guardrail 필요</td></tr>
+          <tr><td>실제 효과 검증 제한</td><td>내부 테스트만으로 상담원 절감 효과를 정확히 산정하기 어려움</td></tr>
+          <tr><td>언어 검수 필요</td><td>보고타 대상이면 스페인어 현지 표현 검수가 중요</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title teal">3개월 PoC 결과물</div>
+      <table class="tbl-teal">
+        <thead><tr><th style="width:220px;">산출물</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>내부 Chat UI</td><td>내부 테스트용 챗봇 화면</td></tr>
+          <tr><td>RAG Pipeline</td><td>문서 검색 기반 답변 생성 구조</td></tr>
+          <tr><td>Intent Taxonomy</td><td>민원 분류체계</td></tr>
+          <tr><td>Golden Set</td><td>평가용 질문/정답 세트 300건 수준</td></tr>
+          <tr><td>답변 품질 평가</td><td>정확성, 근거성, 완전성, 안전성 평가</td></tr>
+          <tr><td>Go/No-Go Memo</td><td>정식 PoC 또는 운영 전환 판단 자료</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. 부정승차 탐지 PoC ── -->
+<div class="card" id="s3">
+  <div class="card-header purple-hd">
+    <span class="num">3</span>
+    <h3>부정승차 탐지 PoC</h3>
+    <span class="en">Fare Evasion Detection PoC</span>
+  </div>
+  <div class="card-body">
+    <p style="font-size:13.5px; color:var(--muted); margin-bottom:20px; line-height:1.75;">
+      AFC 거래 데이터와 카드 이용 패턴을 분석하여 비정상적 이용 행위를 탐지하는 <strong style="color:var(--purple);">이상탐지·리스크 분석 과제</strong>이다.
+    </p>
+
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title purple">처리 흐름</div>
+        <div class="flow">
+          <div class="flow-step data">AFC 거래 데이터 수집</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">데이터 정제 및 전처리</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">패턴 분석 (EDA)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step action">Rule 기반 탐지</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step model">ML/이상탐지 모델</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step output">의심 거래 Score 산출</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step danger">업무부서 검토</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title purple">대표 탐지 대상</div>
+        <ul class="bullet">
+          <li>동일 카드의 비정상 반복 사용</li>
+          <li>짧은 시간 내 불가능한 이동</li>
+          <li>비정상 환승 패턴</li>
+          <li>우대권·할인권 오남용</li>
+          <li>장비별 비정상 승인 패턴</li>
+          <li>카드 공유 의심 패턴</li>
+          <li>블랙리스트 카드 사용 시도</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-section" style="margin-top:20px;">
+      <div class="sub-title green">장점</div>
+      <table class="tbl-green">
+        <thead><tr><th style="width:220px;">장점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>업무 임팩트 큼</td><td>수익 누수 방지, 부정사용 감소, 운영 통제 강화</td></tr>
+          <tr><td>AFC 데이터 활용도 높음</td><td>거래, 카드, 장비, 위치, 시간 데이터를 직접 활용</td></tr>
+          <tr><td>정량 효과 산정 가능</td><td>의심 거래 건수, 예상 손실액, 탐지율 등 수치화 가능</td></tr>
+          <tr><td>고도화 가치 높음</td><td>이상거래, 정산오류, 장비오류 탐지로 확장 가능</td></tr>
+          <tr><td>운영 의사결정 연계</td><td>단속 우선순위, 정책 개선, 룰 개선에 활용 가능</td></tr>
+          <tr><td>ML 과제 구조 명확</td><td>EDA, Feature Engineering, 모델링, 대시보드 구성이 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title red">단점</div>
+      <table class="tbl-red">
+        <thead><tr><th style="width:220px;">단점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>데이터 요구사항 큼</td><td>거래, 카드, 장비, 정류장, 요금정책, 단속 이력 필요</td></tr>
+          <tr><td>라벨 확보 어려움</td><td>실제 부정승차 적발 데이터가 없으면 성능 검증 제한</td></tr>
+          <tr><td>오탐 리스크 큼</td><td>정상 승객을 의심 거래로 분류할 수 있음</td></tr>
+          <tr><td>업무 정의 복잡</td><td>"부정승차" 기준을 명확히 정의해야 함</td></tr>
+          <tr><td>내부 테스트 한계</td><td>실제 단속과 연결하지 않으면 실효성 검증이 제한적</td></tr>
+          <tr><td>개인정보 리스크 높음</td><td>카드 ID, 이동 이력 등 민감 데이터 관리 필요</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title purple">3개월 PoC 결과물</div>
+      <table class="tbl-purple">
+        <thead><tr><th style="width:220px;">산출물</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>AFC 거래 EDA</td><td>거래량, 시간대, 카드, 장비별 패턴 분석</td></tr>
+          <tr><td>부정승차 Rule 후보</td><td>업무 기반 의심 패턴 5~10개</td></tr>
+          <tr><td>Feature Set</td><td>카드·장비·시간·위치 기반 변수</td></tr>
+          <tr><td>이상탐지 모델</td><td>Isolation Forest, Autoencoder 등 후보</td></tr>
+          <tr><td>의심 거래 리스트</td><td>Risk Score 기반 의심 거래 목록</td></tr>
+          <tr><td>업무 검토 결과</td><td>운영부서 검토를 통한 유효성 판단</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. PoC 선택 기준 ── -->
+<div class="card" id="s4">
+  <div class="card-header">
+    <span class="num">4</span>
+    <h3>PoC 선택 기준</h3>
+    <span class="en">Decision Criteria</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-blue">
+      <thead>
+        <tr>
+          <th>질문</th>
+          <th style="width:200px;">예 → 우선과제</th>
+          <th style="width:200px;">아니오 → 우선과제</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>실제 운영계 데이터 접근이 어려운가?</td>
+          <td class="crit-yes">LLM 챗봇 우선</td>
+          <td class="crit-no">부정승차 가능</td>
+        </tr>
+        <tr>
+          <td>3개월 내 시연 가능한 Prototype이 중요한가?</td>
+          <td class="crit-yes">LLM 챗봇 우선</td>
+          <td class="crit-no">부정승차 가능</td>
+        </tr>
+        <tr>
+          <td>FAQ·정책문서는 확보 가능한가?</td>
+          <td class="crit-yes">LLM 챗봇 가능</td>
+          <td class="crit-no">둘 다 위험</td>
+        </tr>
+        <tr>
+          <td>AFC 거래 데이터와 단속 이력이 충분한가?</td>
+          <td class="crit-no">부정승차 적합</td>
+          <td class="crit-yes">LLM 챗봇 우선</td>
+        </tr>
+        <tr>
+          <td>수익 누수 방지 ROI를 강조해야 하는가?</td>
+          <td class="crit-no">부정승차 적합</td>
+          <td class="crit-yes">LLM 챗봇 우선</td>
+        </tr>
+        <tr>
+          <td>내부 테스트만으로 종료할 예정인가?</td>
+          <td class="crit-yes">LLM 챗봇 적합</td>
+          <td class="crit-no">부정승차는 제한적</td>
+        </tr>
+        <tr>
+          <td>데이터 분석·ML 역량 검증이 중요한가?</td>
+          <td class="crit-no">부정승차 적합</td>
+          <td class="crit-yes">LLM 챗봇 적합</td>
+        </tr>
+        <tr>
+          <td>생성형 AI 활용 사례가 필요한가?</td>
+          <td class="crit-yes">LLM 챗봇 적합</td>
+          <td class="crit-no">부정승차는 보조</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 5. 추천 결론 ── -->
+<div class="card" id="s5">
+  <div class="card-header">
+    <span class="num">5</span>
+    <h3>추천 결론</h3>
+    <span class="en">Recommendation</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title teal">현재 조건 (LLM 챗봇 우선 선택 기준)</div>
+      <div class="condition-box">
+        <span class="cb-comment"># 아래 조건이 충족될 경우 LLM 민원 챗봇 PoC를 우선 선택</span><br>
+        3개월 PoC<br>
+        내부 테스트 중심<br>
+        실제 운영 적용 없음<br>
+        산출물 최소화<br>
+        가시적인 Prototype 필요<br>
+        FAQ / 정책문서 확보 가능<br>
+        운영계 데이터 접근 제한
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title teal">과제별 순위</div>
+      <div class="rank-card rank1">
+        <div class="rank-num">1</div>
+        <div>
+          <div class="rank-badge">권장 선택</div>
+          <div class="rank-title">LLM 민원 챗봇</div>
+          <div class="rank-desc">내부 테스트 적합 · Prototype 가시성 높음 · 데이터 부담 낮음 · 3개월 완성 가능성 높음</div>
+        </div>
+      </div>
+      <div class="rank-card rank2">
+        <div class="rank-num">2</div>
+        <div>
+          <div class="rank-badge">조건부 선택</div>
+          <div class="rank-title">부정승차 탐지</div>
+          <div class="rank-desc">업무 임팩트는 크지만 데이터·라벨·업무 검증 부담이 큼 — AFC 데이터 확보 후 추진 권장</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 6. 제안 방향 ── -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">6</span>
+    <h3>제안 방향</h3>
+    <span class="en">Proposed Direction</span>
+  </div>
+  <div class="card-body">
+
+    <div class="option-card opt-a">
+      <div class="option-header">
+        <span class="option-label">선택안 A · 권장</span>
+        LLM 민원 챗봇 PoC
+      </div>
+      <div class="option-body">
+        <div class="option-code">
+          보고타 교통 민원 FAQ·정책문서 기반 RAG 챗봇 내부 Prototype 구축
+        </div>
+        <div class="sub-title teal" style="margin-bottom:10px;">적합 사유</div>
+        <ul class="bullet">
+          <li>내부 테스트만으로 검증 가능</li>
+          <li>실제 고객 노출 없이 품질 평가 가능</li>
+          <li>3개월 내 시연 가능한 결과물 확보 가능</li>
+          <li>향후 Web, App, WhatsApp, 상담원 보조로 확장 가능</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="option-card opt-b">
+      <div class="option-header">
+        <span class="option-label">선택안 B · 조건부</span>
+        부정승차 탐지 PoC
+      </div>
+      <div class="option-body">
+        <div class="option-code">
+          AFC 거래 데이터 기반 부정승차 의심 패턴 발굴 및 이상거래 Score 산출
+        </div>
+        <div class="prereq-label">선행 조건 (미충족 시 추진 보류)</div>
+        <ul class="bullet">
+          <li>최소 6개월~1년 이상의 AFC 거래 데이터 확보</li>
+          <li>카드·장비·정류장·요금정책 데이터 연결 가능</li>
+          <li>부정승차 라벨 또는 적발 사례 일부 확보</li>
+          <li>운영부서가 의심 거래 결과를 검토할 수 있는 체계 확보</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 7. 한 줄 결론 ── -->
+<div class="card" id="s7">
+  <div class="card-header">
+    <span class="num">7</span>
+    <h3>한 줄 결론</h3>
+    <span class="en">Bottom Line</span>
+  </div>
+  <div class="card-body">
+    <div class="final-box">
+      <p><strong>내부 테스트형 3개월 PoC라면 LLM 민원 챗봇이 더 현실적이다.</strong></p>
+      <p class="final-sub">부정승차 탐지는 장기적으로 더 큰 업무 임팩트가 있지만,<br>AFC 거래 데이터·라벨·업무 검증 체계가 확보될 때 선택하는 것이 안전하다.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
