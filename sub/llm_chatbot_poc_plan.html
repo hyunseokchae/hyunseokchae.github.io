@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>보고타 LLM 민원 챗봇 PoC 계획서 — U11 3개월</title>
+<title>한국 TSC 내부 검증 PoC — 보고타 LLM 민원 챗봇 (3개월)</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -387,21 +387,23 @@
 <!-- ── Hero ── -->
 <div class="hero">
   <button class="close-btn" onclick="window.close()">✕ 닫기</button>
-  <div class="hero-badge">U11 · BOGOTÁ, COLOMBIA · PoC 3개월</div>
-  <h1>보고타 LLM 민원 챗봇 PoC 추진 계획서</h1>
-  <h2>Bogotá Web Chatbot PoC — TransMilenio·SITP 민원 자동응답 (스페인어) · TuLlave 카드</h2>
+  <div class="hero-badge">U11 · KOREA TSC 내부 검증 · 보고타 적용 검토 · 3개월</div>
+  <h1>보고타 LLM 민원 챗봇 PoC 추진 계획서 (한국 TSC 내부 검증)</h1>
+  <h2>Internal R&amp;D Validation at Korea TSC — 향후 Bogotá TransMilenio·SITP 적용 가능성 및 기술 수준 사전 검토</h2>
   <div class="hero-summary">
-    본 계획서는 <strong>보고타 대중교통(TransMilenio·SITP, 운영 Recaudo Bogotá)</strong>의 고객 민원 챗봇 핵심 기능을 검증하기 위한
-    <strong>3개월 웹 기반 스페인어 PoC</strong> 추진 계획을 담는다.
-    전체 기능 중 <strong>구현 복잡도가 낮고 효과가 높은 기능</strong>(FAQ 자동응답, Intent 분류, RAG 정책 안내, 기본 상담원(agente) 이관)을 1차 범위로 하여,
-    <strong>충전(recarga)·잔액(saldo)·카드 분실(tarjeta perdida)·노선(rutas)·요금(tarifa)</strong> 등 상위 5개 민원을 대상으로 단기 검증한다.
-    예상 자동응답률 <strong>50~65%</strong> 달성, 상담원 이관 정확도 <strong>85%+</strong>를 PoC 성공 기준으로 설정한다.
+    본 계획서는 <strong>한국 TSC 내부 개발·검증 환경</strong>에서 진행하는 <strong>3개월 기술 검증(PoC)</strong>으로,
+    <strong>실서비스에 반영하지 않고</strong> 향후 <strong>보고타(TransMilenio·SITP, TuLlave) 적용 시점의 적용 범위와 기술 수준을 사전 평가</strong>하는 것이 목적이다.
+    구현 복잡도가 낮은 기능(스페인어 FAQ 자동응답, Intent 분류, RAG 정책 안내, 기본 agente 이관)을 1차 범위로 하여
+    <strong>충전(recarga)·잔액(saldo)·카드 분실(tarjeta perdida)·노선(rutas)·요금(tarifa)</strong> 상위 5개 민원을 한국 TSC 내부에서 시뮬레이션 검증한다.
+    <strong>스페인어 네이티브 검수자는 별도 두지 않고, LLM 번역을 통한 한국어 변환 결과로 내부 평가</strong>하며,
+    검증 인력은 <strong>5명 내외</strong>로 운영한다. 결과는 향후 보고타 본사업 제안 시 <strong>기술 수준·인력·일정·예산</strong> 산정의 근거로 활용한다.
   </div>
 </div>
 
 <!-- ── TOC ── -->
 <nav class="toc-bar">
   <a href="#s0">0. 개요</a>
+  <a href="#s0a">Pre. 사전 준비</a>
   <a href="#s1">1. PoC 범위</a>
   <a href="#s2">2. 3개월 일정</a>
   <a href="#s3">3. 기능 명세</a>
@@ -429,12 +431,13 @@
         <table class="tbl-teal">
           <thead><tr><th style="width:96px; white-space:nowrap;">항목</th><th>내용</th></tr></thead>
           <tbody>
-            <tr><td>추진 배경</td><td>충전·잔액·카드 관련 반복 민원이 TransMilenio·SITP 상담 채널에 집중, 스페인어 응대 품질 편차 발생</td></tr>
-            <tr><td>PoC 목적</td><td>스페인어 LLM/RAG 기반 자동응답 실현 가능성 검증 및 성과 수치화</td></tr>
-            <tr><td>기대 효과</td><td>자동응답률 50~65%, 상담원(agente) 단순 문의 처리 시간 50% 감소</td></tr>
-            <tr><td>PoC 형태</td><td>웹 챗봇 UI(ES) + 백엔드 API + RAG 파이프라인 (독립 환경)</td></tr>
-            <tr><td>검증 대상</td><td>TransMilenio 내부 직원 + 선정된 소수 파일럿 사용자 (약 10명 내외)</td></tr>
-            <tr><td>완료 기준</td><td>KPI 달성 여부 보고서 작성 및 경영진 데모 발표</td></tr>
+            <tr><td>추진 배경</td><td>보고타 본사업 제안 전, 한국 TSC 내부에서 스페인어 LLM/RAG 기술 수준 및 적용 범위 사전 평가 필요</td></tr>
+            <tr><td>PoC 목적</td><td>실서비스 미적용 — 향후 보고타 적용 가능성·기술 수준·예상 공수의 내부 사전 평가</td></tr>
+            <tr><td>기대 효과</td><td>본사업 제안 시 기술 수준·인력·일정·예산 산정 근거 확보, 리스크 사전 식별</td></tr>
+            <tr><td>PoC 형태</td><td>한국 TSC 내부 개발 환경 — 웹 챗봇 UI(ES) + 백엔드 API + RAG 파이프라인 (독립 검증 환경)</td></tr>
+            <tr><td>검증 대상</td><td>한국 TSC 내부 개발팀 (5명 내외) — <strong>실고객·실서비스 미적용</strong></td></tr>
+            <tr><td>평가 방식</td><td>스페인어 네이티브 검수자 없이 LLM 번역 결과(한국어)를 내부에서 평가</td></tr>
+            <tr><td>완료 기준</td><td>기술 검증 보고서 + 향후 보고타 적용 범위·기술 수준 검토 보고서 작성</td></tr>
           </tbody>
         </table>
       </div>
@@ -455,9 +458,126 @@
     </div>
     <div class="sub-section">
       <div class="sub-title accent">3개월 핵심 마일스톤</div>
-      <div class="milestone"><span>M1 완료 — 스페인어 지식베이스 구축 및 기본 RAG 동작 확인</span><span class="ms-date">1개월 차 말</span></div>
-      <div class="milestone"><span>M2 완료 — 웹 챗봇 통합 내부 데모 (TransMilenio 직원 대상)</span><span class="ms-date">2개월 차 말</span></div>
-      <div class="milestone"><span>M3 완료 — 파일럿(10명 내외) 종료 · KPI 보고서 · 경영진 발표</span><span class="ms-date">3개월 차 말</span></div>
+      <div class="milestone"><span>M1 완료 — 한국 TSC 내부 환경 구축 및 스페인어 RAG 기본 동작 확인</span><span class="ms-date">1개월 차 말</span></div>
+      <div class="milestone"><span>M2 완료 — TSC 내부 통합 데모 (개발팀 대상, 5명 내외)</span><span class="ms-date">2개월 차 말</span></div>
+      <div class="milestone"><span>M3 완료 — 내부 기술 검증 종료 (5명 내외, 한국어 번역 평가) · 향후 보고타 적용 검토 보고서 제출</span><span class="ms-date">3개월 차 말</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pre. 사전 준비사항 ── -->
+<div class="card" id="s0a">
+  <div class="card-header">
+    <span class="num" style="background: var(--accent);">Pre</span>
+    <h3>PoC 사전 준비사항</h3>
+    <span class="en">Pre-PoC Prerequisites</span>
+  </div>
+  <div class="card-body">
+    <div class="info-box" style="margin-bottom:16px;">
+      본 PoC는 <strong>한국 TSC 내부 5명 내외</strong>가 진행하는 기술 검증 활동이며 실서비스에 적용하지 않는다.
+      <strong>스페인어 네이티브 검수자는 별도 두지 않고, LLM 번역 결과(한국어)를 내부에서 평가</strong>하는 방식으로 운영 범위를 축소한다.
+      착수 전 다음 항목들을 확보해야 일정·품질·산출물의 신뢰도가 보장된다.
+    </div>
+
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title teal">1. 환경 · 인프라 준비</div>
+        <table class="tbl-teal">
+          <thead><tr><th style="width:110px; white-space:nowrap;">항목</th><th>준비 내용</th></tr></thead>
+          <tbody>
+            <tr><td>개발 서버</td><td>한국 TSC 내부 격리 환경 (CPU 8코어/RAM 32GB/SSD 500GB)</td></tr>
+            <tr><td>네트워크</td><td>외부 LLM API 호출 경로 확보 (보안 정책 사전 협의)</td></tr>
+            <tr><td>접속 통제</td><td>사내 VPN/IP 화이트리스트, HTTPS, API Key 인증</td></tr>
+            <tr><td>형상 관리</td><td>사내 Git Repository 발급 및 권한 부여</td></tr>
+            <tr><td>모니터링</td><td>Grafana / Prometheus / Kibana 사내 인프라 활용 가능성 검토</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-title">2. 데이터 · 지식베이스 준비</div>
+        <table class="tbl-blue">
+          <thead><tr><th style="width:110px; white-space:nowrap;">항목</th><th>준비 내용</th></tr></thead>
+          <tbody>
+            <tr><td>스페인어 FAQ</td><td>TransMilenio·SITP 공개 FAQ 200~500건 수집 (공개 웹 자료)</td></tr>
+            <tr><td>요금·약관</td><td>tarifa·환승·TuLlave 카드 규정 PDF 10~20건 수집 (공개)</td></tr>
+            <tr><td>노선·정류장</td><td>rutas·estaciones 공개 정보 수집</td></tr>
+            <tr><td>가상 민원</td><td>한국어로 작성(150건) → LLM 번역으로 스페인어 변환하여 테스트셋 구성</td></tr>
+            <tr><td>번역 품질 점검</td><td>한국어↔스페인어 번역 결과를 LLM 역번역으로 사전 검증</td></tr>
+            <tr><td>마스킹 규칙</td><td>가상 cédula·전화·카드번호 패턴 마스킹 규칙 사전 정의</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-title purple">3. 인력 · 조직 준비 (5명 내외)</div>
+        <table class="tbl-purple">
+          <thead><tr><th style="width:140px; white-space:nowrap;">역할</th><th>사전 확보 필요사항</th></tr></thead>
+          <tbody>
+            <tr><td>PM (1명)</td><td>킥오프 전 일정·산출물 템플릿 확정, 이해관계자 합의, 한국어 평가 검토 겸임</td></tr>
+            <tr><td>AI 엔지니어 (2명)</td><td>LLM·RAG·LangChain 경험자, 한국어↔스페인어 번역 파이프라인 사전 설계</td></tr>
+            <tr><td>백엔드 개발자 (1명)</td><td>FastAPI 경험자, LLM·벡터 DB API 연동 사전 준비</td></tr>
+            <tr><td>프론트엔드 개발자 (1명)</td><td>React 경험자, 챗봇 UI 레퍼런스 사전 조사</td></tr>
+            <tr><td>법무·보안 (협업)</td><td>외부 LLM API 사용 보안 검토자 사전 협의 채널 확보 (별도 인원 미투입)</td></tr>
+            <tr><td colspan="2" style="background:#f0eaf8; font-size:11.5px; color:var(--purple);">※ 스페인어 네이티브 검수자는 별도 두지 않음 — LLM 번역 결과(한국어)를 PM·AI 엔지니어가 평가</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-title green">4. 기술 스택 · 비용 사전 평가</div>
+        <table class="tbl-green">
+          <thead><tr><th style="width:120px; white-space:nowrap;">항목</th><th>사전 결정 필요</th></tr></thead>
+          <tbody>
+            <tr><td>LLM API</td><td>OpenAI / Anthropic / Azure 후보 비교, 스페인어 성능 사전 PoT</td></tr>
+            <tr><td>임베딩 모델</td><td>다국어 임베딩 후보(text-embedding-3-small, multilingual-e5) 사전 평가</td></tr>
+            <tr><td>벡터 DB</td><td>Chroma 로컬 vs Pinecone 클라우드 (PoC 규모 적합성 판단)</td></tr>
+            <tr><td>비용 한도</td><td>월 LLM API 비용 한도 사전 승인 (~$50/월 PoC 규모 추정)</td></tr>
+            <tr><td>대안 시나리오</td><td>외부 API 사용 불가 시 오픈소스 LLM(Llama 3 등) 대안 사전 정의</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-title red">5. 법무 · 보안 · 컴플라이언스 사전 검토</div>
+        <table class="tbl-red">
+          <thead><tr><th style="width:140px; white-space:nowrap;">항목</th><th>사전 검토 내용</th></tr></thead>
+          <tbody>
+            <tr><td>외부 LLM API 사용</td><td>사내 보안 정책상 외부 API 호출 허용 범위 사전 확인</td></tr>
+            <tr><td>데이터 반출</td><td>PoC 입력 데이터의 외부 LLM 송신 허용 여부 (가상 데이터만 사용 원칙)</td></tr>
+            <tr><td>저작권</td><td>TransMilenio·Recaudo Bogotá 공개 자료 사용 시 출처 표기 정책</td></tr>
+            <tr><td>향후 적용 대비</td><td>콜롬비아 Ley 1581(habeas data) 핵심 요건 사전 정리 (보고서 반영)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-title accent">6. 평가 기준 · 산출물 템플릿</div>
+        <table class="tbl-accent">
+          <thead><tr><th style="width:140px; white-space:nowrap;">항목</th><th>준비 내용</th></tr></thead>
+          <tbody>
+            <tr><td>KPI 측정 방법</td><td>자동응답률·Intent 정확도·Hallucination 채점 룰 사전 정의</td></tr>
+            <tr><td>답변 품질 채점 (한국어 번역 기반)</td><td>4점 척도 (정확성·완결성·안전성·일관성) — 자연스러움(현지 표현)은 본 PoC 제외</td></tr>
+            <tr><td>테스트셋</td><td>한국어 작성 150건 → LLM 번역 (5개 카테고리 × 30건)</td></tr>
+            <tr><td>보고서 템플릿</td><td>주간·월간 진행 보고서, 최종 검토 보고서 양식 사전 확정</td></tr>
+            <tr><td>데모 시나리오</td><td>내부 데모용 시나리오 10건 사전 작성</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title teal">사전 준비 체크리스트 (착수 전 완료 필요)</div>
+      <div class="privacy-box">
+        ✅ 한국 TSC 내부 개발 환경(서버·네트워크·계정) 발급 완료<br>
+        ✅ 외부 LLM API 사용 보안 정책 승인 및 API Key 발급 (번역용 호출 포함)<br>
+        ✅ 한국 TSC 내부 5명 (PM·AI×2·BE·FE) 인력 배정 확정<br>
+        ✅ 공개 TransMilenio·SITP·TuLlave 자료 수집 완료 (FAQ·tarifa·rutas)<br>
+        ✅ 한국어 가상 민원 150건 작성 → LLM 번역으로 스페인어 테스트셋 변환 완료<br>
+        ✅ 한국어 번역 기반 4점 척도 평가 가이드(정확성·완결성·안전성·일관성) 사전 확정<br>
+        ✅ PoC 산출물 템플릿(보고서·로그·결과 시트) 사전 확정<br>
+        ✅ <strong>본 PoC가 실서비스 미적용 내부 기술 검증이며 스페인어 네이티브 검수 없이 한국어 번역으로 평가함을 이해관계자 사전 합의</strong>
+      </div>
     </div>
   </div>
 </div>
@@ -470,6 +590,11 @@
     <span class="en">Scope Definition — In / Out</span>
   </div>
   <div class="card-body">
+    <div class="info-box" style="margin-bottom:16px; background:#fff8e8; border-color:#f08c00; color:#7a4500;">
+      ⚠️ 본 PoC는 <strong>한국 TSC 내부 기술 검증</strong>이 목적이며, <strong>실서비스 운영·실고객 파일럿·보고타 현지 인프라 구축은 포함하지 않는다</strong>.
+      검증 결과는 향후 보고타 본사업 제안 시 적용 범위·기술 수준·예산 산정의 근거 자료로 활용된다.
+    </div>
+
     <div class="grid2">
       <div class="sub-section">
         <div class="sub-title green">IN-SCOPE — PoC 대상 기능</div>
@@ -515,6 +640,22 @@
       </div>
       <div class="sub-section">
         <div class="sub-title red">OUT-OF-SCOPE — PoC 제외 항목</div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 실서비스 운영 / 실고객 노출</div>
+          <ul class="bullet"><li>본 PoC는 한국 TSC 내부 검증용으로 실고객 대상 서비스 노출은 일체 제외</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 보고타 현지 인프라 구축</div>
+          <ul class="bullet"><li>현지 서버·네트워크·운영 인력 구성은 본사업 단계에서 별도 진행</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 실고객 파일럿 (TransMilenio 고객)</div>
+          <ul class="bullet"><li>외부 사용자 노출 없이 TSC 내부 5명 내외로 시뮬레이션 검증만 수행</li></ul>
+        </div>
+        <div class="scope-out">
+          <div class="scope-label">✗ 스페인어 네이티브 검수</div>
+          <ul class="bullet"><li>별도 검수자 미운영 — LLM 번역으로 한국어 변환 후 내부 평가 (자연스러움 평가는 본 PoC 제외)</li></ul>
+        </div>
         <div class="scope-out">
           <div class="scope-label">✗ 음성봇 (STT/TTS)</div>
           <ul class="bullet"><li>콜센터 음성 연동 — 구현 복잡도 및 인프라 비용 높음</li></ul>
@@ -998,7 +1139,7 @@
             <li>일정 및 리스크 관리</li>
             <li>이해관계자 커뮤니케이션</li>
             <li>주간 진행 보고</li>
-            <li>KPI 정의 및 측정</li>
+            <li>KPI 정의·측정 + 한국어 번역 평가 검토</li>
           </ul>
         </div>
         <div class="role-card">
@@ -1008,8 +1149,8 @@
             <li>RAG 파이프라인 설계·구현</li>
             <li>Intent 분류 모델 개발</li>
             <li>LLM 프롬프트 엔지니어링</li>
-            <li>Guardrail·품질 평가</li>
-            <li>지식베이스 구축 및 관리</li>
+            <li>한국어↔스페인어 번역 파이프라인 구성</li>
+            <li>Guardrail·한국어 번역 기반 품질 평가</li>
           </ul>
         </div>
         <div class="role-card">
@@ -1017,7 +1158,7 @@
           <div class="role-title">백엔드 개발자 (1명)</div>
           <ul class="bullet">
             <li>FastAPI 서버 구현</li>
-            <li>LLM·벡터 DB API 연동</li>
+            <li>LLM·벡터 DB·번역 API 연동</li>
             <li>이관 판단 로직 구현</li>
             <li>로깅·모니터링 연동</li>
           </ul>
@@ -1026,30 +1167,20 @@
           <div class="role-badge fe">프론트엔드</div>
           <div class="role-title">프론트엔드 개발자 (1명)</div>
           <ul class="bullet">
-            <li>웹 챗봇 UI 개발</li>
+            <li>웹 챗봇 UI 개발 (ES)</li>
             <li>반응형 레이아웃</li>
             <li>WebSocket 실시간 통신</li>
             <li>모니터링 대시보드 UI</li>
           </ul>
         </div>
-        <div class="role-card">
-          <div class="role-badge qa">QA</div>
-          <div class="role-title">QA / 스페인어 도메인 전문가 (1명)</div>
+        <div class="role-card" style="background:#fff8e8; border-color:#f0c060;">
+          <div class="role-badge" style="background:#fff0d0; color:#a06000;">제외 / 향후 본사업</div>
+          <div class="role-title">스페인어 네이티브 검수자 (PoC 미포함)</div>
           <ul class="bullet">
-            <li>테스트 케이스 작성·실행</li>
-            <li>스페인어 답변 품질 평가 (수동 검수)</li>
-            <li>민원 도메인 검수 (현지어)</li>
-            <li>파일럿 사용자 코디네이션</li>
-          </ul>
-        </div>
-        <div class="role-card">
-          <div class="role-badge" style="background:#f0eaf8; color:var(--purple);">업무 담당자</div>
-          <div class="role-title">TransMilenio 고객센터 담당자 (파트타임)</div>
-          <ul class="bullet">
-            <li>스페인어 FAQ·tarifa·rutas 문서 제공</li>
-            <li>라벨링 검수 (민원 분류)</li>
-            <li>이관(agente) 판단 기준 협의</li>
-            <li>파일럿 결과 피드백</li>
+            <li>본 PoC에서는 별도 검수자 미운영</li>
+            <li>대신 LLM 번역(한국어)으로 PM·AI 엔지니어 평가</li>
+            <li>현지 표현·자연스러움 평가는 본사업 단계에서 적용</li>
+            <li>본사업 제안서에 필요 인력으로 사전 명시</li>
           </ul>
         </div>
       </div>
@@ -1059,12 +1190,11 @@
       <table class="tbl-accent">
         <thead><tr><th>역할</th><th>인원</th><th>M1</th><th>M2</th><th>M3</th><th>합계 (MM)</th></tr></thead>
         <tbody>
-          <tr><td>PM</td><td>1명</td><td>0.6 MM</td><td>0.6 MM</td><td>0.6 MM</td><td>1.8 MM</td></tr>
-          <tr><td>AI 엔지니어</td><td>2명</td><td>2.5 MM</td><td>2.5 MM</td><td>2.0 MM</td><td>7.0 MM</td></tr>
-          <tr><td>백엔드 개발자</td><td>1명</td><td>0.6 MM</td><td>1.2 MM</td><td>0.7 MM</td><td>2.5 MM</td></tr>
-          <tr><td>프론트엔드 개발자</td><td>1명</td><td>0.4 MM</td><td>1.0 MM</td><td>0.6 MM</td><td>2.0 MM</td></tr>
-          <tr><td>QA / 도메인 전문가</td><td>1명</td><td>0.4 MM</td><td>0.6 MM</td><td>0.7 MM</td><td>1.7 MM</td></tr>
-          <tr><td colspan="5" style="text-align:right; font-weight:700;">총 투입 공수</td><td style="font-weight:700; color:var(--teal);">15.0 MM</td></tr>
+          <tr><td>PM (한국어 평가 겸임)</td><td>1명</td><td>0.6 MM</td><td>0.7 MM</td><td>0.7 MM</td><td>2.0 MM</td></tr>
+          <tr><td>AI 엔지니어 (번역·평가 포함)</td><td>2명</td><td>2.0 MM</td><td>2.0 MM</td><td>2.0 MM</td><td>6.0 MM</td></tr>
+          <tr><td>백엔드 개발자</td><td>1명</td><td>0.5 MM</td><td>1.0 MM</td><td>0.6 MM</td><td>2.1 MM</td></tr>
+          <tr><td>프론트엔드 개발자</td><td>1명</td><td>0.4 MM</td><td>0.9 MM</td><td>0.6 MM</td><td>1.9 MM</td></tr>
+          <tr><td colspan="5" style="text-align:right; font-weight:700;">총 투입 공수 (5명, 스페인어 네이티브 검수자 미포함)</td><td style="font-weight:700; color:var(--teal);">12.0 MM</td></tr>
         </tbody>
       </table>
     </div>
@@ -1089,10 +1219,10 @@
           <td>RAG 출처 제한(Source Grounding), 신뢰도 임계값 하에 "확인 필요" 처리, QA 수동 검수 병행</td>
         </tr>
         <tr>
-          <td>스페인어 답변 품질·자연스러움 부족 (현지 표현·구어체)</td>
-          <td><span class="risk-level risk-h">높음</span></td>
+          <td>한국어 번역 기반 평가의 한계 — 스페인어 자연스러움·현지 표현 정밀 평가 불가</td>
           <td><span class="risk-level risk-m">중</span></td>
-          <td>스페인어 강점 LLM 선정, 콜롬비아 현지 표현 프롬프트 가이드, 현지 스페인어 검수자 투입</td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td>본 PoC 평가 범위에서 자연스러움 제외 (정확성·완결성·안전성·일관성만 평가), 보고서에 한계 명시, 본사업 단계에서 네이티브 검수자 별도 투입 계획 사전 명시</td>
         </tr>
         <tr>
           <td>지식베이스 문서 품질 불량 (최신성·상충)</td>
@@ -1125,10 +1255,22 @@
           <td>데이터 처리 동의(habeas data) 확보, 데이터 리전·보관 정책 법무 검토 후 착수</td>
         </tr>
         <tr>
-          <td>파일럿 사용자(10명 내외) 모집 어려움</td>
+          <td>내부 검증 인력(5명 내외) 확보 어려움</td>
           <td><span class="risk-level risk-l">낮음</span></td>
           <td><span class="risk-level risk-l">낮음</span></td>
-          <td>TransMilenio 내부 직원 우선 테스트로 KPI 수집, 외부 파일럿 지연 시 M3 내 내부 검증으로 대체</td>
+          <td>한국 TSC 개발팀 중심 우선 확보, 부족 시 PM/AI 엔지니어가 평가 겸임</td>
+        </tr>
+        <tr>
+          <td>LLM 번역 품질 한계 — 한국어↔스페인어 변환 시 의미 손실</td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td>역번역 검증 절차 도입(스페인어→한국어 재변환 확인), 핵심 도메인 용어 사전 정리, 모호한 케이스 별도 표시</td>
+        </tr>
+        <tr>
+          <td>실서비스 미적용에 따른 검증 결과 일반화 한계</td>
+          <td><span class="risk-level risk-m">중</span></td>
+          <td><span class="risk-level risk-h">높음</span></td>
+          <td>가상 민원 테스트셋 다양화, 콜롬비아 현지 표현·구어체 사전 반영, 보고서에 한계점 명시</td>
         </tr>
         <tr>
           <td>일정 지연 (지식베이스 구축 예상보다 길어짐)</td>
@@ -1173,23 +1315,23 @@
           <div class="kpi-label">Hallucination 발생률</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-val">70%+</div>
-          <div class="kpi-label">파일럿 사용자 만족도</div>
+          <div class="kpi-val">3.0/4.0+</div>
+          <div class="kpi-label">내부 검수자<br>답변 품질 점수</div>
         </div>
       </div>
     </div>
 
     <div class="sub-section">
-      <div class="sub-title">KPI 측정 방법</div>
+      <div class="sub-title">KPI 측정 방법 (내부 검증 환경)</div>
       <table class="tbl-blue">
         <thead><tr><th>KPI</th><th>측정 방법</th><th>측정 시점</th></tr></thead>
         <tbody>
-          <tr><td>자동응답률</td><td>전체 대화 중 이관 없이 완료된 비율 (로그 집계)</td><td>M3 파일럿 기간 2주</td></tr>
+          <tr><td>자동응답률</td><td>가상 테스트셋 200건 중 이관 없이 완료된 비율</td><td>M3 내부 검증 기간</td></tr>
           <tr><td>Intent 분류 정확도</td><td>테스트셋 200건 수동 라벨 vs 모델 예측 비교</td><td>M2 말 내부 평가</td></tr>
           <tr><td>이관 판단 정확도</td><td>이관 여부 수동 판단 vs 시스템 판단 비교 (100건)</td><td>M2 말 내부 평가</td></tr>
           <tr><td>평균 응답시간</td><td>API 응답시간 로그 P50/P95 측정</td><td>상시 모니터링</td></tr>
-          <tr><td>Hallucination 발생률</td><td>QA 수동 검수 (답변 50건) + 피드백 👎 비율</td><td>M3 파일럿 기간</td></tr>
-          <tr><td>사용자 만족도</td><td>대화 종료 후 설문 (5점 척도 → 4점+ 비율)</td><td>M3 파일럿 기간</td></tr>
+          <tr><td>Hallucination 발생률</td><td>QA 수동 검수 (답변 50건)</td><td>M3 내부 검증 기간</td></tr>
+          <tr><td>답변 품질 점수</td><td>LLM 답변(스페인어) → 한국어 번역 → PM·AI 4점 척도 평가 (정확성·완결성·안전성·일관성)</td><td>M3 내부 검증 기간</td></tr>
         </tbody>
       </table>
     </div>
@@ -1199,9 +1341,9 @@
       <table class="tbl-accent">
         <thead><tr><th>판정</th><th>조건</th><th>후속 조치</th></tr></thead>
         <tbody>
-          <tr><td>성공 — 본사업 전환</td><td>자동응답률 50%+ AND Intent 정확도 80%+ AND 만족도 65%+</td><td>본사업 예산·범위 수립 착수</td></tr>
-          <tr><td>보완 — 조건부 전환</td><td>일부 KPI 미달, 특정 민원 유형에서만 성공</td><td>범위 재조정 후 2개월 추가 검증</td></tr>
-          <tr><td>중단 — 재검토</td><td>자동응답률 30% 미만 OR Hallucination 10%+ 초과</td><td>기술 스택 재검토 또는 사업 방향 전환</td></tr>
+          <tr><td>성공 — 보고타 본사업 제안 추진</td><td>자동응답률 50%+ AND Intent 정확도 80%+ AND 품질 점수 3.0/4.0+</td><td>보고타 본사업 제안서 작성 착수 (적용 범위·예산·기술 수준 근거 첨부)</td></tr>
+          <tr><td>보완 — 조건부 추진</td><td>일부 KPI 미달, 특정 민원 유형에서만 성공</td><td>범위 재조정 후 2개월 추가 내부 검증</td></tr>
+          <tr><td>중단 — 재검토</td><td>자동응답률 30% 미만 OR Hallucination 10%+ 초과</td><td>기술 스택 재검토 또는 본사업 제안 보류</td></tr>
         </tbody>
       </table>
     </div>
@@ -1250,12 +1392,13 @@
         <table class="tbl-green">
           <thead><tr><th>산출물</th><th>형태</th></tr></thead>
           <tbody>
-            <tr><td>통합 테스트 결과 보고서</td><td>문서</td></tr>
-            <tr><td>파일럿 테스트 결과 분석</td><td>문서 + 데이터 시트</td></tr>
+            <tr><td>내부 통합 테스트 결과 보고서</td><td>문서</td></tr>
+            <tr><td>내부 검증 결과 분석 (5명 내외, 한국어 번역 평가 기반)</td><td>문서 + 데이터 시트</td></tr>
             <tr><td>KPI 달성 현황 보고서</td><td>문서 (PPT/PDF)</td></tr>
+            <tr><td>향후 보고타 적용 검토 보고서</td><td>문서 — 적용 범위·기술 수준·예산·리스크 평가</td></tr>
             <tr><td>경영진 최종 발표 자료</td><td>PPT (20~30슬라이드)</td></tr>
-            <tr><td>본사업 전환 제안서 (안)</td><td>문서</td></tr>
-            <tr><td>전체 소스코드 및 배포 패키지</td><td>Git Repository</td></tr>
+            <tr><td>보고타 본사업 제안서 초안</td><td>문서 (PoC 결과 기반)</td></tr>
+            <tr><td>전체 소스코드 및 배포 패키지</td><td>Git Repository (한국 TSC 내부)</td></tr>
           </tbody>
         </table>
       </div>
@@ -1274,26 +1417,28 @@
     </div>
 
     <div class="sub-section">
-      <div class="sub-title accent">PoC 완료 후 본사업 확장 계획 (참고)</div>
+      <div class="sub-title accent">PoC 완료 후 향후 보고타 적용 단계 (검토 계획)</div>
       <table class="tbl-accent">
-        <thead><tr><th>항목</th><th>PoC (3개월)</th><th>본사업 Phase 1 (6개월)</th><th>본사업 Phase 2 (추가 6개월)</th></tr></thead>
+        <thead><tr><th>항목</th><th>본 PoC (3개월, TSC 내부)</th><th>보고타 본사업 Phase 1</th><th>보고타 본사업 Phase 2</th></tr></thead>
         <tbody>
-          <tr><td>채널</td><td>웹 챗봇 (ES)</td><td>웹 + 앱 챗봇</td><td>WhatsApp·콜센터 음성봇</td></tr>
-          <tr><td>언어</td><td>스페인어</td><td>스페인어 고도화</td><td>영어 등 다국어 확장</td></tr>
-          <tr><td>민원 유형</td><td>상위 5개</td><td>전체 민원 유형</td><td>개인화 (TuLlave 거래 연동)</td></tr>
-          <tr><td>인증</td><td>비회원 (익명)</td><td>로그인 사용자 지원</td><td>본인인증 (cédula) 연동</td></tr>
-          <tr><td>LLM</td><td>API 기반</td><td>API + 파인튜닝 검토</td><td>온프레미스 LLM 검토</td></tr>
-          <tr><td>자동응답률 목표</td><td>50~65%</td><td>70%+</td><td>80%+</td></tr>
+          <tr><td>실시 주체</td><td>한국 TSC 내부 검증</td><td>보고타 현지 파트너 + 한국 TSC 지원</td><td>현지 운영팀 이관</td></tr>
+          <tr><td>적용 환경</td><td>TSC 내부 격리 환경</td><td>보고타 현지 인프라 구축·실서비스</td><td>현지 운영 고도화</td></tr>
+          <tr><td>채널</td><td>웹 챗봇 (ES, 내부)</td><td>웹 + 앱 챗봇 (실서비스)</td><td>WhatsApp·콜센터 음성봇</td></tr>
+          <tr><td>민원 유형</td><td>상위 5개 (시뮬레이션)</td><td>전체 민원 유형</td><td>개인화 (TuLlave 거래 연동)</td></tr>
+          <tr><td>인증</td><td>없음 (내부 검증)</td><td>비회원 → 로그인 사용자 확대</td><td>본인인증 (cédula) 연동</td></tr>
+          <tr><td>LLM</td><td>외부 API + 가상 데이터</td><td>외부 API + 실데이터 (현지 보안 준수)</td><td>파인튜닝 / 온프레미스 LLM 검토</td></tr>
+          <tr><td>자동응답률 목표</td><td>50~65% (가상 테스트셋)</td><td>60~70% (실고객 환경)</td><td>80%+</td></tr>
+          <tr><td>법무·보안</td><td>한국 TSC 사내 정책 + Ley 1581 사전 정리</td><td>Ley 1581 본격 준수, 현지 법무 검토</td><td>지속 운영 컴플라이언스</td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="sub-section">
       <div class="privacy-box">
-        <strong>개인정보 보호 주의사항 (PoC 전 기간 적용)</strong><br>
-        PoC 기간 중 실제 고객 개인정보(이름, cédula, 카드번호, 전화번호, 거래내역)는 지식베이스 및 학습 데이터에 포함하지 않는다.
-        파일럿 참여자(10명 내외)의 대화 내용은 별도 동의(habeas data) 획득 후 수집하며, PoC 종료 후 30일 이내 파기한다.
-        콜롬비아 개인정보보호법(Ley 1581 de 2012) 준수 여부를 착수 전 법무 검토 후 확인한다.
+        <strong>개인정보 보호 원칙 (한국 TSC 내부 검증 PoC 전 기간 적용)</strong><br>
+        본 PoC는 <strong>실고객·실데이터 미사용</strong> 원칙으로, 모든 입력 데이터는 PM·AI 엔지니어가 한국어로 작성한 후 LLM 번역으로 변환한 <strong>가상 민원·가상 cédula·가상 카드번호</strong>로 한정한다.
+        내부 검증 인력(5명 내외)의 대화 로그는 한국 TSC 내부 시스템에만 저장하고, PoC 종료 후 30일 이내 파기한다.
+        향후 보고타 본사업 적용 시 <strong>콜롬비아 개인정보보호법(Ley 1581 de 2012, habeas data)</strong> 준수 요건을 본 PoC 결과 보고서에 사전 정리하여 첨부한다.
       </div>
     </div>
   </div>

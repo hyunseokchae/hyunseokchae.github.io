@@ -1372,7 +1372,7 @@ html, body {
           <td class="period-val">2~3개월</td>
           <td class="rec-effect">CS 자동화 60%+</td>
         </tr>
-        <tr>
+        <tr class="rec-top">
           <td class="rec-stars">★★★</td>
           <td class="rec-uc"><a href="sub/abnormal_transaction_detection_process.html" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.5);">U05 부정승차·이상거래 탐지</a></td>
           <td class="ai-type">Anomaly Detection</td>
@@ -1451,28 +1451,28 @@ html, body {
      SLIDE 9 — LLM Chatbot PoC 계획서
 ═══════════════════════════════════════════════ -->
 <section class="slide" id="s11">
-  <div class="slide-badge">PROOF OF CONCEPT · BOGOTÁ, COLOMBIA</div>
-  <div class="slide-title">보고타 LLM Chatbot PoC 계획서</div>
-  <div class="slide-sub">웹 기반 3개월 PoC — TransMilenio·SITP 민원 자동응답 (스페인어) · TuLlave 카드</div>
+  <div class="slide-badge">INTERNAL R&amp;D PoC · KOREA TSC · 보고타 적용 검토</div>
+  <div class="slide-title">한국 TSC 내부 검증 — 보고타 LLM Chatbot PoC 계획서</div>
+  <div class="slide-sub">실서비스 미적용 · 한국 TSC 내부 기술 검증 — 향후 보고타(TransMilenio·SITP·TuLlave) 적용 범위·기술 수준 사전 평가</div>
   <div class="slide-content">
 
     <!-- 요약 바 -->
     <div class="poc-summary">
       <div class="poc-sum-card">
-        <div class="poc-sum-label">추진 기간</div>
-        <div class="poc-sum-val">3개월 <small>(12주)</small></div>
+        <div class="poc-sum-label">추진 기간 · 실시 주체</div>
+        <div class="poc-sum-val">3개월 <small>· 한국 TSC 내부 (5명 내외)</small></div>
       </div>
       <div class="poc-sum-card">
-        <div class="poc-sum-label">적용 대상</div>
-        <div class="poc-sum-val">TransMilenio·SITP <small>· Recaudo Bogotá · TuLlave</small></div>
+        <div class="poc-sum-label">PoC 성격 · 평가 방식</div>
+        <div class="poc-sum-val">실서비스 미적용 <small>· 한국어 번역 후 내부 평가 (네이티브 검수 미운영)</small></div>
       </div>
       <div class="poc-sum-card">
-        <div class="poc-sum-label">대상 민원 (ES)</div>
-        <div class="poc-sum-val">상위 5개 <small>(충전·잔액·분실·노선·요금)</small></div>
+        <div class="poc-sum-label">향후 적용 대상</div>
+        <div class="poc-sum-val">보고타 TransMilenio·SITP <small>· TuLlave (Recaudo Bogotá)</small></div>
       </div>
       <div class="poc-sum-card">
         <div class="poc-sum-label">핵심 목표</div>
-        <div class="poc-sum-val">자동응답 60% <small>· 스페인어 챗봇</small></div>
+        <div class="poc-sum-val">적용 범위·기술 수준 <small>사전 평가 · 본사업 제안 근거</small></div>
       </div>
     </div>
 
@@ -1487,12 +1487,12 @@ html, body {
           </div>
         </div>
         <div class="poc-month-body">
-          <div class="poc-task">킥오프 · 환경 구축 · LLM/임베딩 공급사 선정</div>
-          <div class="poc-task">스페인어 데이터 수집·정제 (TransMilenio FAQ·tarifa·rutas)</div>
-          <div class="poc-task">지식베이스 구축 · 스페인어 임베딩 · 벡터 DB</div>
+          <div class="poc-task">사전 준비 점검 · TSC 내부 환경 구축 · LLM/임베딩 선정</div>
+          <div class="poc-task">공개 자료 수집(TransMilenio FAQ·tarifa·rutas) + 한국어 가상 민원 150건 → LLM 번역</div>
+          <div class="poc-task">스페인어 지식베이스 구축 · 임베딩 · 벡터 DB</div>
           <div class="poc-task">기본 RAG 파이프라인 프로토타입 (ES)</div>
         </div>
-        <div class="poc-month-ms"><b>마일스톤</b>스페인어 지식베이스 구축 및 기본 RAG 동작 확인</div>
+        <div class="poc-month-ms"><b>마일스톤</b>한국 TSC 내부 환경 구축 + 스페인어 RAG 기본 동작 확인</div>
       </div>
 
       <div class="poc-month poc-m2">
@@ -1506,10 +1506,10 @@ html, body {
         <div class="poc-month-body">
           <div class="poc-task">스페인어 Intent 분류 모델 개발 및 평가</div>
           <div class="poc-task">웹 챗봇 UI (ES) · FastAPI 백엔드 개발</div>
-          <div class="poc-task">Guardrail · 상담원(agente) 이관 판단 로직</div>
-          <div class="poc-task">TransMilenio 내부 직원 데모 및 피드백</div>
+          <div class="poc-task">Guardrail · agente 이관 판단 로직</div>
+          <div class="poc-task">TSC 내부 통합 데모 · PM·AI 한국어 번역 평가</div>
         </div>
-        <div class="poc-month-ms"><b>마일스톤</b>웹 챗봇 통합 내부 데모 (TransMilenio 직원 대상)</div>
+        <div class="poc-month-ms"><b>마일스톤</b>TSC 내부 통합 데모 (개발팀 5명 대상)</div>
       </div>
 
       <div class="poc-month poc-m3">
@@ -1521,33 +1521,34 @@ html, body {
           </div>
         </div>
         <div class="poc-month-body">
-          <div class="poc-task">시스템 통합 테스트</div>
-          <div class="poc-task">파일럿 사용자 테스트 (10명 내외)</div>
+          <div class="poc-task">내부 통합 테스트 · 가상 테스트셋 150건 평가</div>
+          <div class="poc-task">TSC 내부 검증 (5명 내외) · 한국어 번역 후 4점 척도 평가</div>
           <div class="poc-task">결과 분석 · 모델 튜닝</div>
-          <div class="poc-task">KPI 보고서 · 경영진 발표</div>
+          <div class="poc-task">향후 보고타 적용 검토 보고서 + 경영진 발표</div>
         </div>
-        <div class="poc-month-ms"><b>마일스톤</b>파일럿 종료 · KPI 보고 · 본사업 전환 판단</div>
+        <div class="poc-month-ms"><b>마일스톤</b>내부 검증 종료 · 향후 보고타 적용 검토 보고서 제출</div>
       </div>
     </div>
 
     <!-- 하단: 범위 + KPI -->
     <div class="poc-bottom">
       <div class="poc-scope">
-        <div class="poc-scope-title">PoC 범위 (구현 용이 기능 우선)</div>
+        <div class="poc-scope-title">PoC 범위 (TSC 내부 검증 · 구현 용이 기능 우선)</div>
         <div class="poc-tags">
           <span class="poc-tag in">✓ FAQ 자동응답 (RAG·ES)</span>
           <span class="poc-tag in">✓ Intent 분류 (스페인어)</span>
-          <span class="poc-tag in">✓ 상담원(agente) 이관</span>
+          <span class="poc-tag in">✓ agente 이관 판단</span>
           <span class="poc-tag in">✓ Guardrail</span>
-          <span class="poc-tag in">✓ 모니터링 대시보드</span>
+          <span class="poc-tag in">✓ 사전 준비 · 평가 가이드라인</span>
         </div>
-        <div class="poc-scope-sub">제외 (본사업 단계)</div>
+        <div class="poc-scope-sub">제외 (실서비스·현지 배포·본사업 단계)</div>
         <div class="poc-tags">
+          <span class="poc-tag out">✗ 실서비스 운영·실고객</span>
+          <span class="poc-tag out">✗ 스페인어 네이티브 검수</span>
+          <span class="poc-tag out">✗ 보고타 현지 인프라</span>
           <span class="poc-tag out">✗ 음성봇 STT/TTS</span>
           <span class="poc-tag out">✗ TuLlave 잔액·거래 연동</span>
           <span class="poc-tag out">✗ 본인인증 (cédula)</span>
-          <span class="poc-tag out">✗ WhatsApp·앱 채널</span>
-          <span class="poc-tag out">✗ 영어·다국어 확장</span>
         </div>
       </div>
 
@@ -1559,13 +1560,13 @@ html, body {
           <div class="poc-kpi"><div class="poc-kpi-val">90%</div><div class="poc-kpi-label">이관 정확도</div></div>
           <div class="poc-kpi"><div class="poc-kpi-val">5초</div><div class="poc-kpi-label">평균 응답</div></div>
           <div class="poc-kpi"><div class="poc-kpi-val">3%</div><div class="poc-kpi-label">Hallu. 이하</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">70%</div><div class="poc-kpi-label">사용자 만족</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">3.0/4</div><div class="poc-kpi-label">검수 품질 점수</div></div>
         </div>
       </div>
     </div>
 
     <div style="text-align:center; margin-top:10px;">
-      <a href="sub/llm_chatbot_poc_plan.html" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,122,135,0.25); border:1px solid rgba(0,122,135,0.5); color:#5dd3de; font-size:12.5px; font-weight:700; padding:8px 20px; border-radius:24px; text-decoration:none; letter-spacing:0.3px;">📄 상세 계획서 전문 보기 (범위·일정·기능·기술·인력·리스크·KPI·산출물)</a>
+      <a href="sub/llm_chatbot_poc_plan.html" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,122,135,0.25); border:1px solid rgba(0,122,135,0.5); color:#5dd3de; font-size:12.5px; font-weight:700; padding:8px 20px; border-radius:24px; text-decoration:none; letter-spacing:0.3px;">📄 상세 계획서 전문 보기 (사전 준비 · 범위 · 일정 · 기능 · 기술 · 인력 · 리스크 · KPI · 산출물)</a>
     </div>
 
   </div>
