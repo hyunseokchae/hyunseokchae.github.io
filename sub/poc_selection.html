@@ -67,9 +67,10 @@
   }
   .hero strong { color: #ffc84a; }
   .close-btn {
-    position: absolute;
+    position: fixed;
     top: 20px; right: 24px;
-    background: rgba(255,255,255,.15);
+    z-index: 999;
+    background: rgba(26,55,94,.85);
     border: 1px solid rgba(255,255,255,.35);
     color: var(--white);
     font-size: 13px;
@@ -79,8 +80,9 @@
     cursor: pointer;
     transition: background .15s;
     letter-spacing: .02em;
+    backdrop-filter: blur(6px);
   }
-  .close-btn:hover { background: rgba(255,255,255,.28); }
+  .close-btn:hover { background: rgba(26,55,94,1); }
 
   /* ── TOC ── */
   .toc-bar {
