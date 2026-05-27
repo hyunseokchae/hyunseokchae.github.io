@@ -688,6 +688,29 @@ html, body {
 .medal-silver { background: rgba(160,160,160,0.2); color: #c0c0c0; border: 1px solid rgba(160,160,160,0.4); }
 .medal-gold   { background: rgba(200,160,0,0.2); color: #ffd700; border: 1px solid rgba(200,160,0,0.4); }
 
+.ml-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border: 1.5px dashed rgba(240,140,0,0.6);
+  border-radius: 10px;
+  padding: 12px 8px 8px;
+  background: rgba(240,140,0,0.04);
+}
+.ml-zone-label {
+  position: absolute;
+  top: -11px; right: 14px;
+  background: linear-gradient(90deg, #f08c00, #c96d00);
+  color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+
 .la1 { background: rgba(0,122,135,0.15); }
 .la1 .al-num { background: rgba(0,122,135,0.3); }
 .la1 .al-name { background: rgba(0,122,135,0.2); }
@@ -1209,15 +1232,18 @@ html, body {
         <div class="al-name">Data Lake / Warehouse</div>
         <div class="al-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
       </div>
-      <div class="arch-layer la3">
-        <div class="al-num">3</div>
-        <div class="al-name">Feature Layer</div>
-        <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
-      </div>
-      <div class="arch-layer la4">
-        <div class="al-num">4</div>
-        <div class="al-name">ML Platform</div>
-        <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
+      <div class="ml-zone">
+        <div class="ml-zone-label">⚡ 최소 ML영역</div>
+        <div class="arch-layer la3">
+          <div class="al-num">3</div>
+          <div class="al-name">Feature Layer</div>
+          <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
+        </div>
+        <div class="arch-layer la4">
+          <div class="al-num">4</div>
+          <div class="al-name">ML Platform</div>
+          <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
+        </div>
       </div>
       <div class="arch-layer la5">
         <div class="al-num">5</div>
