@@ -562,7 +562,7 @@
           <tbody>
             <tr><td>KPI 측정 방법</td><td>자동응답률·Intent 정확도·Hallucination 채점 룰 사전 정의</td></tr>
             <tr><td>답변 품질 채점 (한국어 번역 기반)</td><td>4점 척도 (정확성·완결성·안전성·일관성) — 자연스러움(현지 표현)은 본 PoC 제외</td></tr>
-            <tr><td>테스트셋</td><td>한국어 작성 150건 → LLM 번역 (5개 카테고리 × 30건)</td></tr>
+            <tr><td>테스트셋</td><td>4개 카테고리 × 40건 = 160건 — 스페인어 질문 + 한국어 번역 버전 양쪽 구성, 정답 문서·답변 수동 라벨링</td></tr>
             <tr><td>보고서 템플릿</td><td>주간·월간 진행 보고서, 최종 검토 보고서 양식 사전 확정</td></tr>
             <tr><td>데모 시나리오</td><td>내부 데모용 시나리오 10건 사전 작성</td></tr>
           </tbody>
@@ -577,7 +577,7 @@
         ✅ 외부 LLM API 사용 보안 정책 승인 및 API Key 발급 (번역용 호출 포함)<br>
         ✅ 한국 TSC 내부 5명 (PM·AI×2·BE·FE) 인력 배정 확정<br>
         ✅ 공개 TransMilenio·SITP·TuLlave 자료 수집 완료 (FAQ·tarifa·rutas)<br>
-        ✅ 한국어 가상 민원 150건 작성 → LLM 번역으로 스페인어 테스트셋 변환 완료<br>
+        ✅ 4카테고리 × 40건 = 160건 테스트셋 구성 완료 (스페인어 + 한국어 번역 버전, 정답 라벨링 포함)<br>
         ✅ 한국어 번역 기반 4점 척도 평가 가이드(정확성·완결성·안전성·일관성) 사전 확정<br>
         ✅ PoC 산출물 템플릿(보고서·로그·결과 시트) 사전 확정<br>
         ✅ <strong>본 PoC가 실서비스 미적용 내부 기술 검증이며 스페인어 네이티브 검수 없이 한국어 번역으로 평가함을 이해관계자 사전 합의</strong>
@@ -644,6 +644,10 @@
       </div>
       <div class="sub-section">
         <div class="sub-title red">OUT-OF-SCOPE — PoC 제외 항목</div>
+        <div class="scope-out">
+          <div class="scope-label">✗ Agent 개발</div>
+          <ul class="bullet"><li>자율 판단·다단계 실행 AI Agent 개발은 본 PoC 범위 외 — RAG 챗봇 + 룰 기반 이관으로 한정</li></ul>
+        </div>
         <div class="scope-out">
           <div class="scope-label">✗ 실서비스 운영 / 실고객 노출</div>
           <ul class="bullet"><li>본 PoC는 한국 TSC 내부 검증용으로 실고객 대상 서비스 노출은 일체 제외</li></ul>
@@ -1336,7 +1340,7 @@
         <div class="arch-row">
           <div class="arch-box llm">🤖 LLM API<br><small style="font-weight:400;">GPT-4o mini</small></div>
           <div class="arch-box db">🔍 벡터 DB<br><small style="font-weight:400;">Chroma / Pinecone</small></div>
-          <div class="arch-box db" style="background:#fff8e8; border-color:#f08c00; color:#7a4500;">📂 지식베이스 (ES)<br><small style="font-weight:400;">FAQ · tarifa · rutas</small></div>
+          <div class="arch-box db" style="background:#fff8e8; border-color:#f08c00; color:#7a4500;">📂 지식베이스 (ES)<br><small style="font-weight:400;">FAQ · tarifa · rutas · TuLlave</small></div>
         </div>
       </div>
     </div>
@@ -1395,7 +1399,7 @@
     <div class="sub-section">
       <div class="sub-title green">데이터 흐름 — 지식베이스 구축</div>
       <div class="hflow">
-        <span class="hstep">문서 수집<br><small>(FAQ·tarifa·rutas)</small></span><span class="harrow">→</span>
+        <span class="hstep">문서 수집<br><small>(FAQ·tarifa·rutas·TuLlave)</small></span><span class="harrow">→</span>
         <span class="hstep">개인정보 마스킹</span><span class="harrow">→</span>
         <span class="hstep">텍스트 추출<br><small>(PDF·DOCX → 텍스트)</small></span><span class="harrow">→</span>
         <span class="hstep">청크 분할<br><small>(문단·조항 단위)</small></span><span class="harrow">→</span>
