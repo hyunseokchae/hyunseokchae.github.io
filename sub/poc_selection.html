@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3개월 PoC 과제 선택 비교 — LLM 민원 챗봇 vs 부정승차 탐지 vs 수요 예측</title>
+<title>PoC 과제 선택 비교 — LLM 챗봇 vs 부정승차 탐지 vs 수요 예측 vs 예지보전</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -135,10 +135,12 @@
   }
   .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
   .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
-  .card-header.teal-hd   { background: linear-gradient(90deg, var(--navy), var(--teal)); }
-  .card-header.purple-hd { background: linear-gradient(90deg, var(--navy), var(--purple)); }
-  .card-header.green-hd  { background: linear-gradient(90deg, var(--navy), var(--green)); }
-  .green-hd .num { background: var(--green); }
+  .card-header.teal-hd    { background: linear-gradient(90deg, var(--navy), var(--teal)); }
+  .card-header.purple-hd  { background: linear-gradient(90deg, var(--navy), var(--purple)); }
+  .card-header.green-hd   { background: linear-gradient(90deg, var(--navy), var(--green)); }
+  .card-header.accent-hd  { background: linear-gradient(90deg, var(--navy), #c96d00); }
+  .green-hd .num  { background: var(--green); }
+  .accent-hd .num { background: var(--accent); }
   .card-body { padding: 20px 24px; }
 
   .sub-section { margin-bottom: 20px; }
@@ -175,13 +177,14 @@
   @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
 
   /* ── 비교표 특수 셀 ── */
-  .cmp-high  { background: #e8f4ee !important; color: #177b4e; font-weight: 700; }
-  .cmp-mid   { background: #fff8e8 !important; color: #a06000; font-weight: 600; }
-  .cmp-low   { background: #f4f6f9 !important; color: var(--muted); }
+  .cmp-high   { background: #e8f4ee !important; color: #177b4e; font-weight: 700; }
+  .cmp-mid    { background: #fff8e8 !important; color: #a06000; font-weight: 600; }
+  .cmp-low    { background: #f4f6f9 !important; color: var(--muted); }
   .cmp-danger { background: #fdecea !important; color: var(--red); font-weight: 700; }
-  .cmp-hd-llm      { background: #e8f2fb !important; color: var(--blue); font-weight: 700; text-align: center; }
+  .cmp-hd-llm      { background: #e8f2fb !important; color: var(--blue);   font-weight: 700; text-align: center; }
   .cmp-hd-fraud    { background: #f0eaf8 !important; color: var(--purple); font-weight: 700; text-align: center; }
-  .cmp-hd-forecast { background: #e8f4ee !important; color: var(--green); font-weight: 700; text-align: center; }
+  .cmp-hd-forecast { background: #e8f4ee !important; color: var(--green);  font-weight: 700; text-align: center; }
+  .cmp-hd-maint    { background: #fff3e0 !important; color: #b85c00;       font-weight: 700; text-align: center; }
   .cmp-row-label { background: var(--gray) !important; font-weight: 700; color: var(--navy); width: 180px; }
 
   /* ── Flow ── */
@@ -239,6 +242,11 @@
     opacity: .9;
   }
   .rank-card.rank3 {
+    background: linear-gradient(135deg, #f4f0fa, #ece6f6);
+    border: 1.5px solid #9a6cc0;
+    opacity: .85;
+  }
+  .rank-card.rank4 {
     background: var(--gray);
     border: 1px solid var(--border);
     opacity: .75;
@@ -252,7 +260,8 @@
   }
   .rank1 .rank-num { color: var(--teal); }
   .rank2 .rank-num { color: var(--green); }
-  .rank3 .rank-num { color: var(--muted); }
+  .rank3 .rank-num { color: var(--purple); }
+  .rank4 .rank-num { color: var(--muted); }
   .rank-title { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
   .rank-desc  { font-size: 13px; color: var(--muted); line-height: 1.6; }
   .rank-badge {
@@ -261,9 +270,10 @@
     padding: 2px 10px; border-radius: 20px;
     margin-bottom: 6px;
   }
-  .rank1 .rank-badge { background: var(--teal); color: #fff; }
-  .rank2 .rank-badge { background: var(--green); color: #fff; }
-  .rank3 .rank-badge { background: #d0d8e4; color: var(--muted); }
+  .rank1 .rank-badge { background: var(--teal);   color: #fff; }
+  .rank2 .rank-badge { background: var(--green);  color: #fff; }
+  .rank3 .rank-badge { background: var(--purple); color: #fff; }
+  .rank4 .rank-badge { background: #d0d8e4;       color: var(--muted); }
 
   /* ── 조건 코드블록 ── */
   .condition-box {
@@ -297,6 +307,7 @@
   .opt-a .option-header { background: linear-gradient(90deg, var(--teal), #009aaa); }
   .opt-b .option-header { background: linear-gradient(90deg, #0d4a2a, var(--green)); }
   .opt-c .option-header { background: linear-gradient(90deg, #5a3a80, var(--purple)); }
+  .opt-d .option-header { background: linear-gradient(90deg, #7a4500, var(--accent)); }
   .option-label {
     font-size: 10px; font-weight: 700;
     padding: 2px 10px; border-radius: 20px;
@@ -326,7 +337,8 @@
     color: var(--purple);
     margin-bottom: 8px;
   }
-  .prereq-label.green { color: var(--green); }
+  .prereq-label.green  { color: var(--green); }
+  .prereq-label.accent { color: var(--accent); }
 
   /* ── 한 줄 결론 ── */
   .final-box {
@@ -356,14 +368,15 @@
 <!-- ── Hero ── -->
 <div class="hero">
   <button class="close-btn" onclick="window.close()">✕ 닫기</button>
-  <div class="hero-badge">PoC 과제 선택 비교 · LLM 민원 챗봇 vs 부정승차 탐지 vs 수요 예측</div>
-  <h1>3개월 PoC 과제 선택 비교</h1>
-  <h2>LLM Chatbot vs Fare Evasion Detection vs Demand Forecasting — Selection Analysis</h2>
+  <div class="hero-badge">PoC 과제 선택 비교 · LLM 챗봇 vs 부정승차 탐지 vs 수요 예측 vs 예지보전</div>
+  <h1>4개 PoC 과제 선택 비교</h1>
+  <h2>LLM Chatbot vs Fare Evasion vs Demand Forecasting vs Predictive Maintenance — Selection Analysis</h2>
   <div class="hero-summary">
-    보고타 교통·AFC 영역에서 <strong>3개월 PoC</strong>를 추진할 경우, 후보 과제는 <strong>LLM 민원 챗봇</strong>, <strong>부정승차 탐지</strong>, <strong>시간대·역별 수요 예측</strong>으로 구분된다.
-    세 과제 모두 AI/ML 적용 가치가 있으나, PoC 목적이 <strong>내부 테스트 중심인지</strong>, <strong>운영 데이터 확보가 가능한지</strong>,
+    보고타 교통·AFC 영역에서 PoC를 추진할 경우, 후보 과제는 <strong>LLM 민원 챗봇</strong>, <strong>부정승차 탐지</strong>,
+    <strong>시간대·역별 수요 예측</strong>, <strong>게이트·단말기 예지보전</strong> 네 가지로 구분된다.
+    PoC 목적이 <strong>내부 테스트 중심인지</strong>, <strong>운영 데이터 확보가 가능한지</strong>,
     <strong>단기간 내 시연 가능한 결과물이 필요한지</strong>에 따라 적합성이 달라진다.
-    본 문서는 세 과제를 8개 관점에서 비교하고 최적 선택을 안내한다.
+    본 문서는 네 과제를 8개 관점에서 비교하고 최적 선택을 안내한다.
   </div>
 </div>
 
@@ -373,10 +386,11 @@
   <a href="#s2">2. LLM 민원 챗봇</a>
   <a href="#s3">3. 부정승차 탐지</a>
   <a href="#s4">4. 수요 예측</a>
-  <a href="#s5">5. 선택 기준</a>
-  <a href="#s6">6. 추천 결론</a>
-  <a href="#s7">7. 제안 방향</a>
-  <a href="#s8">8. 한 줄 결론</a>
+  <a href="#s5">5. 예지보전</a>
+  <a href="#s6">6. 선택 기준</a>
+  <a href="#s7">7. 추천 결론</a>
+  <a href="#s8">8. 제안 방향</a>
+  <a href="#s9">9. 한 줄 결론</a>
 </nav>
 
 <div class="wrapper">
@@ -392,10 +406,11 @@
     <table>
       <thead>
         <tr>
-          <th style="width:180px;">구분</th>
+          <th style="width:160px;">구분</th>
           <th class="cmp-hd-llm">LLM 민원 챗봇</th>
           <th class="cmp-hd-fraud">부정승차 탐지</th>
           <th class="cmp-hd-forecast">수요 예측</th>
+          <th class="cmp-hd-maint">예지보전</th>
         </tr>
       </thead>
       <tbody>
@@ -404,53 +419,62 @@
           <td>생성형 AI / RAG / 고객응대 자동화</td>
           <td>예측·탐지형 ML / 이상탐지</td>
           <td>시계열 예측 / Forecasting ML</td>
+          <td>Predictive ML / IoT 이상탐지</td>
         </tr>
         <tr>
           <td class="cmp-row-label">주요 목적</td>
           <td>민원 자동응답, 상담원 지원, FAQ 자동화</td>
           <td>비정상 이용 패턴 및 부정승차 의심 거래 탐지</td>
           <td>시간대·역별 승객 수요 예측으로 배차·인력 최적화</td>
+          <td>게이트·단말기 고장 예측으로 다운타임 절감 및 예방정비 실현</td>
         </tr>
         <tr>
           <td class="cmp-row-label">주요 데이터</td>
           <td>FAQ, 정책문서, 상담로그, VOC</td>
           <td>AFC 거래, 카드, 장비, 정류장, 단속 이력</td>
           <td>AFC 승하차 로그, 시간대, 노선, 날씨·이벤트</td>
+          <td>IoT 장비 로그, 오류코드, 센서 데이터, 정비 이력</td>
         </tr>
         <tr>
           <td class="cmp-row-label">주요 결과물</td>
           <td>내부 챗봇 Prototype, RAG Pipeline, 답변 평가</td>
           <td>이상거래 Score, 의심 패턴, 탐지 Rule/Model</td>
           <td>수요 예측 모델, 예측 대시보드, 운영비 절감 리포트</td>
+          <td>고장 예측 모델, RUL 예측값, 정비 우선순위 리포트</td>
         </tr>
         <tr>
           <td class="cmp-row-label">3개월 PoC 적합성</td>
           <td class="cmp-high">높음</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-mid">중간</td>
+          <td class="cmp-low">낮음</td>
         </tr>
         <tr>
           <td class="cmp-row-label">내부 테스트 적합성</td>
           <td class="cmp-high">높음</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-high">높음</td>
+          <td class="cmp-mid">중간</td>
         </tr>
         <tr>
           <td class="cmp-row-label">데이터 확보 난이도</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-danger">높음</td>
           <td class="cmp-mid">중간</td>
+          <td class="cmp-danger">높음</td>
         </tr>
         <tr>
           <td class="cmp-row-label">라벨 필요성</td>
           <td class="cmp-low">낮음~중간</td>
           <td class="cmp-danger">높음</td>
           <td class="cmp-low">낮음</td>
+          <td class="cmp-mid">중간</td>
         </tr>
         <tr>
           <td class="cmp-row-label">운영 리스크</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-danger">높음</td>
+          <td class="cmp-mid">중간</td>
           <td class="cmp-mid">중간</td>
         </tr>
         <tr>
@@ -458,16 +482,19 @@
           <td class="cmp-high">높음</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-mid">중간</td>
+          <td class="cmp-low">낮음</td>
         </tr>
         <tr>
           <td class="cmp-row-label">업무 임팩트</td>
           <td class="cmp-mid">중간</td>
           <td class="cmp-high">높음</td>
           <td class="cmp-high">높음</td>
+          <td class="cmp-high">높음</td>
         </tr>
         <tr>
           <td class="cmp-row-label">정량 ROI 산정</td>
           <td class="cmp-mid">중간</td>
+          <td class="cmp-high">높음</td>
           <td class="cmp-high">높음</td>
           <td class="cmp-high">높음</td>
         </tr>
@@ -743,10 +770,102 @@
   </div>
 </div>
 
-<!-- ── 5. PoC 선택 기준 ── -->
+<!-- ── 5. 예지보전 PoC ── -->
 <div class="card" id="s5">
-  <div class="card-header">
+  <div class="card-header accent-hd">
     <span class="num">5</span>
+    <h3>게이트·단말기 예지보전 PoC</h3>
+    <span class="en">Predictive Maintenance PoC</span>
+  </div>
+  <div class="card-body">
+    <p style="font-size:13.5px; color:var(--muted); margin-bottom:20px; line-height:1.75;">
+      IoT 장비 로그와 오류코드를 분석하여 게이트·단말기의 고장을 사전 예측하고 <strong style="color:var(--accent);">다운타임 절감과 예방정비 전환</strong>을 실현하는 Predictive ML 과제이다.
+    </p>
+
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">처리 흐름</div>
+        <div class="flow">
+          <div class="flow-step data">IoT 장비 로그 + 오류코드 수집</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">데이터 정제 및 표준화</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">EDA + 고장 패턴 분석</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step action">Rule 기반 임계치 알림</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step model">ML 예측 모델 (XGBoost + LSTM)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step output">RUL 예측 및 정비 우선순위 산출</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step action">정비팀 통보 및 작업지시서 연계</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">주요 예지보전 대상</div>
+        <ul class="bullet">
+          <li>게이트 개폐 불량 사전 예측</li>
+          <li>단말기 판독 오류 패턴 감지</li>
+          <li>모터·센서 마모 예측 (RUL)</li>
+          <li>전력 소비 이상 감지</li>
+          <li>네트워크 연결 불안정 예측</li>
+          <li>고장 발생 전 부품 교체 시점 예측</li>
+          <li>장비 수명 주기 기반 정기점검 최적화</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sub-section" style="margin-top:20px;">
+      <div class="sub-title green">장점</div>
+      <table class="tbl-green">
+        <thead><tr><th style="width:220px;">장점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>다운타임 절감 효과 큼</td><td>고장 예측으로 계획 정비 전환 — 다운타임 −30~50% 달성 가능</td></tr>
+          <tr><td>AFC 운영 인프라 직결</td><td>게이트·단말기는 AFC 핵심 자산 — 운영 연속성 직접 영향</td></tr>
+          <tr><td>정량 ROI 명확</td><td>장비 다운타임 비용, 긴급 정비 비용 절감액 산출 가능</td></tr>
+          <tr><td>벤치마크 사례 풍부</td><td>싱가포르 SMRT, 홍콩 MTR 등 교통 예지보전 성공 사례 다수</td></tr>
+          <tr><td>안전 리스크 감소</td><td>게이트 오동작으로 인한 승객 안전 사고 위험 감소</td></tr>
+          <tr><td>확장 가능성 높음</td><td>차량, 역사 시설, 전원 장치 등 다양한 자산으로 확대 가능</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title red">단점</div>
+      <table class="tbl-red">
+        <thead><tr><th style="width:220px;">단점</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td>IoT 로그 표준화 선행 필요</td><td>장비 유형별 로그 포맷이 달라 데이터 통합 작업이 필수</td></tr>
+          <tr><td>고장 이력 데이터 부족</td><td>실제 고장 라벨이 충분치 않으면 지도학습 모델 성능 제한</td></tr>
+          <tr><td>6~9개월 소요</td><td>데이터 표준화 + 모델 학습 + 운영 검증까지 단기 완성 어려움</td></tr>
+          <tr><td>센서 데이터 품질 관리 필요</td><td>센서 오작동 또는 누락 데이터로 인한 신뢰도 저하 위험</td></tr>
+          <tr><td>하드웨어 인프라 연동 필요</td><td>실시간 예측을 위해 장비 모니터링 시스템 연계가 필요</td></tr>
+          <tr><td>3개월 PoC 결과물 제한적</td><td>단기에는 Rule 기반 Baseline 수준에 그칠 수 있음</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-title accent">6~9개월 PoC 결과물</div>
+      <table class="tbl-accent">
+        <thead><tr><th style="width:220px;">산출물</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td>IoT 로그 EDA</td><td>장비 유형별 오류 패턴 및 고장 전조 분석</td></tr>
+          <tr><td>고장 Rule 후보</td><td>업무 기반 임계치 Rule 5~10개</td></tr>
+          <tr><td>Feature Set</td><td>오류코드·운영부하·장비수명·센서 기반 변수 정의</td></tr>
+          <tr><td>Baseline 예측 모델</td><td>XGBoost 기반 고장 예측 Binary Classification</td></tr>
+          <tr><td>정비 우선순위 리포트</td><td>Risk Score 기반 긴급·계획·모니터링 정비 목록</td></tr>
+          <tr><td>Go/No-Go Memo</td><td>운영 적용 확대 판단 자료 (RUL MAE &lt;3일 목표 포함)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 6. PoC 선택 기준 ── -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">6</span>
     <h3>PoC 선택 기준</h3>
     <span class="en">Decision Criteria</span>
   </div>
@@ -754,10 +873,11 @@
     <table>
       <thead>
         <tr>
-          <th style="width:260px;">선택 기준</th>
+          <th style="width:230px;">선택 기준</th>
           <th class="cmp-hd-llm">LLM 챗봇</th>
           <th class="cmp-hd-fraud">부정승차 탐지</th>
           <th class="cmp-hd-forecast">수요 예측</th>
+          <th class="cmp-hd-maint">예지보전</th>
         </tr>
       </thead>
       <tbody>
@@ -766,28 +886,33 @@
           <td class="crit-best">최적</td>
           <td class="crit-low">낮음</td>
           <td class="crit-mid">보통</td>
+          <td class="crit-low">낮음</td>
         </tr>
         <tr>
           <td>3개월 내 가시적 Prototype 필요</td>
           <td class="crit-best">최적</td>
           <td class="crit-mid">보통</td>
           <td class="crit-mid">보통</td>
+          <td class="crit-low">낮음</td>
         </tr>
         <tr>
-          <td>라벨·단속 이력 없이 시작 가능</td>
+          <td>라벨·이력 없이 시작 가능</td>
           <td class="crit-best">최적</td>
           <td class="crit-low">낮음</td>
           <td class="crit-best">최적</td>
+          <td class="crit-mid">보통</td>
         </tr>
         <tr>
           <td>내부 테스트만으로 완결 가능</td>
           <td class="crit-best">최적</td>
           <td class="crit-low">낮음</td>
           <td class="crit-best">최적</td>
+          <td class="crit-mid">보통</td>
         </tr>
         <tr>
           <td>정량 ROI 수치 산정이 중요</td>
           <td class="crit-mid">보통</td>
+          <td class="crit-best">최적</td>
           <td class="crit-best">최적</td>
           <td class="crit-best">최적</td>
         </tr>
@@ -796,16 +921,19 @@
           <td class="crit-mid">보통</td>
           <td class="crit-best">최적</td>
           <td class="crit-mid">보통</td>
+          <td class="crit-low">낮음</td>
         </tr>
         <tr>
           <td>ML 시계열 분석·예측 역량 검증 필요</td>
           <td class="crit-low">낮음</td>
           <td class="crit-mid">보통</td>
           <td class="crit-best">최적</td>
+          <td class="crit-best">최적</td>
         </tr>
         <tr>
           <td>생성형 AI 활용 사례 필요</td>
           <td class="crit-best">최적</td>
+          <td class="crit-low">낮음</td>
           <td class="crit-low">낮음</td>
           <td class="crit-low">낮음</td>
         </tr>
@@ -814,16 +942,24 @@
           <td class="crit-low">낮음</td>
           <td class="crit-mid">보통</td>
           <td class="crit-best">최적</td>
+          <td class="crit-best">최적</td>
+        </tr>
+        <tr>
+          <td>IoT·장비 데이터 표준화 완료</td>
+          <td class="crit-low">낮음</td>
+          <td class="crit-low">낮음</td>
+          <td class="crit-low">낮음</td>
+          <td class="crit-best">최적</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- ── 6. 추천 결론 ── -->
-<div class="card" id="s6">
+<!-- ── 7. 추천 결론 ── -->
+<div class="card" id="s7">
   <div class="card-header">
-    <span class="num">6</span>
+    <span class="num">7</span>
     <h3>추천 결론</h3>
     <span class="en">Recommendation</span>
   </div>
@@ -868,14 +1004,22 @@
           <div class="rank-desc">업무 임팩트는 크지만 데이터·라벨·업무 검증 부담이 큼 — AFC 데이터 및 단속 이력 확보 후 중장기 과제로 추진 권장</div>
         </div>
       </div>
+      <div class="rank-card rank4">
+        <div class="rank-num">4</div>
+        <div>
+          <div class="rank-badge">인프라 표준화 후 추진</div>
+          <div class="rank-title">게이트·단말기 예지보전</div>
+          <div class="rank-desc">다운타임 절감 ROI가 가장 명확하지만 IoT 로그 표준화 + 6~9개월 일정이 선행 조건 — 장비 데이터 파이프라인 구축 후 전략 과제로 추진 권장</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── 7. 제안 방향 ── -->
-<div class="card" id="s7">
+<!-- ── 8. 제안 방향 ── -->
+<div class="card" id="s8">
   <div class="card-header">
-    <span class="num">7</span>
+    <span class="num">8</span>
     <h3>제안 방향</h3>
     <span class="en">Proposed Direction</span>
   </div>
@@ -938,20 +1082,41 @@
       </div>
     </div>
 
+    <div class="option-card opt-d">
+      <div class="option-header">
+        <span class="option-label">선택안 D · 전략 과제</span>
+        게이트·단말기 예지보전 PoC
+      </div>
+      <div class="option-body">
+        <div class="option-code">
+          IoT 장비 로그 + 오류코드 기반 고장 예측 모델 및 정비 우선순위 리포트 구축 (다운타임 −30~50% 목표)
+        </div>
+        <div class="prereq-label accent">선행 조건 (인프라 준비 후 착수 권장)</div>
+        <ul class="bullet">
+          <li>장비 유형별 IoT 로그 포맷 표준화 완료</li>
+          <li>최소 6개월 이상의 장비 오류 이력 + 정비 기록 확보</li>
+          <li>정비팀과 협업 가능한 운영 체계 확보</li>
+          <li>6~9개월 과제 일정으로 추진 계획 수립 (단기 PoC와 별도 트랙)</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- ── 8. 한 줄 결론 ── -->
-<div class="card" id="s8">
+<!-- ── 9. 한 줄 결론 ── -->
+<div class="card" id="s9">
   <div class="card-header">
-    <span class="num">8</span>
+    <span class="num">9</span>
     <h3>한 줄 결론</h3>
     <span class="en">Bottom Line</span>
   </div>
   <div class="card-body">
     <div class="final-box">
       <p><strong>내부 테스트형 3개월 PoC라면 LLM 민원 챗봇이 가장 현실적인 1순위 선택이다.</strong></p>
-      <p class="final-sub">수요 예측은 AFC 거래 로그만으로 착수 가능하며, 운영비 절감 ROI가 명확해 이력 데이터 확보 즉시 2순위 대안으로 추진 권장한다.<br>부정승차 탐지는 라벨·운영 데이터 체계가 갖춰진 후 중장기 과제로 추진하는 것이 안전하다.</p>
+      <p class="final-sub">수요 예측은 AFC 거래 로그만으로 착수 가능하며, 운영비 절감 ROI가 명확해 이력 데이터 확보 즉시 2순위 대안으로 추진 권장한다.<br>
+      부정승차 탐지는 라벨·운영 데이터 체계가 갖춰진 후 중장기 과제로 추진하는 것이 안전하다.<br>
+      예지보전은 다운타임 절감 ROI가 가장 명확하지만 IoT 표준화가 선행되어야 하므로, 장비 데이터 파이프라인 구축 완료 후 전략 과제로 별도 추진한다.</p>
     </div>
   </div>
 </div>
