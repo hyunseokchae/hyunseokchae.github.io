@@ -741,6 +741,72 @@ html, body {
   letter-spacing: 0.3px;
 }
 
+/* ── Architecture Horizontal Layout ── */
+.arch-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+}
+.arch-flow-area { flex: 1; display: flex; align-items: stretch; }
+.arch-h-flow { display: flex; align-items: stretch; gap: 6px; flex: 1; }
+.arch-flow-arrow {
+  display: flex; align-items: center;
+  color: rgba(255,255,255,0.35); font-size: 18px; flex-shrink: 0; padding: 0 2px;
+}
+.arch-zone-h {
+  position: relative;
+  display: flex; align-items: stretch; gap: 6px;
+  border: 1.5px dashed rgba(240,140,0,0.6);
+  border-radius: 10px;
+  padding: 16px 8px 8px;
+  background: rgba(240,140,0,0.04);
+}
+.arch-zone-label-h {
+  position: absolute; top: -11px; left: 12px;
+  background: linear-gradient(90deg, #f08c00, #c96d00);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 2px 12px; border-radius: 20px;
+  letter-spacing: 0.05em; white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+.arch-layer-card {
+  display: flex; flex-direction: column;
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  flex: 1; min-width: 118px;
+}
+.alc-num {
+  padding: 5px 8px; font-size: 12px; font-weight: 700;
+  text-align: center; color: rgba(255,255,255,0.6);
+}
+.alc-name {
+  padding: 5px 10px; font-size: 11.5px; font-weight: 700;
+  color: var(--white); text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.alc-detail {
+  padding: 7px 10px; font-size: 10px;
+  color: rgba(255,255,255,0.6); line-height: 1.5;
+  flex: 1; border-top: 1px solid rgba(255,255,255,0.08);
+}
+.arch-right-sidebar { width: 210px; display: flex; flex-direction: column; gap: 8px; }
+
+.la1 .alc-num { background: rgba(0,122,135,0.3); }
+.la2 .alc-num { background: rgba(46,109,164,0.3); }
+.la3 .alc-num { background: rgba(23,123,78,0.3); }
+.la4 .alc-num { background: rgba(106,13,145,0.3); }
+.la5 .alc-num { background: rgba(240,140,0,0.25); }
+.la6 .alc-num { background: rgba(192,57,43,0.3); }
+.la7 .alc-num { background: rgba(90,106,130,0.3); }
+.la1 .alc-name { background: rgba(0,122,135,0.2); }
+.la2 .alc-name { background: rgba(46,109,164,0.2); }
+.la3 .alc-name { background: rgba(23,123,78,0.2); }
+.la4 .alc-name { background: rgba(106,13,145,0.2); }
+.la5 .alc-name { background: rgba(240,140,0,0.18); }
+.la6 .alc-name { background: rgba(192,57,43,0.2); }
+.la7 .alc-name { background: rgba(90,106,130,0.2); }
+
 /* ── Risk Table (Slide 10) ── */
 .risk-table {
   width: 100%;
@@ -1221,51 +1287,75 @@ html, body {
   <div class="slide-title">AI/ML 시스템 아키텍처</div>
   <div class="slide-sub">Bronze → Silver → Gold 메달리온 아키텍처 + MLOps 7계층</div>
   <div class="slide-content">
-    <div class="arch-layers">
-      <div class="ml-zone" style="border-color:rgba(46,109,164,0.6);background:rgba(46,109,164,0.04);">
-        <div class="ml-zone-label" style="background:linear-gradient(90deg,#2e6da4,#1a5276);">🗄 데이터 플랫폼</div>
-        <div class="arch-layer la1">
-          <div class="al-num">1</div>
-          <div class="al-name">Data Ingestion</div>
-          <div class="al-detail">CDC · Batch · API · File Interface — 운영계 AFC → 분석계 안전 복제 <span class="al-tag medal-bronze">Bronze</span></div>
+    <div class="arch-layout">
+
+      <!-- ── 좌측: 수평 흐름 1→2→3→4→5 ── -->
+      <div class="arch-flow-area">
+        <div class="arch-h-flow">
+
+          <!-- Zone: 데이터 플랫폼 (1, 2) -->
+          <div class="arch-zone-h" style="border-color:rgba(46,109,164,0.6);background:rgba(46,109,164,0.04);">
+            <div class="arch-zone-label-h" style="background:linear-gradient(90deg,#2e6da4,#1a5276);">🗄 데이터 플랫폼</div>
+            <div class="arch-layer-card la1">
+              <div class="alc-num">1</div>
+              <div class="alc-name">Data Ingestion</div>
+              <div class="alc-detail">CDC · Batch · API · File Interface — 운영계 AFC → 분석계 안전 복제 <span class="al-tag medal-bronze">Bronze</span></div>
+            </div>
+            <div class="arch-flow-arrow">→</div>
+            <div class="arch-layer-card la2">
+              <div class="alc-num">2</div>
+              <div class="alc-name">Data Lake / Warehouse</div>
+              <div class="alc-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
+            </div>
+          </div>
+
+          <div class="arch-flow-arrow">→</div>
+
+          <!-- Zone: 최소 ML 영역 (3, 4) -->
+          <div class="arch-zone-h">
+            <div class="arch-zone-label-h">⚡ 최소 ML영역</div>
+            <div class="arch-layer-card la3">
+              <div class="alc-num">3</div>
+              <div class="alc-name">Feature Layer</div>
+              <div class="alc-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
+            </div>
+            <div class="arch-flow-arrow">→</div>
+            <div class="arch-layer-card la4">
+              <div class="alc-num">4</div>
+              <div class="alc-name">ML Platform</div>
+              <div class="alc-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가</div>
+            </div>
+          </div>
+
+          <div class="arch-flow-arrow">→</div>
+
+          <!-- Layer 5 단독 -->
+          <div class="arch-layer-card la5">
+            <div class="alc-num">5</div>
+            <div class="alc-name">Serving Layer</div>
+            <div class="alc-detail">Batch Scoring · API Serving — Phase 1 배치 중심 → Phase 2 준실시간 확장</div>
+          </div>
+
         </div>
-        <div class="arch-layer la2">
-          <div class="al-num">2</div>
-          <div class="al-name">Data Lake / Warehouse</div>
-          <div class="al-detail">Bronze(원천) → Silver(정제) → Gold(분석용) 계층 구조 <span class="al-tag medal-silver">Silver</span><span class="al-tag medal-gold" style="margin-left:4px;">Gold</span></div>
+      </div>
+
+      <!-- ── 우측: Monitoring + Business Application ── -->
+      <div class="arch-right-sidebar">
+        <div class="arch-layer-card la6" style="flex:1;">
+          <div class="alc-num">6</div>
+          <div class="alc-name">Monitoring</div>
+          <div class="alc-detail">Data Drift · Model Drift · KPI Monitoring — 데이터 변화 및 모델 성능 저하 자동 감시</div>
+        </div>
+        <div class="arch-layer-card la7" style="flex:1;">
+          <div class="alc-num">7</div>
+          <div class="alc-name">Business Application</div>
+          <div class="alc-detail">Dashboard · Alert · Workflow — 단속·정비·CS·정산 업무 시스템 연결</div>
         </div>
       </div>
-      <div class="ml-zone">
-        <div class="ml-zone-label">⚡ 최소 ML영역</div>
-        <div class="arch-layer la3">
-          <div class="al-num">3</div>
-          <div class="al-name">Feature Layer</div>
-          <div class="al-detail">Feature Store · Feature Mart — 학습·추론용 변수 표준화 및 재사용 <span class="al-tag medal-gold">Gold</span></div>
-        </div>
-        <div class="arch-layer la4">
-          <div class="al-num">4</div>
-          <div class="al-name">ML Platform</div>
-          <div class="al-detail">Training · Registry · Evaluation — 학습·버전 관리·성능 평가 (SageMaker 기반)</div>
-        </div>
-      </div>
-      <div class="arch-layer la5">
-        <div class="al-num">5</div>
-        <div class="al-name">Serving Layer</div>
-        <div class="al-detail">Batch Scoring · API Serving — Phase 1 배치 중심 → Phase 2 준실시간 확장</div>
-      </div>
-      <div class="arch-layer la6">
-        <div class="al-num">6</div>
-        <div class="al-name">Monitoring</div>
-        <div class="al-detail">Data Drift · Model Drift · KPI Monitoring — 데이터 변화 및 모델 성능 저하 자동 감시</div>
-      </div>
-      <div class="arch-layer la7">
-        <div class="al-num">7</div>
-        <div class="al-name">Business Application</div>
-        <div class="al-detail">Dashboard · Alert · Workflow — 단속·정비·CS·정산 업무 시스템 연결</div>
-      </div>
+
     </div>
     <div class="arch-note" style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-      <span>전체 파이프라인에 MLOps 자동화 적용 · Champion-Challenger 모델 운영 · 자동 재학습 트리거</span>
+      <span>전체 파이프라인에 MLOps 자동화 적용 · Champion-Challenger 모델 운영</span>
       <span style="display:inline-flex;gap:8px;flex-shrink:0;">
         <a href="sub/AFC_AWS_ML_Architecture.html" target="_blank"
            style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
