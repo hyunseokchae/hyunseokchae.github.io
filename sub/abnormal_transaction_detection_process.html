@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이상거래 탐지 AI/ML 적용 예시 — U05</title>
+<title>이상거래 탐지 AI/ML 적용 프로세스 — U05</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -30,6 +30,7 @@
     line-height: 1.7;
   }
 
+  /* ── Hero ── */
   .hero {
     background: linear-gradient(135deg, #1a0a10 0%, #1a375e 50%, #5c0f1a 100%);
     color: var(--white);
@@ -83,6 +84,7 @@
   }
   .close-btn:hover { background: rgba(26,55,94,1); }
 
+  /* ── TOC ── */
   .toc-bar {
     background: var(--navy);
     padding: 0 5%;
@@ -105,6 +107,7 @@
   }
   .toc-bar a:hover { background: var(--red); color: var(--white); }
 
+  /* ── Layout ── */
   .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
 
   .card {
@@ -144,10 +147,13 @@
     padding-left: 10px;
     margin-bottom: 10px;
   }
-  .sub-title.red  { color: var(--red);   border-color: var(--red); }
-  .sub-title.green{ color: var(--green); border-color: var(--green); }
-  .sub-title.teal { color: var(--teal);  border-color: var(--teal); }
+  .sub-title.red    { color: var(--red);    border-color: var(--red); }
+  .sub-title.green  { color: var(--green);  border-color: var(--green); }
+  .sub-title.teal   { color: var(--teal);   border-color: var(--teal); }
+  .sub-title.purple { color: var(--purple); border-color: var(--purple); }
+  .sub-title.accent { color: var(--accent); border-color: var(--accent); }
 
+  /* ── Tables ── */
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
   td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
@@ -162,28 +168,35 @@
   .tbl-accent th { background: var(--accent); }
   .tbl-blue   th { background: var(--blue); }
 
+  /* ── Grids ── */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
   @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
 
-  .code-block {
-    background: #0d1b2a;
-    color: #a8d8ea;
-    border-radius: 10px;
-    padding: 18px 22px;
-    font-family: 'Consolas', 'D2Coding', monospace;
-    font-size: 12px;
-    line-height: 1.9;
-    overflow-x: auto;
-    margin-top: 10px;
+  /* ── Horizontal flow ── */
+  .hflow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
   }
-  .code-block .kw  { color: #c792ea; font-weight: 600; }
-  .code-block .fn  { color: #82aaff; }
-  .code-block .str { color: #c3e88d; }
-  .code-block .cmt { color: #546e7a; font-style: italic; }
-  .code-block .num { color: #f78c6c; }
-  .code-block .arr { color: #ffc84a; font-weight: 700; }
+  .hstep {
+    background: #fdecea;
+    border: 1.5px solid var(--red);
+    color: #7a1010;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .harrow { color: #aab8cc; font-size: 16px; }
 
+  /* ── Vertical flow ── */
   .flow {
     display: flex;
     flex-direction: column;
@@ -211,13 +224,9 @@
   .flow-step.action  { border-color: var(--accent); }
   .flow-step.danger  { border-color: var(--red);    }
   .flow-step .num-circle {
-    position: absolute;
-    left: -10px; top: -10px;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    color: var(--white);
-    font-size: 11px;
-    font-weight: 700;
+    position: absolute; left: -10px; top: -10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    color: var(--white); font-size: 11px; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 2px 4px rgba(0,0,0,.15);
   }
@@ -231,47 +240,62 @@
   .flow-step .step-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
   .flow-arrow { font-size: 20px; color: var(--red); margin: 6px 0; font-weight: 700; }
 
-  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  .kpi-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  @media (max-width: 900px) { .kpi-grid, .kpi-grid-3 { grid-template-columns: 1fr 1fr; } }
+  /* ── Info box ── */
+  .info-box {
+    background: #fdf0ef;
+    border: 1px solid rgba(192,57,43,.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #5a1010;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--red); }
+
+  /* ── KPI ── */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 10px; }
   .kpi-card {
+    background: linear-gradient(135deg, #fdf0ef, #f8e0de);
+    border: 1px solid rgba(192,57,43,.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .kpi-card .kpi-val { font-size: 1.5rem; font-weight: 700; color: var(--red); line-height: 1.2; }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Legacy kpi (section 8 Baseline) ── */
+  .kpi-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .kpi-grid-4 { grid-template-columns: 1fr 1fr; } }
+  .kpi-card-lg {
     background: linear-gradient(135deg, #f8fafd 0%, #eef2f7 100%);
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 16px 14px;
     text-align: center;
   }
-  .kpi-card .kpi-icon { font-size: 24px; margin-bottom: 6px; }
-  .kpi-card .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--red); line-height: 1.2; }
-  .kpi-card .kpi-unit { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .kpi-card .kpi-label { font-size: 12px; font-weight: 600; color: var(--navy); }
-  .kpi-card .kpi-desc { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+  .kpi-card-lg .kpi-icon { font-size: 24px; margin-bottom: 6px; }
+  .kpi-card-lg .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--red); line-height: 1.2; }
+  .kpi-card-lg .kpi-unit { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-card-lg .kpi-label { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .kpi-card-lg .kpi-desc { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
 
+  /* ── Mini cards ── */
   .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
   .card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 12px; }
   @media (max-width: 900px) { .card-grid, .card-grid-3 { grid-template-columns: 1fr; } }
-  .mini-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .mini-card-header {
-    padding: 10px 14px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--white);
-    display: flex; align-items: center; gap: 8px;
-  }
+  .mini-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .mini-card-header { padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: var(--white); display: flex; align-items: center; gap: 8px; }
   .mini-card-body { padding: 12px 14px; font-size: 12.5px; color: var(--muted); line-height: 1.75; }
   .mini-card-body ul { list-style: none; }
   .mini-card-body ul li::before { content: "· "; color: var(--blue); font-weight: 700; }
 
+  /* ── Severity / Badge ── */
   .sev { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
-  .sev-crit   { background: rgba(192,57,43,.12);  color: var(--red);    border: 1px solid rgba(192,57,43,.3); }
-  .sev-high   { background: rgba(240,140,0,.12);  color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
-  .sev-med    { background: rgba(46,109,164,.12); color: var(--blue);   border: 1px solid rgba(46,109,164,.3); }
-  .sev-low    { background: rgba(23,123,78,.12);  color: var(--green);  border: 1px solid rgba(23,123,78,.3); }
+  .sev-crit { background: rgba(192,57,43,.12); color: var(--red);    border: 1px solid rgba(192,57,43,.3); }
+  .sev-high { background: rgba(240,140,0,.12); color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
+  .sev-med  { background: rgba(46,109,164,.12); color: var(--blue);  border: 1px solid rgba(46,109,164,.3); }
+  .sev-low  { background: rgba(23,123,78,.12);  color: var(--green); border: 1px solid rgba(23,123,78,.3); }
 
   .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-right: 4px; }
   .badge-green  { background: rgba(23,123,78,.12);  color: var(--green);  border: 1px solid rgba(23,123,78,.3); }
@@ -281,6 +305,7 @@
   .badge-accent { background: rgba(240,140,0,.12);  color: var(--accent); border: 1px solid rgba(240,140,0,.3); }
   .badge-teal   { background: rgba(0,122,135,.12);  color: var(--teal);   border: 1px solid rgba(0,122,135,.3); }
 
+  /* ── Notice boxes ── */
   .privacy-box {
     background: linear-gradient(135deg, #fff8f0 0%, #fff3e0 100%);
     border: 1px solid rgba(240,140,0,.3);
@@ -297,32 +322,43 @@
   .em-box   { background: rgba(46,109,164,.06); border: 1px solid rgba(46,109,164,.2); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
   .ok-box   { background: rgba(23,123,78,.06); border: 1px solid rgba(23,123,78,.2); border-left: 4px solid var(--green); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 12.5px; color: var(--text); margin-top: 12px; }
 
+  /* ── Code block ── */
+  .code-block {
+    background: #0d1b2a;
+    color: #a8d8ea;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin-top: 10px;
+  }
+  .code-block .kw  { color: #c792ea; font-weight: 600; }
+  .code-block .fn  { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .cmt { color: #546e7a; font-style: italic; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .arr { color: #ffc84a; font-weight: 700; }
+
+  /* ── Misc ── */
+  ul.bullet { padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  ul.bullet li { margin-bottom: 2px; }
+  ul.bullet li strong { color: var(--text); }
+
   p { font-size: 13px; line-height: 1.8; color: var(--muted); margin-bottom: 10px; }
   p:last-child { margin-bottom: 0; }
   strong { color: var(--navy); }
-  .ul-disc { list-style: disc; padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
-  .ul-disc li { margin-bottom: 4px; }
-  .ul-disc li strong { color: var(--navy); }
 
   .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
   .tag { background: var(--gray); border: 1px solid var(--border); border-radius: 8px; padding: 3px 10px; font-size: 12px; color: var(--muted); }
   .tag.hl { background: rgba(192,57,43,.08); border-color: rgba(192,57,43,.25); color: var(--red); font-weight: 600; }
 
+  /* ── Timeline ── */
   .timeline-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
   @media (max-width: 900px) { .timeline-grid { grid-template-columns: 1fr 1fr; } }
-  .tl-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .tl-header {
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--white);
-    text-align: center;
-  }
+  .tl-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .tl-header { padding: 8px 12px; font-size: 12px; font-weight: 700; color: var(--white); text-align: center; }
   .tl-body { padding: 10px 12px; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
   .tl-body ul { list-style: none; }
   .tl-body ul li::before { content: "✓ "; color: var(--green); font-weight: 700; }
@@ -330,78 +366,88 @@
 </head>
 <body>
 
+<!-- ── Hero ── -->
 <div class="hero">
   <button class="close-btn" onclick="window.close()">✕ 닫기</button>
-  <div class="hero-badge">U05 · Anomaly Detection / AI/ML Process</div>
-  <h1>이상거래 탐지 AI/ML 적용 예시</h1>
-  <h2>Anomaly &amp; Fraud Transaction Detection — Step-by-Step ML Process</h2>
+  <div class="hero-badge">U05 · Anomaly Detection / ML Process</div>
+  <h1>이상거래 탐지 AI/ML 적용 프로세스</h1>
+  <h2>Anomaly Detection — AFC 거래 데이터 기반 이상패턴 탐지 및 부정승차 방지</h2>
   <div class="hero-summary">
-    AFC·결제·정산·ABT 환경에서 <strong>부정승차, 비정상 환불, 장비 오류, 정산 불일치</strong> 등 고위험 거래를
-    조기에 식별하는 AI/ML 적용 실무 절차서. 업무 문제 정의부터 데이터 목록화, EDA, 기술통계, 데이터 정제,
-    Target/Label 정의, Feature Engineering, Baseline 모델, ML 학습·평가, 운영 적용, 모니터링·재학습까지
-    <strong>11단계 전체 흐름</strong>을 단계별로 정리한다.
+    AFC·결제·정산 환경에서 <strong>부정승차, 비정상 환불·취소, 장비 오류 거래, 정산 불일치</strong> 등
+    고위험 거래를 조기에 탐지하는 AI/ML 적용 프로세스.
+    업무 문제 정의부터 데이터 목록화, EDA, 기술통계, 정제, Target·Label 정의, Feature Engineering,
+    Baseline, ML 학습·평가, 운영 적용, 모니터링·재학습까지
+    <strong>12단계 전체 흐름</strong>을 단계별로 정리한다.
   </div>
 </div>
 
+<!-- ── TOC ── -->
 <nav class="toc-bar">
-  <a href="#s00">0. 목적</a>
-  <a href="#s01">1. 문제 정의</a>
-  <a href="#s02">2. 데이터 목록화</a>
-  <a href="#s03">3. EDA</a>
-  <a href="#s04">4. 기술통계</a>
-  <a href="#s05">5. 데이터 정제</a>
-  <a href="#s06">6. Target/Label</a>
-  <a href="#s07">7. Feature Engineering</a>
-  <a href="#s08">8. Baseline 모델</a>
-  <a href="#s09">9. ML 학습·평가</a>
+  <a href="#s0">0. 개요</a>
+  <a href="#s1">1. 업무 문제 정의</a>
+  <a href="#s2">2. 데이터 목록화</a>
+  <a href="#s3">3. EDA</a>
+  <a href="#s4">4. 기술통계</a>
+  <a href="#s5">5. 데이터 정제</a>
+  <a href="#s6">6. Target/Label</a>
+  <a href="#s7">7. Feature Engineering</a>
+  <a href="#s8">8. Baseline 모델</a>
+  <a href="#s9">9. ML 학습·평가</a>
   <a href="#s10">10. 운영 적용</a>
   <a href="#s11">11. 모니터링·재학습</a>
-  <a href="#s12">12. 전체 요약</a>
-  <a href="#s13">13. 추진 일정</a>
-  <a href="#s14">14. 결론</a>
+  <a href="#s12">12. 산출물 &amp; 핵심 정리</a>
 </nav>
 
 <div class="wrapper">
 
-<!-- ══ S00 문서 목적 ══ -->
-<div class="card" id="s00">
+<!-- ── 0. 개요 ── -->
+<div class="card" id="s0">
   <div class="card-header">
-    <span class="num">00</span>
-    <h3>문서 목적</h3>
-    <span class="en">Document Purpose</span>
+    <span class="num">0</span>
+    <h3>개요</h3>
+    <span class="en">Overview</span>
   </div>
   <div class="card-body">
-    <p>본 문서는 교통 AFC, 결제, 정산, 카드 이용, 계정 기반 티켓팅(ABT) 환경에서 <strong>이상거래 탐지(Anomaly/Fraud Transaction Detection)</strong> 모델을 적용하기 위한 실무 절차를 정리한 가이드입니다. 이상거래 탐지는 단순히 모델을 학습하는 작업이 아니라, 아래의 전체 흐름으로 추진되어야 합니다.</p>
-    <div class="flow" style="margin-top:16px;">
-      <div class="flow-step danger"><span class="num-circle">1</span><div class="step-title">업무 문제 정의</div><div class="step-sub">탐지 대상 유형 · KPI · 사용자 정의</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step data"><span class="num-circle">2</span><div class="step-title">데이터 목록화</div><div class="step-sub">소스 · 테이블 · 컬럼 인벤토리</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step data"><span class="num-circle">3</span><div class="step-title">EDA</div><div class="step-sub">구조 · 품질 · 패턴 탐색</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step data"><span class="num-circle">4</span><div class="step-title">기술통계 분석</div><div class="step-sub">분포 · 빈도 · 그룹별 패턴</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step process"><span class="num-circle">5</span><div class="step-title">데이터 정제</div><div class="step-sub">결측 · 중복 · 이상값 처리</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step process"><span class="num-circle">6</span><div class="step-title">Target / Label 판단</div><div class="step-sub">지도 / 비지도 / 하이브리드 결정</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step process"><span class="num-circle">7</span><div class="step-title">Feature Engineering</div><div class="step-sub">거래 · 카드 · 장비 · 시간 · 공간 Feature</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step model"><span class="num-circle">8</span><div class="step-title">Baseline 모델</div><div class="step-sub">룰 기반 · 통계 기반 탐지 기준선</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step model"><span class="num-circle">9</span><div class="step-title">ML 모델 학습 · 평가</div><div class="step-sub">비지도 / 지도 / 하이브리드 학습</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step output"><span class="num-circle">10</span><div class="step-title">검증 및 운영 적용</div><div class="step-sub">Batch · API · Dashboard · Alert</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step action"><span class="num-circle">11</span><div class="step-title">모니터링 · 재학습</div><div class="step-sub">드리프트 감지 · 피드백 · 버전 관리</div></div>
+    <div class="sub-section">
+      <div class="sub-title red">전체 AI/ML 적용 흐름</div>
+      <div class="hflow">
+        <span class="hstep">업무 문제 정의</span><span class="harrow">→</span>
+        <span class="hstep">데이터 목록화</span><span class="harrow">→</span>
+        <span class="hstep">EDA</span><span class="harrow">→</span>
+        <span class="hstep">기술통계 분석</span><span class="harrow">→</span>
+        <span class="hstep">데이터 정제</span><span class="harrow">→</span>
+        <span class="hstep">Target/Label 정의</span><span class="harrow">→</span>
+        <span class="hstep">Feature Engineering</span><span class="harrow">→</span>
+        <span class="hstep">Baseline 모델</span><span class="harrow">→</span>
+        <span class="hstep">ML 모델 학습</span><span class="harrow">→</span>
+        <span class="hstep">운영 적용</span><span class="harrow">→</span>
+        <span class="hstep">모니터링·재학습</span>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title red">주요 탐지 대상 유형</div>
+      <div class="grid3">
+        <div class="info-box">
+          <strong>부정승차 · 카드 오남용</strong><br>
+          동일 카드 반복 태그, 물리적 불가능 이동, 우대권·할인권 오남용, 블랙리스트 카드 사용 시도
+        </div>
+        <div class="info-box">
+          <strong>비정상 환불 · 취소 · 정산 오류</strong><br>
+          특정 카드·계정의 환불 비율 급증, 거래-정산 금액 불일치, 요금 음수·비정상 고액
+        </div>
+        <div class="info-box">
+          <strong>장비 기반 이상거래</strong><br>
+          특정 단말기·게이트에서 오류 거래 급증, 영업시간 외 거래 발생, 장비 오류 코드 연계 이상 패턴
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══ S01 업무 문제 정의 ══ -->
-<div class="card" id="s01">
+<!-- ── 1. 업무 문제 정의 ── -->
+<div class="card" id="s1">
   <div class="card-header">
-    <span class="num">01</span>
+    <span class="num">1</span>
     <h3>업무 문제 정의</h3>
     <span class="en">Problem Definition</span>
   </div>
@@ -460,10 +506,10 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S02 데이터 목록화 ══ -->
-<div class="card" id="s02">
+<!-- ── 2. 데이터 목록화 ── -->
+<div class="card" id="s2">
   <div class="card-header">
-    <span class="num">02</span>
+    <span class="num">2</span>
     <h3>데이터 목록화</h3>
     <span class="en">Data Inventory</span>
   </div>
@@ -528,11 +574,11 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S03 EDA ══ -->
-<div class="card" id="s03">
+<!-- ── 3. EDA ── -->
+<div class="card" id="s3">
   <div class="card-header">
-    <span class="num">03</span>
-    <h3>EDA — 데이터 구조·품질 확인</h3>
+    <span class="num">3</span>
+    <h3>탐색적 데이터 분석 (EDA)</h3>
     <span class="en">Exploratory Data Analysis</span>
   </div>
   <div class="card-body">
@@ -581,11 +627,11 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S04 기술통계 ══ -->
-<div class="card" id="s04">
+<!-- ── 4. 기술통계 ── -->
+<div class="card" id="s4">
   <div class="card-header">
-    <span class="num">04</span>
-    <h3>기술통계 분석 — 분포·패턴 파악</h3>
+    <span class="num">4</span>
+    <h3>기술통계 분석</h3>
     <span class="en">Descriptive Statistics</span>
   </div>
   <div class="card-body">
@@ -644,12 +690,12 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S05 데이터 정제 ══ -->
-<div class="card" id="s05">
+<!-- ── 5. 데이터 정제 ── -->
+<div class="card" id="s5">
   <div class="card-header">
-    <span class="num">05</span>
-    <h3>데이터 정제 — 결측·중복·이상값 처리</h3>
-    <span class="en">Data Cleaning</span>
+    <span class="num">5</span>
+    <h3>데이터 정제</h3>
+    <span class="en">Data Cleansing</span>
   </div>
   <div class="card-body">
     <div class="sub-section">
@@ -699,11 +745,11 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S06 Target/Label ══ -->
-<div class="card" id="s06">
+<!-- ── 6. Target/Label ── -->
+<div class="card" id="s6">
   <div class="card-header">
-    <span class="num">06</span>
-    <h3>Target / Label 판단</h3>
+    <span class="num">6</span>
+    <h3>Target / Label 정의</h3>
     <span class="en">Target Definition &amp; Label Strategy</span>
   </div>
   <div class="card-body">
@@ -748,12 +794,12 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S07 Feature Engineering ══ -->
-<div class="card" id="s07">
+<!-- ── 7. Feature Engineering ── -->
+<div class="card" id="s7">
   <div class="card-header">
-    <span class="num">07</span>
+    <span class="num">7</span>
     <h3>Feature Engineering</h3>
-    <span class="en">Feature Engineering</span>
+    <span class="en">Feature Construction</span>
   </div>
   <div class="card-body">
     <p>원천 데이터를 모델이 학습 가능한 변수로 변환한다. 개별 거래 자체보다 <strong>거래 전후 맥락, 카드/계정별 패턴, 장비별 패턴, 시간·공간 패턴</strong>이 탐지에 중요하다.</p>
@@ -809,10 +855,10 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
   </div>
 </div>
 
-<!-- ══ S08 Baseline ══ -->
-<div class="card" id="s08">
+<!-- ── 8. Baseline ── -->
+<div class="card" id="s8">
   <div class="card-header">
-    <span class="num">08</span>
+    <span class="num">8</span>
     <h3>Baseline 모델</h3>
     <span class="en">Baseline Model — Rule &amp; Statistics</span>
   </div>
@@ -849,20 +895,20 @@ AFC 거래 데이터에서 정상 이용 패턴과 다른 비정상 거래를 �
 
     <div class="sub-section">
       <div class="sub-title">8.3 Baseline 평가 기준</div>
-      <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-icon">🎯</div><div class="kpi-label">탐지 건수</div><div class="kpi-desc">룰이 검출한 거래 수</div></div>
-        <div class="kpi-card"><div class="kpi-icon">✅</div><div class="kpi-label">업무 검토 결과</div><div class="kpi-desc">실제 이상 여부 확인</div></div>
-        <div class="kpi-card"><div class="kpi-icon">⚠️</div><div class="kpi-label">오탐률</div><div class="kpi-desc">정상인데 이상으로 탐지된 비율</div></div>
-        <div class="kpi-card"><div class="kpi-icon">🔍</div><div class="kpi-label">운영 가능성</div><div class="kpi-desc">담당자 검토 가능 수준</div></div>
+      <div class="kpi-grid-4">
+        <div class="kpi-card-lg"><div class="kpi-icon">🎯</div><div class="kpi-label">탐지 건수</div><div class="kpi-desc">룰이 검출한 거래 수</div></div>
+        <div class="kpi-card-lg"><div class="kpi-icon">✅</div><div class="kpi-label">업무 검토 결과</div><div class="kpi-desc">실제 이상 여부 확인</div></div>
+        <div class="kpi-card-lg"><div class="kpi-icon">⚠️</div><div class="kpi-label">오탐률</div><div class="kpi-desc">정상인데 이상으로 탐지된 비율</div></div>
+        <div class="kpi-card-lg"><div class="kpi-icon">🔍</div><div class="kpi-label">운영 가능성</div><div class="kpi-desc">담당자 검토 가능 수준</div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ S09 ML 학습·평가 ══ -->
-<div class="card" id="s09">
+<!-- ── 9. ML 학습·평가 ── -->
+<div class="card" id="s9">
   <div class="card-header">
-    <span class="num">09</span>
+    <span class="num">9</span>
     <h3>ML 모델 학습 · 평가</h3>
     <span class="en">ML Model Training &amp; Evaluation</span>
   </div>
@@ -928,12 +974,12 @@ Test       : <span class="str">11월 ~ 12월</span><br><br>
   </div>
 </div>
 
-<!-- ══ S10 운영 적용 ══ -->
+<!-- ── 10. 운영 적용 ── -->
 <div class="card" id="s10">
   <div class="card-header">
     <span class="num">10</span>
-    <h3>검증 및 운영 적용</h3>
-    <span class="en">Validation &amp; Production Deployment</span>
+    <h3>운영 적용</h3>
+    <span class="en">Operational Deployment</span>
   </div>
   <div class="card-body">
     <div class="sub-section">
@@ -974,20 +1020,7 @@ Test       : <span class="str">11월 ~ 12월</span><br><br>
     </div>
 
     <div class="sub-section">
-      <div class="sub-title">10.3 운영 프로세스 흐름</div>
-      <div class="code-block">
-거래 데이터 수집<br>
-<span class="arr">→</span> Feature 생성<br>
-<span class="arr">→</span> 모델 점수 산출<br>
-<span class="arr">→</span> 위험도 등급 부여<br>
-<span class="arr">→</span> Dashboard 표시<br>
-<span class="arr">→</span> 담당자 검토<br>
-<span class="arr">→</span> 정상/이상 판정<br>
-<span class="arr">→</span> 판정 결과 재학습 데이터로 저장</div>
-    </div>
-
-    <div class="sub-section">
-      <div class="sub-title">10.4 위험도 등급 기준</div>
+      <div class="sub-title">10.3 위험도 등급 기준</div>
       <table>
         <thead><tr><th>등급</th><th>기준</th><th>조치</th></tr></thead>
         <tbody>
@@ -1001,7 +1034,7 @@ Test       : <span class="str">11월 ~ 12월</span><br><br>
   </div>
 </div>
 
-<!-- ══ S11 모니터링·재학습 ══ -->
+<!-- ── 11. 모니터링·재학습 ── -->
 <div class="card" id="s11">
   <div class="card-header">
     <span class="num">11</span>
@@ -1060,122 +1093,71 @@ Test       : <span class="str">11월 ~ 12월</span><br><br>
   </div>
 </div>
 
-<!-- ══ S12 전체 태스크 요약 ══ -->
+<!-- ── 12. 산출물 & 핵심 정리 ── -->
 <div class="card" id="s12">
   <div class="card-header">
     <span class="num">12</span>
-    <h3>전체 프로세스 요약</h3>
-    <span class="en">Full Process Summary</span>
+    <h3>산출물 &amp; 핵심 정리</h3>
+    <span class="en">Deliverables &amp; Key Summary</span>
   </div>
   <div class="card-body">
-    <table>
-      <thead><tr><th>단계</th><th>핵심 태스크</th><th>주요 산출물</th></tr></thead>
-      <tbody>
-        <tr><td>1. 업무 문제 정의</td><td>탐지 대상, 사용자, KPI 정의</td><td>Use Case 정의서</td></tr>
-        <tr><td>2. 데이터 목록화</td><td>데이터 소스, 테이블, 컬럼 식별</td><td>데이터 인벤토리</td></tr>
-        <tr><td>3. EDA</td><td>구조, 품질, 패턴 탐색</td><td>EDA 리포트</td></tr>
-        <tr><td>4. 기술통계</td><td>분포, 빈도, 그룹별 통계 분석</td><td>기술통계 보고서</td></tr>
-        <tr><td>5. 데이터 정제</td><td>결측, 중복, 이상값 처리</td><td>데이터 정제 기준서</td></tr>
-        <tr><td>6. Target/Label 판단</td><td>Label 존재 여부, 접근 방식 결정</td><td>Target/Label 정의서</td></tr>
-        <tr><td>7. Feature Engineering</td><td>거래/카드/장비/시간/공간 Feature 생성</td><td>Feature 정의서</td></tr>
-        <tr><td>8. Baseline 모델</td><td>룰 기반/통계 기반 탐지</td><td>Baseline 결과</td></tr>
-        <tr><td>9. ML 학습·평가</td><td>모델 학습, 성능 평가, 오류 분석</td><td>모델 평가서</td></tr>
-        <tr><td>10. 검증 및 운영 적용</td><td>Batch/API/Dashboard 적용</td><td>검증 결과서, 운영 설계서</td></tr>
-        <tr><td>11. 모니터링·재학습</td><td>성능, 드리프트, 피드백 관리</td><td>운영 리포트, 재학습 이력</td></tr>
-      </tbody>
-    </table>
-
-    <div class="ok-box" style="margin-top:16px;">
-      <strong>종합 요약</strong><br>
-      이상거래 탐지 AI/ML 모델은 AFC 거래, 카드/계정, 장비, 위치, 요금정책, 정산 데이터를 통합 분석하여 정상 거래 패턴과 다른 거래를 자동으로 식별한다. 업무 문제 정의, 데이터 인벤토리 구성, EDA 및 기술통계 분석, 결측·중복·이상값 정리, Target 및 Label 정의, Feature Engineering, Baseline 모델, ML 모델 학습·평가, 운영 적용, 모니터링 및 재학습의 단계적 절차를 적용하여 <strong>부정승차, 비정상 환불, 장비 오류, 정산 불일치</strong> 등 고위험 거래를 조기에 탐지하고, 데이터 기반 위험관리 체계를 구축한다.
-    </div>
-  </div>
-</div>
-
-<!-- ══ S13 추진 일정 ══ -->
-<div class="card" id="s13">
-  <div class="card-header">
-    <span class="num">13</span>
-    <h3>추진 일정</h3>
-    <span class="en">Implementation Timeline (12 Weeks)</span>
-  </div>
-  <div class="card-body">
-    <div class="timeline-grid">
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--red);">1~2주차</div>
-        <div class="tl-body"><ul><li>업무 문제 정의</li><li>데이터 소스 확인</li><li>스테이크홀더 인터뷰</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: #b03060;">3~4주차</div>
-        <div class="tl-body"><ul><li>데이터 추출</li><li>EDA 수행</li><li>기술통계 분석</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--navy);">5~6주차</div>
-        <div class="tl-body"><ul><li>데이터 정제</li><li>Target/Label 검토</li><li>Label 기준서 작성</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--blue);">7~8주차</div>
-        <div class="tl-body"><ul><li>Feature Engineering</li><li>Baseline 모델 구축</li><li>룰 기반 탐지 검증</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--purple);">9~10주차</div>
-        <div class="tl-body"><ul><li>ML 모델 학습</li><li>성능 평가</li><li>오류 분석</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--teal);">11주차</div>
-        <div class="tl-body"><ul><li>업무 담당자 검토</li><li>오탐/미탐 분석</li><li>모델 개선</li></ul></div>
-      </div>
-      <div class="tl-card">
-        <div class="tl-header" style="background: var(--green);">12주차</div>
-        <div class="tl-body"><ul><li>검증 결과 정리</li><li>운영 적용 방안 수립</li><li>최종 보고</li></ul></div>
+    <div class="sub-section">
+      <div class="sub-title red">KPI 목표</div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val">80%+</div>
+          <div class="kpi-label">이상거래 탐지율 (Recall)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">&lt;10%</div>
+          <div class="kpi-label">False Positive Rate</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">−50%</div>
+          <div class="kpi-label">수작업 검토 대상 절감</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">+0.3~1%</div>
+          <div class="kpi-label">매출 회수율 향상</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">F1 ≥ 0.70</div>
+          <div class="kpi-label">모델 종합 성능</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">D+1</div>
+          <div class="kpi-label">이상 탐지 → 알림 지연</div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ══ S14 결론 ══ -->
-<div class="card" id="s14">
-  <div class="card-header">
-    <span class="num">14</span>
-    <h3>결론 및 추진 원칙</h3>
-    <span class="en">Conclusion &amp; Key Principles</span>
-  </div>
-  <div class="card-body">
-    <p>이상거래 탐지 AI/ML 적용은 모델 개발보다 <strong>정확한 업무 문제 정의와 데이터 품질 분석</strong>이 우선이다. 특히 AFC/결제 환경에서는 이상거래의 정답 라벨이 부족하거나 희소한 경우가 많기 때문에, 초기에는 아래의 단계적 접근이 현실적이다.</p>
-    <div class="flow" style="margin-top:16px; padding: 16px;">
-      <div class="flow-step danger" style="max-width:560px;"><span class="num-circle">1</span><div class="step-title">룰 기반 Baseline</div><div class="step-sub">R-001~R-007 룰로 즉시 탐지 시작</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step data" style="max-width:560px;"><span class="num-circle">2</span><div class="step-title">기술통계 기반 이상값 탐지</div><div class="step-sub">Z-score, IQR, 이동평균 기준 이상 식별</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step model" style="max-width:560px;"><span class="num-circle">3</span><div class="step-title">비지도 이상탐지 모델</div><div class="step-sub">Isolation Forest, Autoencoder로 패턴 학습</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step process" style="max-width:560px;"><span class="num-circle">4</span><div class="step-title">업무 담당자 피드백 기반 Label 축적</div><div class="step-sub">판정 결과를 재학습 데이터로 지속 축적</div></div>
-      <div class="flow-arrow">↓</div>
-      <div class="flow-step output" style="max-width:560px;"><span class="num-circle">5</span><div class="step-title">단계적 지도학습 고도화</div><div class="step-sub">Label 축적 후 XGBoost/LightGBM 적용</div></div>
+    <div class="sub-section">
+      <div class="sub-title red">주요 산출물</div>
+      <table class="tbl-red">
+        <thead><tr><th>산출물</th><th>내용</th><th>활용처</th></tr></thead>
+        <tbody>
+          <tr><td>EDA 리포트</td><td>거래 패턴, 이상 분포, 카드·장비·역별 분석 결과</td><td>업무팀 교육, 룰 기반 기준 개선</td></tr>
+          <tr><td>Feature 정의서</td><td>입력 피처 정의·계산 로직·업데이트 주기</td><td>파이프라인 개발 표준</td></tr>
+          <tr><td>이상거래 탐지 모델</td><td>XGBoost/Isolation Forest 앙상블 (Label 유무 조건별)</td><td>일배치 및 준실시간 추론</td></tr>
+          <tr><td>위험도 대시보드</td><td>Critical/High/Medium/Low Tier 거래·카드·장비 현황</td><td>운영센터·단속팀 일일 확인</td></tr>
+          <tr><td>정산 불일치 리포트</td><td>거래-정산 금액 차이 자동 집계</td><td>정산팀 오류 추적</td></tr>
+          <tr><td>모델 성능 리포트</td><td>주간 Precision/Recall/F1 추이 및 오탐 분석</td><td>MLOps 모니터링, 재학습 판단</td></tr>
+          <tr><td>검증결과서</td><td>PoC 기간 탐지 정확도 및 업무 검토 결과 종합</td><td>운영 전환 의사결정 자료</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="ok-box">
-      이 접근 방식은 <strong>초기 검증 성공 가능성을 높이고</strong>, 운영 현장의 검토 부담을 줄이며, 장기적으로 재학습 가능한 이상거래 탐지 체계를 구축하는 데 적합하다.
+
+    <div class="sub-section">
+      <div class="sub-title red">단계적 추진 원칙</div>
+      <div class="ok-box">
+        이상거래 탐지 AI/ML 적용은 모델 개발보다 <strong>정확한 업무 문제 정의와 데이터 품질 분석</strong>이 우선이다.
+        초기에는 <strong>룰 기반 Baseline → 비지도 이상탐지 → 업무 피드백 Label 축적 → 지도학습 고도화</strong>의
+        단계적 접근이 현실적이며, 장기적으로 재학습 가능한 이상거래 탐지 체계를 구축한다.
+      </div>
     </div>
   </div>
 </div>
 
 </div><!-- /wrapper -->
-<script>
-(function(){
-  document.addEventListener('contextmenu',function(e){e.preventDefault();return false;});
-  document.addEventListener('keydown',function(e){
-    if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&'IJC'.indexOf(e.key)>-1)||(e.ctrlKey&&(e.key.toLowerCase()==='u'||e.key.toLowerCase()==='s'))){
-      e.preventDefault();return false;
-    }
-  });
-  document.addEventListener('dragstart',function(e){if(e.target.tagName==='IMG')e.preventDefault();});
-  document.addEventListener('DOMContentLoaded',function(){
-    var s=document.createElement('style');
-    s.textContent='img{-webkit-user-drag:none;user-select:none;pointer-events:none;}';
-    document.head.appendChild(s);
-    document.querySelectorAll('img').forEach(function(i){i.setAttribute('draggable','false');});
-  });
-})();
-</script>
 </body>
 </html>
