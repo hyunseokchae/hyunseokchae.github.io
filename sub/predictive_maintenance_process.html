@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게이트·단말기 예지보전 AI/ML 적용 프로세스 — U04</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1a375e;
+    --blue:   #2e6da4;
+    --sky:    #e8f2fb;
+    --accent: #f08c00;
+    --red:    #c0392b;
+    --green:  #177b4e;
+    --purple: #6a0d91;
+    --teal:   #007a87;
+    --white:  #ffffff;
+    --gray:   #f4f6f9;
+    --border: #ccddeee0;
+    --text:   #1a1a2e;
+    --muted:  #5a6a82;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #eef2f7;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #1a375e 55%, #4a2000 100%);
+    color: var(--white);
+    padding: 48px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .05em;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -.02em; }
+  .hero h2 { font-size: 1rem; font-weight: 400; color: #f0c070; margin-bottom: 20px; }
+  .hero-summary {
+    background: rgba(255,255,255,.10);
+    border-left: 4px solid var(--accent);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13.5px;
+    line-height: 1.75;
+    max-width: 900px;
+  }
+  .hero strong { color: #ffc84a; }
+  .close-btn {
+    position: fixed;
+    top: 20px; right: 24px;
+    z-index: 999;
+    background: rgba(26,55,94,.85);
+    border: 1px solid rgba(255,255,255,.35);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s;
+    letter-spacing: .02em;
+    backdrop-filter: blur(6px);
+  }
+  .close-btn:hover { background: rgba(26,55,94,1); }
+
+  /* ── TOC ── */
+  .toc-bar {
+    background: var(--navy);
+    padding: 0 5%;
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
+  .toc-bar a {
+    color: #aaccee;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 10px 13px;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .toc-bar a:hover { background: var(--accent); color: var(--white); }
+
+  /* ── Layout ── */
+  .wrapper { max-width: 1200px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(30,60,100,.08);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .card-header .num {
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+  }
+  .card-header h3 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+  .card-header .en { font-size: 11.5px; color: #aaccee; margin-left: auto; }
+  .card-body { padding: 20px 24px; }
+
+  .sub-section { margin-bottom: 20px; }
+  .sub-section:last-child { margin-bottom: 0; }
+  .sub-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    border-left: 3px solid var(--blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  .sub-title.teal   { color: var(--teal);   border-color: var(--teal); }
+  .sub-title.green  { color: var(--green);  border-color: var(--green); }
+  .sub-title.purple { color: var(--purple); border-color: var(--purple); }
+  .sub-title.red    { color: var(--red);    border-color: var(--red); }
+  .sub-title.accent { color: var(--accent); border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--navy); color: var(--white); padding: 9px 14px; font-weight: 600; text-align: left; font-size: 12px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--gray); }
+  tr:hover td { background: var(--sky); transition: background .15s; }
+  td:first-child { font-weight: 600; color: var(--navy); }
+
+  .tbl-teal   th { background: var(--teal); }
+  .tbl-green  th { background: var(--green); }
+  .tbl-blue   th { background: var(--blue); }
+  .tbl-purple th { background: var(--purple); }
+  .tbl-accent th { background: var(--accent); }
+  .tbl-red    th { background: var(--red); }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+
+  /* ── Flow ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+  }
+  .flow-step {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .flow-step.data    { background: #e8f4fb; border: 1.5px solid #2e6da4; color: #1a375e; }
+  .flow-step.process { background: #e8f8f4; border: 1.5px solid #177b4e; color: #0d4a2a; }
+  .flow-step.model   { background: #f0eaf8; border: 1.5px solid #6a0d91; color: #4a0060; }
+  .flow-step.output  { background: #fff8e8; border: 1.5px solid #f08c00; color: #7a4500; }
+  .flow-step.action  { background: #e6f4f5; border: 1.5px solid #007a87; color: #004a54; }
+  .flow-step.danger  { background: #fdecea; border: 1.5px solid #c0392b; color: #7a1a10; }
+  .flow-arrow { color: #aab8cc; font-size: 18px; margin: 3px 0; line-height: 1; }
+
+  /* ── Horizontal flow ── */
+  .hflow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: #f8fafd;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .hstep {
+    background: #fff3e0;
+    border: 1.5px solid var(--accent);
+    color: #7a4500;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .harrow { color: #aab8cc; font-size: 16px; }
+
+  /* ── KPI ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 10px;
+  }
+  .kpi-card {
+    background: #fff3e0;
+    border: 1px solid #f0c060;
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .kpi-card .kpi-val {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Info box ── */
+  .info-box {
+    background: #fff8f0;
+    border: 1px solid #f0c060;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #5a3000;
+    line-height: 1.7;
+  }
+  .info-box strong { color: var(--accent); }
+
+  /* ── Privacy box ── */
+  .privacy-box {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 1px solid #f0c060;
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #5a3000;
+  }
+  .privacy-box strong { color: var(--accent); }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #0d1b2a;
+    color: #a8d8ea;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Consolas', 'D2Coding', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin-top: 10px;
+  }
+  .code-block .arr { color: #ffc84a; font-weight: 700; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .kw  { color: #c792ea; font-weight: 600; }
+
+  /* ── Bullet list ── */
+  ul.bullet { padding-left: 18px; font-size: 13px; line-height: 1.9; color: var(--muted); }
+  ul.bullet li { margin-bottom: 2px; }
+  ul.bullet li strong { color: var(--text); }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 9px; border-radius: 4px; margin: 2px;
+  }
+  .tag-accent { background: #fff0d0; color: #a06000; border: 1px solid #f0c060; }
+  .tag-green  { background: #e8f4ee; color: var(--green); border: 1px solid #9dd8b8; }
+  .tag-blue   { background: #e8f2fb; color: var(--blue); border: 1px solid #a0c4e8; }
+  .tag-red    { background: #fdecea; color: var(--red); border: 1px solid #e8a0a0; }
+  .tag-teal   { background: #e0f4f6; color: var(--teal); border: 1px solid #9dd0d8; }
+  .tag-gray   { background: #f0f2f5; color: var(--muted); border: 1px solid #ccd0d8; }
+  .tag-purple { background: #f0eaf8; color: var(--purple); border: 1px solid #c090e0; }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <button class="close-btn" onclick="window.close()">✕ 닫기</button>
+  <div class="hero-badge">U04 · Predictive Maintenance / IoT ML</div>
+  <h1>게이트·단말기 예지보전 AI/ML 적용 프로세스</h1>
+  <h2>Predictive Maintenance — AFC 장비 IoT 데이터 기반 고장 사전 예측 및 정비 최적화</h2>
+  <div class="hero-summary">
+    AFC 게이트·단말기·충전기 등 현장 장비의 <strong>IoT 센서 로그·오류 코드·정비 이력</strong>을 분석하여
+    고장 발생 전 <strong>잔여 수명(RUL)</strong>과 <strong>고장 확률</strong>을 예측한다.
+    규칙 기반 임계치 탐지에서 <strong>Random Forest · XGBoost · LSTM 앙상블 모델</strong>로 진화하여
+    <strong>계획 정비 전환율 70%+, 다운타임 30~50% 감소</strong>를 목표로 하며,
+    예측 결과는 유지보수 스케줄링 시스템에 자동 연계된다.
+  </div>
+</div>
+
+<!-- ── TOC ── -->
+<nav class="toc-bar">
+  <a href="#s0">0. 개요</a>
+  <a href="#s1">1. 업무 문제 정의</a>
+  <a href="#s2">2. 데이터 목록화</a>
+  <a href="#s3">3. EDA</a>
+  <a href="#s4">4. 기술통계</a>
+  <a href="#s5">5. 데이터 정제</a>
+  <a href="#s6">6. Target 정의</a>
+  <a href="#s7">7. Feature Engineering</a>
+  <a href="#s8">8. Baseline 모델</a>
+  <a href="#s9">9. ML 모델 학습</a>
+  <a href="#s10">10. 운영 적용</a>
+  <a href="#s11">11. 모니터링/재학습</a>
+  <a href="#s12">12. 산출물 &amp; 핵심 정리</a>
+</nav>
+
+<div class="wrapper">
+
+<!-- ── 0. 개요 ── -->
+<div class="card" id="s0">
+  <div class="card-header">
+    <span class="num">0</span>
+    <h3>개요</h3>
+    <span class="en">Overview</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title accent">전체 AI/ML 적용 흐름</div>
+      <div class="hflow">
+        <span class="hstep">업무 문제 정의</span><span class="harrow">→</span>
+        <span class="hstep">데이터 목록화</span><span class="harrow">→</span>
+        <span class="hstep">EDA</span><span class="harrow">→</span>
+        <span class="hstep">기술통계 분석</span><span class="harrow">→</span>
+        <span class="hstep">데이터 정제</span><span class="harrow">→</span>
+        <span class="hstep">Target 정의</span><span class="harrow">→</span>
+        <span class="hstep">Feature Engineering</span><span class="harrow">→</span>
+        <span class="hstep">Baseline 모델</span><span class="harrow">→</span>
+        <span class="hstep">ML 모델 학습</span><span class="harrow">→</span>
+        <span class="hstep">운영 적용</span><span class="harrow">→</span>
+        <span class="hstep">모니터링·재학습</span>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">주요 대상 장비 유형</div>
+      <div class="grid3">
+        <div class="info-box">
+          <strong>AFC 게이트 (Flap Gate / Turnstile)</strong><br>
+          모터·플랩·센서 등 가동부 마모 및 PCB 오류 탐지 중심. 고장 시 승객 정체 직결
+        </div>
+        <div class="info-box">
+          <strong>카드 단말기 (Validator / Reader)</strong><br>
+          RF 안테나·통신 모듈 오류, 소프트웨어 Hang, 전원 불안정 탐지. 미탐지 시 매출 누락
+        </div>
+        <div class="info-box">
+          <strong>충전기·발매기 (TVM / TOM)</strong><br>
+          현금·지폐 모듈, 영수증 프린터, 터치스크린 마모 탐지. 고장 시 고객 불편 즉각 발생
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 1. 업무 문제 정의 ── -->
+<div class="card" id="s1">
+  <div class="card-header">
+    <span class="num">1</span>
+    <h3>업무 문제 정의</h3>
+    <span class="en">Business Problem Definition</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title red">현재 문제점</div>
+        <ul class="bullet">
+          <li><strong>사후 정비 중심:</strong> 고장 발생 후 출동 수리 — 다운타임이 1~4시간에 달하는 경우 빈발</li>
+          <li><strong>계획 없는 예방 정비:</strong> 일정 주기로 전수 점검하나 실제 고장과 무관한 낭비 발생</li>
+          <li><strong>오류 코드 미활용:</strong> 장비 로그에 사전 경고 신호(오류 코드 증가)가 있으나 실시간 분석 부재</li>
+          <li><strong>부품 재고 비효율:</strong> 고장 예측 부재로 부품 과잉 재고 또는 긴급 조달 비용 발생</li>
+          <li><strong>현장 인력 낭비:</strong> 우선순위 없이 전체 장비 점검 → 정비 인력 비효율 배치</li>
+        </ul>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title green">AI 적용 목표</div>
+        <ul class="bullet">
+          <li><strong>고장 사전 예측:</strong> 7일 이내 고장 가능성 예측으로 계획 정비 전환</li>
+          <li><strong>잔여 수명(RUL) 추정:</strong> 장비별 예상 수명 시점 제공으로 교체 계획 최적화</li>
+          <li><strong>우선순위 정비 알림:</strong> 고위험 장비 자동 우선순위화 → 정비팀 파견 최적화</li>
+          <li><strong>부품 수요 예측:</strong> 고장 예측 기반 부품 조달 계획 자동화</li>
+          <li><strong>다운타임 절감:</strong> 다운타임 30~50% 감소 및 MTTR 단축</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">예측 대상 범위</div>
+      <table class="tbl-accent">
+        <thead><tr><th>구분</th><th>상세</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>예측 단위</td><td>장비 ID 단위 고장 확률 / RUL</td><td>게이트·단말기·충전기 각각</td></tr>
+          <tr><td>예측 Horizon</td><td>D+1~D+7 (7일 선행 예측)</td><td>정비 스케줄 계획 주기</td></tr>
+          <tr><td>예측 갱신 주기</td><td>매일 오전 배치 (전일 로그 반영)</td><td>준실시간 옵션 가능</td></tr>
+          <tr><td>고장 정의 기준</td><td>비계획 다운타임 발생 또는 오류 코드 긴급 출동</td><td>정비 이력 DB 기준</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 2. 데이터 목록화 ── -->
+<div class="card" id="s2">
+  <div class="card-header">
+    <span class="num">2</span>
+    <h3>데이터 목록화</h3>
+    <span class="en">Data Inventory</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-blue">
+      <thead><tr><th>데이터셋</th><th>주요 컬럼</th><th>수집 주기</th><th>보존 기간</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>장비 오류 로그</td><td>장비ID, 발생시각, 오류코드, 오류명, 심각도, 카운트</td><td>실시간</td><td>5년+</td><td>핵심 원천 — 고장 전조 신호</td></tr>
+        <tr><td>정비 이력</td><td>작업번호, 장비ID, 작업유형, 작업일시, 부품교체, 작업자</td><td>이벤트 기반</td><td>영구</td><td>고장 라벨 소스</td></tr>
+        <tr><td>장비 마스터</td><td>장비ID, 유형, 모델명, 설치일, 위치(역·게이트), 제조사</td><td>변경 시</td><td>영구</td><td>장비 특성 피처</td></tr>
+        <tr><td>IoT 센서 로그</td><td>장비ID, 시각, 전류, 전압, 온도, 진동, 동작횟수</td><td>1분~10분</td><td>2년+</td><td>센서 장착 장비 한정</td></tr>
+        <tr><td>거래량 로그</td><td>장비ID, 시각, 처리건수, 거부건수, 태그인·아웃 횟수</td><td>실시간</td><td>5년+</td><td>부하량 지표</td></tr>
+        <tr><td>부품 교체 이력</td><td>장비ID, 부품명, 교체일, 단가, 재고수량</td><td>이벤트 기반</td><td>영구</td><td>RUL 보정 소스</td></tr>
+        <tr><td>환경 데이터</td><td>역사 온도, 습도, 먼지, 강수 여부</td><td>시간별</td><td>3년+</td><td>외부 환경 영향 반영</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 3. EDA ── -->
+<div class="card" id="s3">
+  <div class="card-header">
+    <span class="num">3</span>
+    <h3>탐색적 데이터 분석 (EDA)</h3>
+    <span class="en">Exploratory Data Analysis</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">고장 전조 패턴 분석</div>
+        <ul class="bullet">
+          <li><strong>오류 코드 누적 증가:</strong> 고장 전 7~14일간 특정 오류 코드 발생 빈도가 3~5배 증가하는 패턴 확인</li>
+          <li><strong>응답 지연 증가:</strong> 태그 처리 응답시간이 고장 전 72시간부터 통계적으로 유의하게 증가</li>
+          <li><strong>거부율 증가:</strong> 고장 직전 48시간 동안 태그 거부(Read Error) 비율 급상승</li>
+          <li><strong>센서 진동 이상:</strong> 모터 구동 진동값이 정상 범위(σ±2) 초과 후 평균 3.2일 내 고장 발생</li>
+        </ul>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">장비 유형별 패턴 분석</div>
+        <ul class="bullet">
+          <li><strong>게이트 (플랩):</strong> 모터 과부하 오류 → 플랩 잠김 → 물리적 고장 순서 패턴</li>
+          <li><strong>단말기:</strong> RF 통신 오류 증가 → Hang 재부팅 반복 → 완전 오프라인</li>
+          <li><strong>충전기 (현금 모듈):</strong> 지폐 걸림 이벤트 누적 → 롤러 마모 → 모듈 교체 필요</li>
+          <li><strong>계절성:</strong> 우기·고온 다습 시 전자 부품 오류 30% 증가, 겨울 저온 시 기구 부품 마모 가속</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">MTBF / MTTR 분석</div>
+      <div class="grid3">
+        <div class="info-box">
+          <strong>MTBF (평균 고장 간격)</strong><br>
+          게이트 평균 MTBF 85일, 단말기 120일, 충전기 60일 수준. 장비 노후화(3년+) 시 MTBF가 50% 이하로 단축
+        </div>
+        <div class="info-box">
+          <strong>MTTR (평균 복구 시간)</strong><br>
+          평균 MTTR 2.4시간. 역 위치 원격성·부품 재고·기술자 가용성에 따라 30분~8시간까지 편차 큼
+        </div>
+        <div class="info-box">
+          <strong>고장 집중 시간대</strong><br>
+          피크 시간(07~09시, 17~20시) 직후 30분에 고장 신고 집중. 부하 누적 후 약한 부품부터 순차 이탈
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 4. 기술통계 분석 ── -->
+<div class="card" id="s4">
+  <div class="card-header">
+    <span class="num">4</span>
+    <h3>기술통계 분석</h3>
+    <span class="en">Descriptive Statistics</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title accent">장비 운영 주요 통계</div>
+      <table class="tbl-accent">
+        <thead><tr><th>지표</th><th>게이트</th><th>단말기</th><th>충전기</th><th>비고</th></tr></thead>
+        <tbody>
+          <tr><td>일평균 처리 건수</td><td>~3,200건</td><td>~1,800건</td><td>~120건</td><td>역 규모별 편차</td></tr>
+          <tr><td>평균 MTBF</td><td>85일</td><td>120일</td><td>60일</td><td>3년 이상 장비 기준</td></tr>
+          <tr><td>평균 MTTR</td><td>2.4시간</td><td>1.8시간</td><td>3.2시간</td><td>부품 재고 영향</td></tr>
+          <tr><td>오류 코드 종류</td><td>~120종</td><td>~80종</td><td>~95종</td><td>제조사별 상이</td></tr>
+          <tr><td>고장 전 최다 오류</td><td>E041 (모터 과부하)</td><td>E012 (RF 타임아웃)</td><td>E073 (지폐 걸림)</td><td>고장 예측 핵심 신호</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">오류 코드 분포 분석</div>
+      <div class="grid3">
+        <div class="info-box">
+          <strong>고빈도·저위험</strong><br>
+          전체 오류의 60%+를 차지하나 자동 복구되는 일시적 오류. 모델 학습 시 노이즈 처리 필요
+        </div>
+        <div class="info-box">
+          <strong>중빈도·고위험</strong><br>
+          발생 시 거의 100% 기술자 출동으로 이어지는 오류. 소수지만 예측 목표 변수의 핵심 선행 지표
+        </div>
+        <div class="info-box">
+          <strong>복합 오류 패턴</strong><br>
+          단일 오류보다 여러 유형 오류의 조합이 실제 고장과 상관관계가 더 높음 — 시퀀스 분석 필요
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 5. 데이터 정제 ── -->
+<div class="card" id="s5">
+  <div class="card-header">
+    <span class="num">5</span>
+    <h3>데이터 정제</h3>
+    <span class="en">Data Cleansing</span>
+  </div>
+  <div class="card-body">
+    <table class="tbl-teal">
+      <thead><tr><th>이슈 유형</th><th>탐지 방법</th><th>처리 방법</th></tr></thead>
+      <tbody>
+        <tr><td>로그 중복/누락</td><td>장비ID × 시각 기준 중복 검사, 연속 결측 구간 탐지</td><td>중복 제거, 결측 구간 이전 값 Forward-fill 또는 0 대체</td></tr>
+        <tr><td>계획 정비 구간 제거</td><td>정비 이력 테이블의 계획 정비 기간과 교차</td><td>계획 정비 중 발생한 오류는 라벨에서 제외 (고장 아님)</td></tr>
+        <tr><td>장비 교체 후 초기 안정화</td><td>정비 이력의 부품 교체 후 3일 이내 구간</td><td>교체 후 3일 데이터는 학습에서 제외 (노이즈)</td></tr>
+        <tr><td>폐기 장비 데이터</td><td>장비 마스터의 폐기 여부·날짜</td><td>폐기일 이후 데이터 분석 대상 제외</td></tr>
+        <tr><td>오류 코드 표준화</td><td>제조사별 상이한 코드 체계</td><td>제조사·버전별 코드 매핑 테이블 작성 후 통합 코드로 변환</td></tr>
+        <tr><td>센서 이상치</td><td>물리적 불가능한 값 (음수 전류, 극값 온도)</td><td>장비 사양 범위 외 값은 NaN 처리 후 선형 보간</td></tr>
+        <tr><td>시간 비동기</td><td>장비 내부 시계 드리프트 (±수십 초)</td><td>서버 수신 시각으로 정규화, 심각한 드리프트 장비 별도 관리</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── 6. Target 정의 ── -->
+<div class="card" id="s6">
+  <div class="card-header">
+    <span class="num">6</span>
+    <h3>Target 정의</h3>
+    <span class="en">Target Variable Definition</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">예측 목표 변수 (이진 분류)</div>
+        <div class="flow">
+          <div class="flow-step data">장비 ID × 일자 기준 레코드 생성</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">정비 이력에서 비계획 고장 날짜 추출</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step model">고장 전 7일 이내: <strong>label = 1</strong> (고장 임박)<br>그 외: <strong>label = 0</strong> (정상)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step output">클래스 불균형 처리 (SMOTE / 가중치 조정)</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">보조 예측 목표 (RUL)</div>
+        <div class="flow">
+          <div class="flow-step data">장비별 직전 정비일 → 다음 고장일 산출</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step process">RUL = 다음 고장까지 남은 일수</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step model">회귀 모델로 RUL 수치 예측</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step output">정비 우선순위 스코어 산출 (RUL 낮을수록 높은 우선순위)</div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">모델 평가 지표</div>
+      <table>
+        <thead><tr><th>지표</th><th>정의</th><th>목표</th><th>중요 이유</th></tr></thead>
+        <tbody>
+          <tr><td>Recall (재현율)</td><td>실제 고장 중 예측 성공 비율</td><td>&gt; 80%</td><td>놓친 고장(False Negative)이 서비스 장애로 직결</td></tr>
+          <tr><td>Precision (정밀도)</td><td>예측 고장 중 실제 고장 비율</td><td>&gt; 60%</td><td>오탐(False Positive) 과다 시 정비 인력 낭비</td></tr>
+          <tr><td>F1-Score</td><td>Precision × Recall 조화 평균</td><td>&gt; 0.70</td><td>불균형 클래스 종합 평가</td></tr>
+          <tr><td>MAE (RUL)</td><td>RUL 예측 오차 (일)</td><td>&lt; 3일</td><td>정비 스케줄 계획 오차 허용 범위</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── 7. Feature Engineering ── -->
+<div class="card" id="s7">
+  <div class="card-header">
+    <span class="num">7</span>
+    <h3>Feature Engineering</h3>
+    <span class="en">Feature Construction</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">오류 코드 기반 피처</div>
+        <table class="tbl-accent">
+          <thead><tr><th>피처</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>err_cnt_1d / 7d / 30d</td><td>1일·7일·30일 오류 발생 건수 (전체)</td></tr>
+            <tr><td>err_cnt_critical_7d</td><td>최근 7일 고위험 오류 코드 발생 건수</td></tr>
+            <tr><td>err_unique_types_7d</td><td>최근 7일 오류 코드 유형 다양성 수</td></tr>
+            <tr><td>err_rate_increase</td><td>전주 대비 이번 주 오류 발생률 증가율</td></tr>
+            <tr><td>err_seq_pattern</td><td>고장 전조 오류 시퀀스 패턴 매칭 점수</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">운영 부하 기반 피처</div>
+        <table class="tbl-accent">
+          <thead><tr><th>피처</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>daily_tx_count</td><td>일별 처리 거래 건수 (누적 부하)</td></tr>
+            <tr><td>reject_rate_7d</td><td>7일 평균 태그 거부율 (Read Error 비율)</td></tr>
+            <tr><td>peak_load_ratio</td><td>피크 시간대 처리량 / 평균 처리량</td></tr>
+            <tr><td>cumulative_ops</td><td>설치 이후 누적 동작 횟수 (게이트 플랩 개폐 수)</td></tr>
+            <tr><td>response_time_p95</td><td>최근 7일 태그 응답시간 95th percentile</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:16px;">
+      <div class="sub-section">
+        <div class="sub-title accent">장비 수명 기반 피처</div>
+        <table class="tbl-accent">
+          <thead><tr><th>피처</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>days_since_install</td><td>설치 후 경과 일수</td></tr>
+            <tr><td>days_since_last_pm</td><td>최근 계획 정비 후 경과 일수</td></tr>
+            <tr><td>days_since_last_fix</td><td>최근 수리 후 경과 일수</td></tr>
+            <tr><td>repair_count_1y</td><td>최근 1년 수리 횟수 (고장 빈도 지표)</td></tr>
+            <tr><td>part_age_critical</td><td>핵심 부품의 교체 후 경과 일수</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">센서 기반 피처 (장착 장비)</div>
+        <table class="tbl-accent">
+          <thead><tr><th>피처</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>temp_rolling_7d_max</td><td>7일 최고 온도 (전자 부품 스트레스)</td></tr>
+            <tr><td>vibration_z_std_7d</td><td>7일 Z축 진동 표준편차 (모터 이상)</td></tr>
+            <tr><td>current_anomaly_cnt</td><td>전류 이상값 초과 횟수 (과부하 지표)</td></tr>
+            <tr><td>humidity_high_ratio</td><td>7일 중 습도 80%+ 비율 (환경 영향)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="sub-section" style="margin-top:16px;">
+      <div class="sub-title accent">피처 중요도 (예상 순위)</div>
+      <div class="code-block">
+<span class="kw">Feature Importance (XGBoost 기준 예상)</span>
+<span class="num">1.</span> err_cnt_critical_7d    <span class="arr">████████████</span>  고위험 오류 누적 — 가장 강한 선행 지표
+<span class="num">2.</span> days_since_last_pm     <span class="arr">██████████</span>   정비 후 경과 시간 — 전통적 예방 정비 기준
+<span class="num">3.</span> err_seq_pattern         <span class="arr">████████</span>     고장 전조 시퀀스 패턴 매칭
+<span class="num">4.</span> reject_rate_7d          <span class="arr">███████</span>      거부율 추세 — 단말기 고장 직전 신호
+<span class="num">5.</span> cumulative_ops          <span class="arr">██████</span>       누적 동작 횟수 — 물리적 마모 지표
+<span class="num">6.</span> repair_count_1y         <span class="arr">█████</span>        고장 빈발 장비 식별
+<span class="num">7.</span> response_time_p95       <span class="arr">████</span>         응답 지연 — 소프트웨어 불안정 지표
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 8. Baseline 모델 ── -->
+<div class="card" id="s8">
+  <div class="card-header">
+    <span class="num">8</span>
+    <h3>Baseline 모델</h3>
+    <span class="en">Baseline Model</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">규칙 기반 임계치 탐지</div>
+        <div class="code-block">
+<span class="kw">Rule-based Baseline</span>
+<span class="arr">IF</span> err_cnt_critical_7d <span class="arr">&gt;=</span> <span class="num">5</span>          <span class="arr">→</span> ALERT
+<span class="arr">OR</span> days_since_last_pm   <span class="arr">&gt;=</span> <span class="num">90</span>         <span class="arr">→</span> SCHEDULE PM
+<span class="arr">OR</span> reject_rate_7d       <span class="arr">&gt;=</span> <span class="num">0.05</span>       <span class="arr">→</span> ALERT
+<span class="arr">OR</span> repair_count_1y      <span class="arr">&gt;=</span> <span class="num">3</span>          <span class="arr">→</span> HIGH RISK
+<span class="arr">→</span> Baseline Recall <span class="arr">~55%</span>, Precision <span class="arr">~42%</span>
+        </div>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">Baseline 성능 분석</div>
+        <ul class="bullet">
+          <li><strong>재현율 55%:</strong> 실제 고장의 45%는 사전 경보 없이 발생 → 개선 필요</li>
+          <li><strong>정밀도 42%:</strong> 경보의 58%가 실제로 고장 없이 종료 → 정비 인력 낭비</li>
+          <li><strong>임계치 한계:</strong> 장비 유형·노후도·환경 조건 차이를 반영하지 못함</li>
+          <li><strong>ML 개선 목표:</strong> Recall 80%+, F1 0.70+ 달성으로 전체 정비 효율 2배 이상 향상</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 9. ML 모델 학습 ── -->
+<div class="card" id="s9">
+  <div class="card-header">
+    <span class="num">9</span>
+    <h3>ML 모델 학습</h3>
+    <span class="en">Model Training</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title accent">후보 모델 비교</div>
+      <table class="tbl-accent">
+        <thead><tr><th>모델</th><th>적합성</th><th>장점</th><th>단점</th><th>권장 용도</th></tr></thead>
+        <tbody>
+          <tr><td>XGBoost</td><td>★★★ 권장</td><td>고성능·빠른 학습·피처 중요도 해석</td><td>시퀀스 패턴 학습 한계</td><td>이진 분류 (고장 임박 예측)</td></tr>
+          <tr><td>Random Forest</td><td>★★★</td><td>과적합 강건·해석 용이</td><td>XGBoost 대비 소폭 낮은 성능</td><td>앙상블 베이스 모델</td></tr>
+          <tr><td>LSTM (Seq2One)</td><td>★★☆</td><td>시간 시퀀스 패턴 포착</td><td>학습 데이터 다량 필요·학습 시간 증가</td><td>오류 시퀀스 기반 예측</td></tr>
+          <tr><td>생존 분석 (Weibull)</td><td>★★☆</td><td>RUL 분포 추정에 이론적 근거</td><td>복잡한 비선형 패턴 반영 한계</td><td>RUL 보조 추정</td></tr>
+          <tr><td>Logistic Regression</td><td>★☆☆</td><td>빠른 학습·단순 해석</td><td>비선형 패턴 학습 불가</td><td>2차 Baseline 비교용</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">학습 전략</div>
+      <div class="grid2">
+        <div class="info-box">
+          <strong>클래스 불균형 처리</strong><br>
+          고장 발생 비율 약 2~5%. SMOTE로 소수 클래스 오버샘플링 + class_weight 조정을 병행하여
+          Recall 우선 모델 학습. 임계치(threshold)를 0.3~0.4로 낮춰 고장 탐지 민감도 증가
+        </div>
+        <div class="info-box">
+          <strong>Train / Validation 분할</strong><br>
+          시계열 특성 유지를 위해 무작위 분할 금지. 최근 3개월을 Validation, 이전 데이터를 Train으로 설정.
+          장비 유형별로 별도 모델 학습하여 유형 간 패턴 차이 반영
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">앙상블 최종 모델 구조</div>
+      <div class="flow">
+        <div class="flow-step data">일별 장비 피처 벡터 (오류·부하·수명·센서)</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step model">XGBoost 고장 확률 예측 + LSTM 시퀀스 스코어</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step process">가중 평균 앙상블 (XGB 0.7 + LSTM 0.3)</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step output">장비별 고장 확률 P(고장 7일 내) + RUL 추정값</div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step action">정비 우선순위 Tier 자동 분류 (긴급·계획·모니터링)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 10. 운영 적용 ── -->
+<div class="card" id="s10">
+  <div class="card-header">
+    <span class="num">10</span>
+    <h3>운영 적용</h3>
+    <span class="en">Operational Deployment</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title accent">배포 아키텍처</div>
+      <div class="hflow">
+        <span class="hstep">장비 로그 수집 (일배치)</span><span class="harrow">→</span>
+        <span class="hstep">피처 계산 파이프라인</span><span class="harrow">→</span>
+        <span class="hstep">고장 예측 모델 추론</span><span class="harrow">→</span>
+        <span class="hstep">Risk Tier 분류</span><span class="harrow">→</span>
+        <span class="hstep">정비 대시보드 업데이트</span><span class="harrow">→</span>
+        <span class="hstep">정비팀 알림 발송</span>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">정비 우선순위 Tier 기준</div>
+      <table class="tbl-accent">
+        <thead><tr><th>Tier</th><th>조건</th><th>조치</th><th>SLA</th></tr></thead>
+        <tbody>
+          <tr><td>🔴 긴급 (Tier 1)</td><td>고장 확률 ≥ 70% 또는 RUL ≤ 2일</td><td>당일 긴급 출동 정비</td><td>4시간 이내 처리</td></tr>
+          <tr><td>🟡 계획 (Tier 2)</td><td>고장 확률 40~70% 또는 RUL 3~7일</td><td>3일 이내 계획 정비 예약</td><td>72시간 이내 처리</td></tr>
+          <tr><td>🟢 모니터링 (Tier 3)</td><td>고장 확률 20~40%</td><td>다음 정기 점검 시 우선 확인</td><td>7일 이내 점검</td></tr>
+          <tr><td>⚪ 정상 (Tier 4)</td><td>고장 확률 &lt; 20%</td><td>일반 모니터링 유지</td><td>정기 점검 주기 준수</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">정비팀 알림 콘텐츠 예시</div>
+      <div class="code-block">
+<span class="kw">[예지보전 알림] 2026-05-28 07:30</span>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔴 <span class="arr">긴급 점검 필요</span> — 장비 3건
+  ├ [GTW-A14] 1번 게이트 | 고장확률 <span class="num">84%</span> | RUL <span class="num">1.3</span>일
+  │  └ 주요 신호: E041 모터 과부하 <span class="num">8</span>회 (7일), 진동 이상 감지
+  ├ [VDR-B07] B구역 단말기 | 고장확률 <span class="num">77%</span> | RUL <span class="num">2.1</span>일
+  │  └ 주요 신호: RF 타임아웃 급증, 거부율 <span class="num">7.2%</span> (기준 2%)
+  └ [TVM-C02] C충전기 | 고장확률 <span class="num">71%</span> | RUL <span class="num">1.8</span>일
+     └ 주요 신호: 지폐 걸림 <span class="num">12</span>회 (7일), 롤러 교체 <span class="num">214</span>일 경과
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 11. 모니터링/재학습 ── -->
+<div class="card" id="s11">
+  <div class="card-header">
+    <span class="num">11</span>
+    <h3>모니터링 &amp; 재학습</h3>
+    <span class="en">Monitoring &amp; Retraining</span>
+  </div>
+  <div class="card-body">
+    <div class="grid2">
+      <div class="sub-section">
+        <div class="sub-title accent">모델 성능 모니터링</div>
+        <table>
+          <thead><tr><th>모니터링 항목</th><th>주기</th><th>경보 기준</th></tr></thead>
+          <tbody>
+            <tr><td>Recall (주간)</td><td>주 1회</td><td>2주 연속 80% 미만</td></tr>
+            <tr><td>Precision (주간)</td><td>주 1회</td><td>3주 연속 50% 미만</td></tr>
+            <tr><td>오탐율 (False Positive Rate)</td><td>주 1회</td><td>40% 초과 지속</td></tr>
+            <tr><td>피처 분포 드리프트</td><td>월 1회</td><td>KS-test p-value &lt; 0.05</td></tr>
+            <tr><td>신규 오류 코드 출현</td><td>실시간</td><td>미등록 코드 10건 이상</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="sub-section">
+        <div class="sub-title accent">재학습 트리거 기준</div>
+        <ul class="bullet">
+          <li><strong>정기 재학습:</strong> 매 3개월 신규 데이터 포함 전체 재학습</li>
+          <li><strong>장비 신규 도입:</strong> 신규 모델·버전 장비 배치 후 4주 데이터 누적 시 추가 학습</li>
+          <li><strong>성능 저하 경보:</strong> Recall 75% 미만 2주 연속 → 즉시 재학습 트리거</li>
+          <li><strong>오류 코드 변경:</strong> 펌웨어 업데이트로 오류 코드 체계 변경 시 매핑 업데이트 후 재학습</li>
+          <li><strong>환경 변화:</strong> 역사 증설·리모델링 등 운영 환경 대폭 변화 시 수동 트리거</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 12. 산출물 & 핵심 정리 ── -->
+<div class="card" id="s12">
+  <div class="card-header">
+    <span class="num">12</span>
+    <h3>산출물 &amp; 핵심 정리</h3>
+    <span class="en">Deliverables &amp; Key Summary</span>
+  </div>
+  <div class="card-body">
+    <div class="sub-section">
+      <div class="sub-title accent">KPI 목표</div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val">80%+</div>
+          <div class="kpi-label">고장 예측 재현율 (Recall)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">−30~50%</div>
+          <div class="kpi-label">비계획 다운타임 감소</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">70%+</div>
+          <div class="kpi-label">계획 정비 전환율</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">−25%</div>
+          <div class="kpi-label">긴급 출동 정비 건수 감소</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">≤ 3일</div>
+          <div class="kpi-label">RUL 예측 오차 (MAE)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val">−15%</div>
+          <div class="kpi-label">부품 재고 비용 절감</div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">주요 산출물</div>
+      <table class="tbl-accent">
+        <thead><tr><th>산출물</th><th>내용</th><th>활용처</th></tr></thead>
+        <tbody>
+          <tr><td>EDA 리포트</td><td>장비 유형별 고장 패턴·오류 코드 분석 결과</td><td>정비팀 교육, 규칙 기반 정비 기준 개선</td></tr>
+          <tr><td>피처 엔지니어링 사양서</td><td>입력 피처 정의·계산 로직·업데이트 주기</td><td>파이프라인 개발 표준 문서</td></tr>
+          <tr><td>고장 예측 모델</td><td>XGBoost + LSTM 앙상블 (장비 유형별)</td><td>일배치 추론 서비스로 배포</td></tr>
+          <tr><td>정비 우선순위 대시보드</td><td>전체 장비 Risk Tier 맵 + 알림 리스트</td><td>정비팀 일과 시작 전 확인</td></tr>
+          <tr><td>부품 수요 예측 리포트</td><td>30일 이내 예측 수리 건수 기반 부품 수요량</td><td>구매팀 발주 계획</td></tr>
+          <tr><td>모델 성능 리포트</td><td>주간 Recall/Precision/F1 추이 및 오탐 분석</td><td>MLOps 모니터링, 재학습 판단</td></tr>
+          <tr><td>검증결과서</td><td>PoC 기간 고장 예측 정확도 및 다운타임 절감 실적</td><td>본 사업 투자 결정 자료</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title accent">벤치마크 사례</div>
+      <div class="grid2">
+        <div class="info-box">
+          <strong>Singapore SMRT — 예지보전 플랫폼</strong><br>
+          게이트·에스컬레이터·시그널 장비 대상 IoT 센서 + ML 기반 고장 예측 도입.
+          계획 정비 비율 60% → 85% 상승, 긴급 출동 건수 35% 감소. AWS IoT + SageMaker 활용
+        </div>
+        <div class="info-box">
+          <strong>HK MTR — 스마트 유지보수</strong><br>
+          게이트 모터·전장 부품 IoT 모니터링 + 예측 정비 스케줄링 시스템 운영.
+          MTBF 42% 향상, 정비 비용 18% 절감. 자체 플랫폼(OMMS) 기반 구축 후 외부 벤더에 기술 이전
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title red">데이터 보안 및 운영 고려사항</div>
+      <div class="privacy-box">
+        <strong>개인정보:</strong> 장비 운영 데이터는 승객 개인정보를 포함하지 않아 개인정보 보호 리스크 낮음.<br>
+        <strong>보안:</strong> 장비 오류 로그·취약점 정보는 사이버보안 관점의 접근 통제 필요 (외부 유출 시 취약 장비 정보 노출 위험).<br>
+        <strong>운영 연속성:</strong> 예측 모델 오류로 인한 과도한 정비 지시를 막기 위해 최종 정비 결정은 정비 관리자 승인 구조 권장.<br>
+        <strong>데이터 소유권:</strong> 장비 제조사 IoT 플랫폼 경유 데이터인 경우 데이터 소유권·API 접근 계약 사전 확인 필요.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
