@@ -1622,28 +1622,28 @@ html, body {
      SLIDE 9 — LLM Chatbot PoC 계획서
 ═══════════════════════════════════════════════ -->
 <section class="slide" id="s11">
-  <div class="slide-badge">INTERNAL R&amp;D PoC · KOREA TSC · 보고타 적용 검토</div>
-  <div class="slide-title">한국 TSC 내부 검증 — 보고타 LLM Chatbot PoC 계획서</div>
-  <div class="slide-sub">실서비스 미적용 · 한국 TSC 내부 기술 검증 — 향후 보고타(TransMilenio·SITP·TuLlave) 적용 범위·기술 수준 사전 평가</div>
+  <div class="slide-badge">INTERNAL R&amp;D PoC · KOREA TSC · TransMilenio RAG 검증</div>
+  <div class="slide-title">TransMilenio 문서 기반 RAG 검증 + 다국어 챗봇 검증 PoC</div>
+  <div class="slide-sub">FAQ·Tarifa·Rutas × 4대 카테고리 160건 · 경로 A(ES) + 경로 B(KR↔ES) — 한국 TSC 내부 3개월 기술 검증</div>
   <div class="slide-content">
 
     <!-- 요약 바 -->
     <div class="poc-summary">
       <div class="poc-sum-card">
-        <div class="poc-sum-label">추진 기간 · 실시 주체</div>
-        <div class="poc-sum-val">3개월 <small>· 한국 TSC 내부 (5명 내외)</small></div>
+        <div class="poc-sum-label">검증 문서 기반</div>
+        <div class="poc-sum-val">FAQ·tarifa·rutas <small>· 4카테고리×40건 = 160건 테스트셋</small></div>
       </div>
       <div class="poc-sum-card">
-        <div class="poc-sum-label">PoC 성격 · 평가 방식</div>
-        <div class="poc-sum-val">실서비스 미적용 <small>· 한국어 번역 후 내부 평가 (네이티브 검수 미운영)</small></div>
+        <div class="poc-sum-label">RAG 검증 축</div>
+        <div class="poc-sum-val">Retrieval@3 ≥80% <small>· Faithfulness ≥88% · 수치 오류 0건</small></div>
       </div>
       <div class="poc-sum-card">
-        <div class="poc-sum-label">향후 적용 대상</div>
-        <div class="poc-sum-val">보고타 TransMilenio·SITP <small>· TuLlave (Recaudo Bogotá)</small></div>
+        <div class="poc-sum-label">다국어 검증 축</div>
+        <div class="poc-sum-val">경로 A(ES→ES) <small>+ 경로 B(KR→ES→KR) · 번역 일관성 ≥75%</small></div>
       </div>
       <div class="poc-sum-card">
-        <div class="poc-sum-label">핵심 목표</div>
-        <div class="poc-sum-val">적용 범위·기술 수준 <small>사전 평가 · 본사업 제안 근거</small></div>
+        <div class="poc-sum-label">추진 체계</div>
+        <div class="poc-sum-val">3개월 · TSC 5명 <small>· 실서비스 미적용 · 본사업 제안 근거</small></div>
       </div>
     </div>
 
@@ -1658,12 +1658,12 @@ html, body {
           </div>
         </div>
         <div class="poc-month-body">
-          <div class="poc-task">사전 준비 점검 · TSC 내부 환경 구축 · LLM/임베딩 선정</div>
-          <div class="poc-task">공개 자료 수집(TransMilenio FAQ·tarifa·rutas) + 한국어 가상 민원 150건 → LLM 번역</div>
-          <div class="poc-task">스페인어 지식베이스 구축 · 임베딩 · 벡터 DB</div>
-          <div class="poc-task">기본 RAG 파이프라인 프로토타입 (ES)</div>
+          <div class="poc-task">TransMilenio FAQ·tarifa·rutas 수집·정제 + 테스트셋 160건 수동 라벨링</div>
+          <div class="poc-task">multilingual-e5 임베딩 + Chroma 벡터 DB 구축</div>
+          <div class="poc-task">RAG 파이프라인 프로토타입 (Baseline B-1~B-3)</div>
+          <div class="poc-task">Retrieval@3 초기 측정 · 임계 달성 여부 확인</div>
         </div>
-        <div class="poc-month-ms"><b>마일스톤</b>한국 TSC 내부 환경 구축 + 스페인어 RAG 기본 동작 확인</div>
+        <div class="poc-month-ms"><b>마일스톤</b>스페인어 RAG 기본 동작 확인 + Retrieval@3 초기값 도출</div>
       </div>
 
       <div class="poc-month poc-m2">
@@ -1675,12 +1675,12 @@ html, body {
           </div>
         </div>
         <div class="poc-month-body">
-          <div class="poc-task">스페인어 Intent 분류 모델 개발 및 평가</div>
-          <div class="poc-task">웹 챗봇 UI (ES) · FastAPI 백엔드 개발</div>
-          <div class="poc-task">Guardrail · agente 이관 판단 로직</div>
-          <div class="poc-task">TSC 내부 통합 데모 · PM·AI 한국어 번역 평가</div>
+          <div class="poc-task">Intent 분류 모델 (요금/환승/카드/노선/기타) + Guardrail·이관 판단</div>
+          <div class="poc-task">웹 챗봇 UI(ES) + FastAPI 백엔드 개발</div>
+          <div class="poc-task">경로 A(ES) RAG 파이프라인 완성 + Faithfulness 1차 측정</div>
+          <div class="poc-task">TSC 내부 통합 데모 (개발팀 5명)</div>
         </div>
-        <div class="poc-month-ms"><b>마일스톤</b>TSC 내부 통합 데모 (개발팀 5명 대상)</div>
+        <div class="poc-month-ms"><b>마일스톤</b>내부 통합 데모 + RAG 검증 1차 결과 확인</div>
       </div>
 
       <div class="poc-month poc-m3">
@@ -1692,10 +1692,10 @@ html, body {
           </div>
         </div>
         <div class="poc-month-body">
-          <div class="poc-task">내부 통합 테스트 · 가상 테스트셋 150건 평가</div>
-          <div class="poc-task">TSC 내부 검증 (5명 내외) · 한국어 번역 후 4점 척도 평가</div>
-          <div class="poc-task">결과 분석 · 모델 튜닝</div>
-          <div class="poc-task">검증결과서</div>
+          <div class="poc-task">경로 B(KR→ES→KR) 번역 파이프라인 + 다국어 의미 일관성 측정</div>
+          <div class="poc-task">4대 카테고리 전체 KPI 측정 (160건 테스트셋)</div>
+          <div class="poc-task">내부 검증 (5명, 한국어 번역 4점 척도) + 결과 분석</div>
+          <div class="poc-task">검증결과서 제출 · 본사업 제안 근거 확보</div>
         </div>
         <div class="poc-month-ms"><b>마일스톤</b>내부 검증 종료 · 검증결과서 제출</div>
       </div>
@@ -1704,12 +1704,12 @@ html, body {
     <!-- 하단: 범위 + KPI -->
     <div class="poc-bottom">
       <div class="poc-scope">
-        <div class="poc-scope-title">PoC 범위 (TSC 내부 검증 · 구현 용이 기능 우선)</div>
+        <div class="poc-scope-title">PoC 범위 (TSC 내부 검증)</div>
         <div class="poc-tags">
-          <span class="poc-tag in">✓ FAQ 자동응답 (RAG·ES)</span>
-          <span class="poc-tag in">✓ Intent 분류 (스페인어)</span>
-          <span class="poc-tag in">✓ agente 이관 판단</span>
-          <span class="poc-tag in">✓ Guardrail</span>
+          <span class="poc-tag in">✓ TransMilenio FAQ·tarifa·rutas 지식베이스</span>
+          <span class="poc-tag in">✓ 4대 카테고리 RAG 검증</span>
+          <span class="poc-tag in">✓ 다국어 경로 A(ES) + B(KR↔ES)</span>
+          <span class="poc-tag in">✓ Intent 분류 · Guardrail · 이관 판단</span>
           <span class="poc-tag in">✓ 사전 준비 · 평가 가이드라인</span>
         </div>
         <div class="poc-scope-sub">제외 (실서비스·현지 배포·본사업 단계)</div>
@@ -1726,18 +1726,18 @@ html, body {
       <div class="poc-scope" style="padding:10px 14px;">
         <div class="poc-scope-title">성공 기준 KPI</div>
         <div class="poc-kpi-strip" style="border:none; padding:6px 0 0; background:transparent;">
-          <div class="poc-kpi"><div class="poc-kpi-val">60%</div><div class="poc-kpi-label">자동응답률</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">85%</div><div class="poc-kpi-label">Intent 정확도</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">90%</div><div class="poc-kpi-label">이관 정확도</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">5초</div><div class="poc-kpi-label">평균 응답</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">3%</div><div class="poc-kpi-label">Hallu. 이하</div></div>
-          <div class="poc-kpi"><div class="poc-kpi-val">3.0/4</div><div class="poc-kpi-label">검수 품질 점수</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">60%+</div><div class="poc-kpi-label">자동응답률</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">≥80%</div><div class="poc-kpi-label">Retrieval@3<br>정확도</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">≥88%</div><div class="poc-kpi-label">Context<br>Faithfulness</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">0건</div><div class="poc-kpi-label">요금 수치<br>오류</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">≤3%</div><div class="poc-kpi-label">Hallu.<br>발생률</div></div>
+          <div class="poc-kpi"><div class="poc-kpi-val">≥75%</div><div class="poc-kpi-label">번역 의미<br>일관성</div></div>
         </div>
       </div>
     </div>
 
     <div style="text-align:center; margin-top:10px;">
-      <a href="sub/llm_chatbot_poc_plan.html" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,122,135,0.25); border:1px solid rgba(0,122,135,0.5); color:#5dd3de; font-size:12.5px; font-weight:700; padding:8px 20px; border-radius:24px; text-decoration:none; letter-spacing:0.3px;">📄 상세 계획서 전문 보기 (사전 준비 · 범위 · 일정 · 기능 · 기술 · 인력 · 리스크 · KPI · 산출물)</a>
+      <a href="sub/llm_chatbot_poc_plan.html" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(0,122,135,0.25); border:1px solid rgba(0,122,135,0.5); color:#5dd3de; font-size:12.5px; font-weight:700; padding:8px 20px; border-radius:24px; text-decoration:none; letter-spacing:0.3px;">📄 상세 계획서 전문 보기 (RAG·다국어 검증 시나리오 · 기술 스택 · KPI · 산출물)</a>
     </div>
 
   </div>
