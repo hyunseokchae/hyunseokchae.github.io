@@ -936,6 +936,18 @@ html, body {
 .poc-sum-val { font-size: 14px; font-weight: 700; color: var(--white); line-height: 1.3; }
 .poc-sum-val small { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.55); }
 
+.poc-purpose {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(240,140,0,0.08); border: 1px solid rgba(240,140,0,0.28);
+  border-left: 3px solid #f08c00; border-radius: 8px;
+  padding: 8px 14px; margin-bottom: 10px;
+}
+.poc-pur-lead { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; color: #f08c00; text-transform: uppercase; white-space: nowrap; }
+.poc-pur-text { font-size: 11.5px; color: rgba(255,255,255,0.6); flex: 1; min-width: 160px; }
+.poc-pur-tag { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: var(--white); font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 5px; white-space: nowrap; }
+.poc-pur-tag small { font-size: 10px; font-weight: 400; color: rgba(255,255,255,0.5); margin-left: 4px; }
+.poc-pur-arrow { color: rgba(255,255,255,0.3); font-size: 13px; }
+
 .poc-roadmap {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1645,6 +1657,17 @@ html, body {
         <div class="poc-sum-label">추진 체계</div>
         <div class="poc-sum-val">3개월 · TSC 5명 <small>· 실서비스 미적용 · 본사업 제안 근거</small></div>
       </div>
+    </div>
+
+    <!-- 선정 목적 -->
+    <div class="poc-purpose">
+      <span class="poc-pur-lead">선정 목적</span>
+      <span class="poc-pur-text">지식베이스·Intent·Guardrail이 모듈화되어 도메인·용도 교체만으로 즉시 확장 — PoC 검증 결과를 기반으로 다양한 용도로 재활용 가능</span>
+      <span class="poc-pur-tag">💬 민원 챗봇<small>FAQ·정책 응답</small></span>
+      <span class="poc-pur-arrow">→</span>
+      <span class="poc-pur-tag">🎓 교육 Agent<small>매뉴얼·운영 학습</small></span>
+      <span class="poc-pur-arrow">→</span>
+      <span class="poc-pur-tag">🔧 정비 Agent<small>설비·장애 대응</small></span>
     </div>
 
     <!-- 3개월 로드맵 -->
